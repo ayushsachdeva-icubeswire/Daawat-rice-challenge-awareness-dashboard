@@ -1,4 +1,4 @@
-# Darkone Dashboard - React TypeScript
+# Rice Challenge Awareness Dashboard - React 
 
 A comprehensive and modern admin dashboard built with React, TypeScript, and Bootstrap. Features a professional dark theme with advanced data visualization and management capabilities.
 
@@ -11,7 +11,6 @@ A comprehensive and modern admin dashboard built with React, TypeScript, and Boo
 - Responsive charts and graphs
 
 ### 🎨 UI/UX Excellence
-- Professional dark theme design
 - Custom rice grain animation background
 - Responsive layout for all devices
 - Bootstrap-powered components

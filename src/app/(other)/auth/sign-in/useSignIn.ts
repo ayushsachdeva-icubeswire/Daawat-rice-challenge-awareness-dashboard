@@ -58,7 +58,7 @@ const useSignIn = () => {
             token: data.token,
           })
           redirectUser()
-          showNotification({ message: 'Successfully logged in. Redirecting....', variant: 'success' })
+          showNotification({ message: 'Successfully logged in.', variant: 'success' })
         }
       } else {
         const errorData = await response.json().catch(() => ({}))
