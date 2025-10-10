@@ -27,10 +27,10 @@ const SignIn = () => {
                   <div className="text-center">
                     <div className="mx-auto mb-4 text-center auth-logo">
                       <Link to="/dashboards" className="logo-dark">
-                        <img src={DarkLogo} height={32} alt="logo dark" />
+                        {/* <img src={DarkLogo} height={32} alt="logo dark" /> */}
                       </Link>
                       <Link to="/dashboards" className="logo-light">
-                        <img src={LightLogo} height={28} alt="logo light" />
+                        {/* <img src={LightLogo} height={28} alt="logo light" /> */}
                       </Link>
                     </div>
                     <h4 className="fw-bold text-dark mb-2">Welcome Back!</h4>
@@ -38,7 +38,7 @@ const SignIn = () => {
                   </div>
                   <form onSubmit={login} className="mt-4">
                     <div className="mb-3">
-                      <TextFormInput control={control} name="email" placeholder="Enter your email" className="form-control" label="Email Address" />
+                      <TextFormInput control={control} name="username" placeholder="Enter your username" className="form-control" label="Username" />
                     </div>
                     <div className="mb-3">
                       <Link to="/auth/reset-password" className="float-end text-muted  ms-1">

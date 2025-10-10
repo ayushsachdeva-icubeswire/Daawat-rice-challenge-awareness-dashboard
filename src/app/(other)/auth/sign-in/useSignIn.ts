@@ -1,5 +1,4 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import type { AxiosResponse } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -7,7 +6,6 @@ import * as yup from 'yup'
 
 import { useAuthContext } from '@/context/useAuthContext'
 import { useNotificationContext } from '@/context/useNotificationContext'
-import httpClient from '@/helpers/httpClient'
 import type { UserType } from '@/types/auth'
 
 const useSignIn = () => {
@@ -20,15 +18,15 @@ const useSignIn = () => {
   const { showNotification } = useNotificationContext()
 
   const loginFormSchema = yup.object({
-    email: yup.string().email('Please enter a valid email').required('Please enter your email'),
+    username: yup.string().required('Please enter your username'),
     password: yup.string().required('Please enter your password'),
   })
 
   const { control, handleSubmit } = useForm({
     resolver: yupResolver(loginFormSchema),
     defaultValues: {
-      email: 'user@demo.com',
-      password: '123456',
+      username: '',
+      password: '',
     },
   })
 
@@ -41,21 +39,40 @@ const useSignIn = () => {
   }
 
   const login = handleSubmit(async (values: LoginFormFields) => {
+    setLoading(true)
     try {
-      const res: AxiosResponse<UserType> = await httpClient.post('/login', values)
-      if (res.data.token) {
-        saveSession({
-          ...(res.data ?? {}),
-          token: res.data.token,
-        })
-        redirectUser()
-        showNotification({ message: 'Successfully logged in. Redirecting....', variant: 'success' })
+      const response = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values)
+      })
+      
+      if (response.ok) {
+        const data: UserType = await response.json()
+        
+        if (data.token) {
+          saveSession({
+            ...data,
+            token: data.token,
+          })
+          redirectUser()
+          showNotification({ message: 'Successfully logged in. Redirecting....', variant: 'success' })
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        
+        if (errorData.error) {
+          showNotification({ message: errorData.error, variant: 'danger' })
+        } else if (errorData.message) {
+          showNotification({ message: errorData.message, variant: 'danger' })
+        } else {
+          showNotification({ message: `Login failed with status: ${response.status}`, variant: 'danger' })
+        }
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      if (e.response?.data?.error) {
-        showNotification({ message: e.response?.data?.error, variant: 'danger' })
-      }
+    } catch (error) {
+      showNotification({ message: 'Network error. Please try again.', variant: 'danger' })
     } finally {
       setLoading(false)
     }
