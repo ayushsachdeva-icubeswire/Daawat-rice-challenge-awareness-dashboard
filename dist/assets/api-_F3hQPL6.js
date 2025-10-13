@@ -1,0 +1,1 @@
+const o=()=>(typeof window<"u"&&window.location.href.includes("localhost:5174"),"http://localhost:8080"),t=o(),n="api",e={BASE_URL:t,API_URL:`${t}/${n}`,ENDPOINTS:{AUTH:{LOGIN:"/auth/login",LOGOUT:"/auth/logout",REGISTER:"/auth/register"}}};export{e as A};

@@ -1,8 +1,16 @@
 // API Configuration
 // This file centralizes all API-related configuration
 
-// Environment variables with fallback defaults
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+// Determine base URL based on environment
+const getBaseUrl = (): string => {
+  if (typeof window !== 'undefined' && window.location.href.includes('localhost:5174')) {
+    return 'http://localhost:8080'
+  }
+  
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+}
+
+const API_BASE_URL = getBaseUrl()
 const API_VERSION = import.meta.env.VITE_API_VERSION || 'api'
 
 // Construct the full API URL
