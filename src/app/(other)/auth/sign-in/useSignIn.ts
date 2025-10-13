@@ -6,6 +6,7 @@ import * as yup from 'yup'
 
 import { useAuthContext } from '@/context/useAuthContext'
 import { useNotificationContext } from '@/context/useNotificationContext'
+import { API_CONFIG } from '@/config/api'
 import type { UserType } from '@/types/auth'
 
 const useSignIn = () => {
@@ -41,7 +42,7 @@ const useSignIn = () => {
   const login = handleSubmit(async (values: LoginFormFields) => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
+      const response = await fetch(`${API_CONFIG.API_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

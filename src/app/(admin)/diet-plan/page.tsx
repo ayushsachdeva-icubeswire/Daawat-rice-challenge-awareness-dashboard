@@ -1,78 +1,147 @@
 import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNotificationContext } from '@/context/useNotificationContext'
+import DietPlanService from '@/services/dietPlanService'
+import { DietPlan, DietPlanFilters, DIET_CATEGORIES, DIET_TYPES, DIET_SUBCATEGORIES } from '@/types/diet-plan'
+import DietPlanForm from './components/DietPlanForm'
+import DeleteConfirmationModal from './components/DeleteConfirmationModal'
 
 const DietPlanPage = () => {
+  
+  const [dietPlans, setDietPlans] = useState<DietPlan[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [filters, setFilters] = useState<DietPlanFilters>({
+    page: 1,
+    limit: 10
+  })
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  })
+  const [showForm, setShowForm] = useState(false)
+  const [editingPlan, setEditingPlan] = useState<DietPlan | null>(null)
+  const [deleteModal, setDeleteModal] = useState<{
+    show: boolean
+    plan: DietPlan | null
+    isDeleteAll: boolean
+  }>({
+    show: false,
+    plan: null,
+    isDeleteAll: false
+  })
 
-  // Mock rice-based diet plan data for 30-day challenge
-  const dietPlans = [
-    {
-      id: 1,
-      name: '30-Day Rice Challenge Diet',
-      duration: '30 days',
-      calories: '1800 cal/day',
-      meals: 4,
-      difficulty: 'Intermediate',
-      created: '2024-10-01',
-      status: 'Active',
-      riceType: 'Mixed Varieties',
-      participants: 156
-    },
-    {
-      id: 2,
-      name: 'Biryani Lover\'s Plan',
-      duration: '30 days',
-      calories: '2200 cal/day',
-      meals: 3,
-      difficulty: 'Advanced',
-      created: '2024-10-05',
-      status: 'Active',
-      riceType: 'Basmati Focus',
-      participants: 89
-    },
-    {
-      id: 3,
-      name: 'Healthy Brown Rice Journey',
-      duration: '30 days',
-      calories: '1600 cal/day',
-      meals: 5,
-      difficulty: 'Beginner',
-      created: '2024-09-28',
-      status: 'Active',
-      riceType: 'Brown Rice Only',
-      participants: 203
-    },
-    {
-      id: 4,
-      name: 'South Indian Rice Special',
-      duration: '30 days',
-      calories: '1900 cal/day',
-      meals: 4,
-      difficulty: 'Intermediate',
-      created: '2024-09-25',
-      status: 'Draft',
-      riceType: 'Regional Varieties',
-      participants: 67
-    },
-    {
-      id: 5,
-      name: 'Quick Rice Meals Plan',
-      duration: '30 days',
-      calories: '1700 cal/day',
-      meals: 6,
-      difficulty: 'Beginner',
-      created: '2024-09-30',
-      status: 'Active',
-      riceType: 'Fast Cooking',
-      participants: 142
-    },
-  ]
+  const { showNotification } = useNotificationContext()
 
-  const filteredPlans = dietPlans.filter(plan =>
+  // Fetch diet plans function for manual calls
+  const fetchDietPlans = async () => {
+    try {
+      // console.log('🔄 Manual: fetchDietPlans called with filters:', filters)
+      setLoading(true)
+      const response = await DietPlanService.getAllDietPlans(filters)
+      setDietPlans(response.dietPlans || [])
+      if (response.pagination) {
+        setPagination(response.pagination)
+      }
+    } catch (error) {
+      console.error('Error fetching diet plans:', error)
+      showNotification({ message: 'Error fetching diet plans', variant: 'danger' })
+      setDietPlans([]) // Ensure dietPlans is always an array even on error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Effect to fetch data when filters change
+  useEffect(() => {
+    const loadDietPlans = async () => {
+      try {
+        setLoading(true)
+        const response = await DietPlanService.getAllDietPlans(filters)
+        setDietPlans(response.dietPlans || [])
+        if (response.pagination) {
+          setPagination(response.pagination)
+        }
+      } catch (error) {
+        console.error('❌ Error fetching diet plans:', error)
+        showNotification({ message: 'Error fetching diet plans', variant: 'danger' })
+        setDietPlans([]) // Ensure dietPlans is always an array even on error
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadDietPlans()
+    
+ 
+  }, [filters])
+
+  // Filter diet plans based on search term
+  const filteredPlans = (dietPlans || []).filter(plan =>
     plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plan.difficulty.toLowerCase().includes(searchTerm.toLowerCase())
+    plan.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    plan.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (plan.subcategory && plan.subcategory.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+  // Handle PDF download
+  const handleDownloadPDF = async (plan: DietPlan) => {
+    if (!plan._id || !plan.pdfFile) {
+      showNotification({ message: 'No PDF file available for this diet plan', variant: 'warning' })
+      return
+    }
+
+    try {
+      const blob = await DietPlanService.downloadPDF(plan._id)
+      DietPlanService.triggerPDFDownload(blob, plan.pdfFile.filename)
+      showNotification({ message: 'PDF downloaded successfully', variant: 'success' })
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      showNotification({ message: 'Error downloading PDF', variant: 'danger' })
+    }
+  }
+
+  // Handle delete diet plan
+  const handleDelete = async (plan: DietPlan) => {
+    try {
+      if (!plan._id) return
+      await DietPlanService.deleteDietPlan(plan._id)
+      showNotification({ message: 'Diet plan deleted successfully', variant: 'success' })
+      fetchDietPlans()
+      setDeleteModal({ show: false, plan: null, isDeleteAll: false })
+    } catch (error) {
+      console.error('Error deleting diet plan:', error)
+      showNotification({ message: 'Error deleting diet plan', variant: 'danger' })
+    }
+  }
+
+  // Handle delete all diet plans
+  const handleDeleteAll = async () => {
+    try {
+      await DietPlanService.deleteAllDietPlans()
+      showNotification({ message: 'All diet plans deleted successfully', variant: 'success' })
+      fetchDietPlans()
+      setDeleteModal({ show: false, plan: null, isDeleteAll: false })
+    } catch (error) {
+      console.error('Error deleting all diet plans:', error)
+      showNotification({ message: 'Error deleting all diet plans', variant: 'danger' })
+    }
+  }
+
+  // Handle form submission
+  const handleFormSubmit = () => {
+    setShowForm(false)
+    setEditingPlan(null)
+    fetchDietPlans()
+  }
+
+  // Handle pagination
+  const handlePageChange = (page: number) => {
+    setFilters(prev => ({ ...prev, page }))
+  }
 
   return (
     <>
@@ -82,10 +151,11 @@ const DietPlanPage = () => {
         <ComponentContainerCard
           id="diet-plan-container"
           title="Diet Plans Management"
-          description="Manage and track all diet plans"
+          description="Manage and track all diet plans for rice challenge awareness"
         >
+          {/* Filters and Actions */}
           <div className="row mb-3">
-            <div className="col-md-6">
+            <div className="col-md-2">
               <input
                 type="text"
                 className="form-control"
@@ -94,76 +164,236 @@ const DietPlanPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="col-md-6 text-end">
-              <button className="btn btn-primary">
+            <div className="col-md-2">
+              <select
+                className="form-select"
+                value={filters.category || ''}
+                onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value || undefined }))}
+              >
+                <option value="">All Categories</option>
+                {DIET_CATEGORIES.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
+              <select
+                className="form-select"
+                value={filters.subcategory || ''}
+                onChange={(e) => setFilters(prev => ({ ...prev, subcategory: e.target.value || undefined }))}
+              >
+                <option value="">All Subcategories</option>
+                {DIET_SUBCATEGORIES.map(subcategory => (
+                  <option key={subcategory} value={subcategory}>{subcategory}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
+              <select
+                className="form-select"
+                value={filters.type || ''}
+                onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value || undefined }))}
+              >
+                <option value="">All Types</option>
+                {DIET_TYPES.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
+              <select
+                className="form-select"
+                value={filters.isActive === undefined ? '' : filters.isActive.toString()}
+                onChange={(e) => setFilters(prev => ({ 
+                  ...prev, 
+                  isActive: e.target.value === '' ? undefined : e.target.value === 'true'
+                }))}
+              >
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+            <div className="col-md-2 text-end">
+              <button 
+                className="btn btn-primary me-2"
+                onClick={() => setShowForm(true)}
+              >
                 <i className="fas fa-plus me-2"></i>Add New Plan
               </button>
+              {/* <button 
+                className="btn btn-danger"
+                onClick={() => setDeleteModal({ show: true, plan: null, isDeleteAll: true })}
+                disabled={dietPlans.length === 0}
+              >
+                <i className="fas fa-trash me-2"></i>Delete All
+              </button> */}
             </div>
           </div>
 
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead className="table-dark">
-                <tr>
-                  <th>Plan Name</th>
-                  <th>Duration</th>
-                  <th>Calories/Day</th>
-                  <th>Meals</th>
-                  <th>Difficulty</th>
-                  <th>Created</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPlans.map((plan) => (
-                  <tr key={plan.id}>
-                    <td className="fw-semibold">{plan.name}</td>
-                    <td>{plan.duration}</td>
-                    <td>
-                      <span className="badge bg-info">{plan.calories}</span>
-                    </td>
-                    <td>{plan.meals}</td>
-                    <td>
-                      <span className={`badge ${
-                        plan.difficulty === 'Beginner' ? 'bg-success' :
-                        plan.difficulty === 'Intermediate' ? 'bg-warning' : 'bg-danger'
-                      }`}>
-                        {plan.difficulty}
-                      </span>
-                    </td>
-                    <td>{new Date(plan.created).toLocaleDateString()}</td>
-                    <td>
-                      <span className={`badge ${plan.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
-                        {plan.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="btn-group" role="group">
-                        <button className="btn btn-sm btn-outline-primary">
-                          <i className="fas fa-eye"></i>
-                        </button>
-                        <button className="btn btn-sm btn-outline-warning">
-                          <i className="fas fa-edit"></i>
-                        </button>
-                        <button className="btn btn-sm btn-outline-danger">
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredPlans.length === 0 && (
+          {/* Loading State */}
+          {loading ? (
             <div className="text-center py-4">
-              <p className="text-muted">No diet plans found matching your search.</p>
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
             </div>
+          ) : (
+            <>
+              {/* Diet Plans Table */}
+              <div className="table-responsive">
+                <table className="table table-striped table-hover">
+                  <thead className="table-dark">
+                    <tr>
+                      <th>Plan Name</th>
+                      <th>Duration</th>
+                      <th>Type</th>
+                      <th>Category</th>
+                      <th>Subcategory</th>
+                      <th>PDF</th>
+                      <th>Status</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPlans.map((plan) => (
+                      <tr key={plan._id}>
+                        <td className="fw-semibold">{plan.name}</td>
+                        <td>
+                          <span className="badge bg-info">{plan.duration}</span>
+                        </td>
+                        <td>{plan.type}</td>
+                        <td>
+                          <span className="badge bg-secondary">{plan.category}</span>
+                        </td>
+                        <td>
+                          {plan.subcategory ? (
+                            <span className="badge bg-light text-dark">{plan.subcategory}</span>
+                          ) : (
+                            <span className="text-muted">-</span>
+                          )}
+                        </td>
+                        <td>
+                          {plan.pdfFile ? (
+                            <button
+                              className="btn btn-sm btn-outline-success"
+                              onClick={() => handleDownloadPDF(plan)}
+                              title="Download PDF"
+                            >
+                              <i className="fas fa-download"></i>
+                            </button>
+                          ) : (
+                            <span className="text-muted">No PDF</span>
+                          )}
+                        </td>
+                        <td>
+                          <span className={`badge ${plan.isActive ? 'bg-success' : 'bg-secondary'}`}>
+                            {plan.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          {plan.createdAt ? new Date(plan.createdAt).toLocaleDateString() : '-'}
+                        </td>
+                        <td>
+                          <div className="btn-group" role="group">
+                            <button 
+                              className="btn btn-sm btn-outline-warning"
+                              onClick={() => {
+                                setEditingPlan(plan)
+                                setShowForm(true)
+                              }}
+                              title="Edit"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button 
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => setDeleteModal({ show: true, plan, isDeleteAll: false })}
+                              title="Delete"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Empty State */}
+              {filteredPlans.length === 0 && (
+                <div className="text-center py-4">
+                  <p className="text-muted">No diet plans found matching your criteria.</p>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <nav aria-label="Diet plans pagination">
+                  <ul className="pagination justify-content-center">
+                    <li className={`page-item ${pagination.page === 1 ? 'disabled' : ''}`}>
+                      <button 
+                        className="page-link"
+                        onClick={() => handlePageChange(pagination.page - 1)}
+                        disabled={pagination.page === 1}
+                      >
+                        Previous
+                      </button>
+                    </li>
+                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
+                      <li key={page} className={`page-item ${pagination.page === page ? 'active' : ''}`}>
+                        <button 
+                          className="page-link"
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </button>
+                      </li>
+                    ))}
+                    <li className={`page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}`}>
+                      <button 
+                        className="page-link"
+                        onClick={() => handlePageChange(pagination.page + 1)}
+                        disabled={pagination.page === pagination.totalPages}
+                      >
+                        Next
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              )}
+            </>
           )}
         </ComponentContainerCard>
       </div>
+
+      {/* Diet Plan Form Modal */}
+      {showForm && (
+        <DietPlanForm
+          show={showForm}
+          onHide={() => {
+            setShowForm(false)
+            setEditingPlan(null)
+          }}
+          editingPlan={editingPlan}
+          onSubmit={handleFormSubmit}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        show={deleteModal.show}
+        onHide={() => setDeleteModal({ show: false, plan: null, isDeleteAll: false })}
+        onConfirm={deleteModal.isDeleteAll ? handleDeleteAll : () => deleteModal.plan && handleDelete(deleteModal.plan)}
+        title={deleteModal.isDeleteAll ? 'Delete All Diet Plans' : 'Delete Diet Plan'}
+        message={
+          deleteModal.isDeleteAll 
+            ? 'Are you sure you want to delete all diet plans? This action cannot be undone.'
+            : `Are you sure you want to delete "${deleteModal.plan?.name}"? This action cannot be undone.`
+        }
+      />
     </>
   )
 }
