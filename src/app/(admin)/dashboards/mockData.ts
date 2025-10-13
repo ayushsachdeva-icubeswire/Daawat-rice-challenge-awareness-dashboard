@@ -1,7 +1,7 @@
 import { Interaction, Challenge, Post, ChatMessage, DashboardStats, ExtendedCardsType } from '@/types/dashboard'
 
 // Mock Rice Challenge Influencers Data
-const mockUsers = [
+export const mockUsers = [
   { id: '1', name: 'Priya Sharma', mobile: '+91-9876543210', avatar: '/src/assets/images/users/avatar-1.jpg', followers: '156K', specialty: 'Biryani Expert' },
   { id: '2', name: 'Rahul Khanna', mobile: '+91-9876543211', avatar: '/src/assets/images/users/avatar-2.jpg', followers: '89K', specialty: 'Street Food Rice' },
   { id: '3', name: 'Meera Patel', mobile: '+91-9876543212', avatar: '/src/assets/images/users/avatar-3.jpg', followers: '203K', specialty: 'South Indian Rice' },
