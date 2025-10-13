@@ -1,0 +1,1 @@
+import{e as a,u as n,r,j as e}from"./index-ByQwV90u.js";const o=()=>{const s=a(),{changeMenu:t}=n();return r.useEffect(()=>{t.size("hidden"),s("/dashboards")},[s]),e.jsx(e.Fragment,{})},i=()=>e.jsx(e.Fragment,{children:e.jsx(o,{})});export{i as default};

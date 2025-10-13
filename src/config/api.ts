@@ -5,6 +5,8 @@
 const getBaseUrl = (): string => {
   if (typeof window !== 'undefined' && window.location.href.includes('localhost:5174')) {
     return 'http://localhost:8080'
+  }else{
+    return 'http://127.0.0.1:8080'
   }
   
   return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
