@@ -1,1 +1,0 @@
-import{e as s,u as r,r as o,j as a}from"./index-CyIL2mBc.js";const n=()=>{const t=s(),{changeTopbarTheme:e}=r();return o.useEffect(()=>{e("dark"),t("/dashboards")},[t]),a.jsx(a.Fragment,{})},c=()=>a.jsx(a.Fragment,{children:a.jsx(n,{})});export{c as default};
