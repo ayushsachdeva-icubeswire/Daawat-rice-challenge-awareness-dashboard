@@ -6,11 +6,9 @@ const getBaseUrl = (): string => {
   if (typeof window !== 'undefined' && window.location.href.includes('localhost:5174')) {
     return 'http://localhost:8080'
   }else{
-    return 'http://127.0.0.1:8080'
+    return 'http://13.201.26.193'
   }
-  
-  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
-}
+  }
 
 const API_BASE_URL = getBaseUrl()
 const API_VERSION = import.meta.env.VITE_API_VERSION || 'api'
