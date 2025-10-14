@@ -3,6 +3,8 @@ import { useEffect } from 'react'
 import { Card, CardBody, Col, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import useSignIn from '../useSignIn'
+import DarkLogo from '@/assets/images/Daawat-logo (1).png'
+import LightLogo from '@/assets/images/Daawat-logo (1).png'
 
 const SignIn = () => {
   useEffect(() => {
@@ -25,10 +27,10 @@ const SignIn = () => {
                   <div className="text-center">
                     <div className="mx-auto mb-4 text-center auth-logo">
                       <Link to="/dashboards" className="logo-dark">
-                        {/* <img src={DarkLogo} height={32} alt="logo dark" /> */}
+                        <img src={DarkLogo} height={32} alt="logo dark" />
                       </Link>
                       <Link to="/dashboards" className="logo-light">
-                        {/* <img src={LightLogo} height={28} alt="logo light" /> */}
+                        <img src={LightLogo} height={28} alt="logo light" />
                       </Link>
                     </div>
                     <h4 className="fw-bold text-dark mb-2">Welcome Back!</h4>

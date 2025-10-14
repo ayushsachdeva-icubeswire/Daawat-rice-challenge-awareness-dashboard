@@ -1,5 +1,5 @@
-import DarkLogo from '@/assets/images/logo-dark.png'
-import LightLogo from '@/assets/images/logo-light.png'
+import DarkLogo from '@/assets/images/Daawat-logo (1).png'
+import LightLogo from '@/assets/images/Daawat-logo (1).png'
 import * as yup from 'yup'
 import TextFormInput from '@/components/from/TextFormInput'
 import { yupResolver } from '@hookform/resolvers/yup'

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import DarkLogo from '@/assets/images/logo-dark.png'
-import LightLogo from '@/assets/images/logo-light.png'
+import DarkLogo from '@/assets/images/Daawat-logo (1).png'
+import LightLogo from '@/assets/images/Daawat-logo (1).png'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm } from 'react-hook-form'
 import * as yup from 'yup'

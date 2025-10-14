@@ -2,7 +2,7 @@ import { lazy } from 'react'
 import { Navigate, type RouteProps } from 'react-router-dom'
 
 const Dashboards = lazy(() => import('@/app/(admin)/dashboards/page'))
-const Interactions = lazy(() => import('@/app/(admin)/interactions/page'))
+// const Interactions = lazy(() => import('@/app/(admin)/interactions/page'))
 const Challenges = lazy(() => import('@/app/(admin)/challenges/page'))
 const Posts = lazy(() => import('@/app/(admin)/posts/page'))
 const DietPlan = lazy(() => import('@/app/(admin)/diet-plan/page'))
@@ -94,11 +94,11 @@ const generalRoutes: RoutesProps[] = [
     name: 'Dashboards',
     element: <Dashboards />,
   },
-  {
-    path: '/interactions',
-    name: 'Interactions',
-    element: <Interactions />,
-  },
+  // {
+  //   path: '/interactions',
+  //   name: 'Interactions',
+  //   element: <Interactions />,
+  // },
   {
     path: '/challenges',
     name: 'Challenges',

@@ -325,7 +325,7 @@ const DietPlanPage = () => {
               {/* Empty State */}
               {filteredPlans.length === 0 && (
                 <div className="text-center py-4">
-                  <p className="text-muted">No diet plans found matching your criteria.</p>
+                  <p className="text-muted">No diet plans found.</p>
                 </div>
               )}
 

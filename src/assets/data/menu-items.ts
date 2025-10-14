@@ -44,11 +44,11 @@ export const MENU_ITEMS: MenuItemType[] = [
         label: 'Hashtag Performance',
         url: '/social/hashtag-performance',
       },
-      {
-        key: 'social-interactions',
-        label: 'Interactions',
-        url: '/interactions',
-      },
+      // {
+      //   key: 'social-interactions',
+      //   label: 'Interactions',
+      //   url: '/interactions',
+      // },
       {
         key: 'social-stories',
         label: 'Stories',

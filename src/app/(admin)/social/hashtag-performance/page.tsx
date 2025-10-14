@@ -1,10 +1,22 @@
 import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { CampaignContentsService, CampaignContent, processPostsIntoAnalytics, CampaignAnalysisData } from '@/services/campaignContentsService'
 
 const HashtagPerformancePage = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedPlatform, setSelectedPlatform] = useState('all')
+  const [campaignData, setCampaignData] = useState<CampaignContent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [currentHashtag] = useState('itchotels')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(8)
+  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [allPosts, setAllPosts] = useState<any[]>([])
+  const [expandedCaptions, setExpandedCaptions] = useState<Set<string>>(new Set())
+  const [expandedHashtags, setExpandedHashtags] = useState<Set<string>>(new Set())
+  const [analysisData, setAnalysisData] = useState<CampaignAnalysisData | null>(null)
 
   // Mock hashtag performance data
   const hashtagData = [
@@ -55,185 +67,958 @@ const HashtagPerformancePage = () => {
     },
   ]
 
-  const filteredHashtags = hashtagData.filter(hashtag => {
-    const matchesSearch = hashtag.hashtag.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesPlatform = selectedPlatform === 'all' || hashtag.platform.toLowerCase() === selectedPlatform
-    return matchesSearch && matchesPlatform
-  })
+  // Fetch campaign contents and analysis from API
+  useEffect(() => {
+    const loadCampaignData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Call both APIs with individual error handling
+        let contentsResponse, analysisResponse
+        
+        try {
+          contentsResponse = await CampaignContentsService.getCampaignContents(currentHashtag, 1, itemsPerPage)
+          console.log('Campaign Contents API Response:', contentsResponse) // Debug log
+        } catch (contentsError) {
+          console.error('Contents API Error:', contentsError)
+        }
+        
+        try {
+          analysisResponse = await CampaignContentsService.getCampaignAnalysis(currentHashtag)
+          console.log('Campaign Analysis API Response:', analysisResponse) // Debug log
+        } catch (analysisError) {
+          console.error('Analysis API Error:', analysisError)
+        }
+        
+        // Handle contents response
+        if (contentsResponse?.success && contentsResponse.data.posts.length > 0) {
+          // Store pagination metadata
+          setTotalCount(contentsResponse.data.total_count)
+          setTotalPages(contentsResponse.data.total_pages)
+          setAllPosts(contentsResponse.data.posts)
+          
+          // Reset expanded states
+          setExpandedCaptions(new Set())
+          setExpandedHashtags(new Set())
+          
+          // Process the posts data into analytics format
+          const analyticsData = processPostsIntoAnalytics(contentsResponse.data.posts, currentHashtag)
+          setCampaignData([analyticsData])
+          setCurrentPage(1)
+        } else {
+          setCampaignData([])
+          setAllPosts([])
+          setTotalCount(0)
+          setTotalPages(0)
+          setCurrentPage(1)
+        }
+        
+        // Handle analysis response
+        if (analysisResponse?.success) {
+          setAnalysisData(analysisResponse.data)
+        } else {
+          setAnalysisData(null)
+        }
+        
+      } catch (err) {
+        setError('Failed to fetch some campaign data. Please try again.')
+        console.error('General API Error:', err)
+        setCampaignData([])
+        setAllPosts([])
+        setAnalysisData(null)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const totalReach = hashtagData.reduce((sum, hashtag) => sum + hashtag.reach, 0)
-  const totalEngagement = hashtagData.reduce((sum, hashtag) => sum + hashtag.engagement, 0)
-  const totalPosts = hashtagData.reduce((sum, hashtag) => sum + hashtag.posts, 0)
-  const trendingCount = hashtagData.filter(hashtag => hashtag.trending).length
+    loadCampaignData()
+  }, [currentHashtag, itemsPerPage])
+
+  // Function to load more pages
+  const loadMoreData = async () => {
+    if (currentPage >= totalPages || loading) return
+    
+    try {
+      setLoading(true)
+      const nextPage = currentPage + 1
+      const response = await CampaignContentsService.getCampaignContents(currentHashtag, nextPage, itemsPerPage)
+      
+      if (response.success && response.data.posts.length > 0) {
+        // Append new posts to existing data
+        const combinedPosts = [...allPosts, ...response.data.posts]
+        setAllPosts(combinedPosts)
+        
+        // Update analytics with combined data
+        const analyticsData = processPostsIntoAnalytics(combinedPosts, currentHashtag)
+        setCampaignData([analyticsData])
+        setCurrentPage(nextPage)
+      }
+    } catch (err) {
+      console.error('Error loading more data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Helper functions for expanding content
+  const toggleCaptionExpansion = (postId: string) => {
+    setExpandedCaptions(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(postId)) {
+        newSet.delete(postId)
+      } else {
+        newSet.add(postId)
+      }
+      return newSet
+    })
+  }
+
+  const toggleHashtagExpansion = (postId: string) => {
+    setExpandedHashtags(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(postId)) {
+        newSet.delete(postId)
+      } else {
+        newSet.add(postId)
+      }
+      return newSet
+    })
+  }
+
+  // Use API data if available, otherwise use mock data
+  const dataToUse = campaignData.length > 0 ? campaignData : hashtagData
+
+  const totalReach = dataToUse.reduce((sum, hashtag) => sum + hashtag.reach, 0)
+  const totalEngagement = dataToUse.reduce((sum, hashtag) => sum + hashtag.engagement, 0)
+  const totalPosts = dataToUse.reduce((sum, hashtag) => sum + hashtag.posts, 0)
+  const trendingCount = dataToUse.filter(hashtag => hashtag.trending).length
 
   return (
     <>
       <PageTitle title="Hashtag Performance" subName="Track hashtag effectiveness across platforms" />
       
+      
       <div className="container-fluid">
-        {/* Overview Cards */}
-        <div className="row mb-4">
-          <div className="col-xl-3 col-md-6">
-            <div className="card bg-primary text-white">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h4 className="mb-0">{totalReach.toLocaleString()}</h4>
-                    <p className="mb-0">Total Reach</p>
-                  </div>
-                  <i className="fas fa-hashtag fa-2x opacity-75"></i>
+        {/* Loading State */}
+        {loading && (
+          <div className="row">
+            <div className="col-12">
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
+                <p className="mt-2">Loading campaign data...</p>
               </div>
             </div>
           </div>
-          <div className="col-xl-3 col-md-6">
-            <div className="card bg-success text-white">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h4 className="mb-0">{totalEngagement.toLocaleString()}</h4>
-                    <p className="mb-0">Total Engagement</p>
-                  </div>
-                  <i className="fas fa-heart fa-2x opacity-75"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-xl-3 col-md-6">
-            <div className="card bg-warning text-white">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h4 className="mb-0">{totalPosts.toLocaleString()}</h4>
-                    <p className="mb-0">Total Posts</p>
-                  </div>
-                  <i className="fas fa-file-alt fa-2x opacity-75"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-xl-3 col-md-6">
-            <div className="card bg-info text-white">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h4 className="mb-0">{trendingCount}</h4>
-                    <p className="mb-0">Trending Hashtags</p>
-                  </div>
-                  <i className="fas fa-fire fa-2x opacity-75"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
 
-        {/* Hashtag Performance Table */}
+        {/* Error State */}
+        {error && (
+          <div className="row">
+            <div className="col-12">
+              <div className="alert alert-danger" role="alert">
+                <i className="fas fa-exclamation-triangle me-2"></i>
+                {error}
+                <button 
+                  className="btn btn-sm btn-outline-danger ms-3"
+                  onClick={() => window.location.reload()}
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Hashtag Selection */}
+        {!loading && (
+          <div className="row mb-4">
+            <div className="col-md-6">
+              {/* <div className="card">
+                <div className="card-body">
+                  <label htmlFor="hashtagInput" className="form-label">Track Hashtag Performance</label>
+                  <div className="input-group">
+                    <span className="input-group-text">#</span>
+                    <input
+                      id="hashtagInput"
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter hashtag (e.g., itchotels)"
+                      value={currentHashtag}
+                      onChange={(e) => setCurrentHashtag(e.target.value)}
+                    />
+                    <button 
+                      className="btn btn-primary" 
+                      type="button"
+                      onClick={() => {
+                        // Force re-fetch by updating state
+                        const trimmedHashtag = currentHashtag.trim()
+                        if (trimmedHashtag) {
+                          setCurrentHashtag(trimmedHashtag)
+                          // Clear previous data to show loading
+                          setCampaignData([])
+                        }
+                      }}
+                      disabled={loading || !currentHashtag.trim()}
+                    >
+                      {loading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-search me-2"></i>
+                          Analyze
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <small className="form-text text-muted">
+                    Currently analyzing: <strong>#{currentHashtag}</strong>
+                    {campaignData.length > 0 && (
+                      <span className="badge bg-success ms-2">
+                        <i className="fas fa-check me-1"></i>
+                        API Data Loaded
+                      </span>
+                    )}
+                    {campaignData.length === 0 && !loading && (
+                      <span className="badge bg-warning ms-2">
+                        <i className="fas fa-exclamation-triangle me-1"></i>
+                        Using Mock Data
+                      </span>
+                    )}
+                  </small>
+                </div>
+              </div> */}
+            </div>
+          </div>
+        )}
+
+        {/* Main Content - Only show when not loading */}
+        {!loading && (
+          <>
+            {/* Campaign Analytics Dashboard */}
+            {analysisData ? (
+              <>
+                {/* Primary Metrics Row */}
+                <div className="row mb-4">
+                  <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{analysisData.total_followers.toLocaleString()}</h3>
+                            <p className="mb-0 opacity-75">Total Followers</p>
+                            <small className="opacity-75">Cumulative reach</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-users fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{analysisData.total_engagements.toLocaleString()}</h3>
+                            <p className="mb-0 opacity-75">Total Engagements</p>
+                            <small className="opacity-75">Likes + Comments + Shares</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-heart fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{analysisData.total_plays.toLocaleString()}</h3>
+                            <p className="mb-0 opacity-75">Total Video Plays</p>
+                            <small className="opacity-75">Video content views</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-play-circle fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{(analysisData.avg_er * 100).toFixed(1)}%</h3>
+                            <p className="mb-0 opacity-75">Avg Engagement Rate</p>
+                            <small className="opacity-75">Performance metric</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-chart-line fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Secondary Metrics Row */}
+                <div className="row mb-4">
+                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-primary text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-file-alt fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{analysisData.post_count}</h4>
+                          <p className="mb-0 small">Total Posts</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-success text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-user-friends fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{analysisData.influencer_count}</h4>
+                          <p className="mb-0 small">Influencers</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-info text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-thumbs-up fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{analysisData.avg_likes.toLocaleString()}</h4>
+                          <p className="mb-0 small">Avg Likes</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-warning text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-venus fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{analysisData.gender_distribution.find(g => g.name === 'female')?.percentage || 0}%</h4>
+                          <p className="mb-0 small">Female</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-secondary text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-mars fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{analysisData.gender_distribution.find(g => g.name === 'male')?.percentage || 0}%</h4>
+                          <p className="mb-0 small">Male</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-dark text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-fire fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{analysisData.er_distribution.find(er => er.name === 'Above 10')?.count || 0}</h4>
+                          <p className="mb-0 small">High ER (&gt;10%)</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Fallback cards when no analysis data */
+              <div className="row mb-4">
+                <div className="col-xl-3 col-md-6">
+                  <div className="card bg-primary text-white">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h4 className="mb-0">{totalReach.toLocaleString()}</h4>
+                          <p className="mb-0">Total Reach</p>
+                        </div>
+                        <i className="fas fa-hashtag fa-2x opacity-75"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-xl-3 col-md-6">
+                  <div className="card bg-success text-white">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h4 className="mb-0">{totalEngagement.toLocaleString()}</h4>
+                          <p className="mb-0">Total Engagement</p>
+                        </div>
+                        <i className="fas fa-heart fa-2x opacity-75"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-xl-3 col-md-6">
+                  <div className="card bg-warning text-white">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h4 className="mb-0">{totalPosts.toLocaleString()}</h4>
+                          <p className="mb-0">Total Posts</p>
+                        </div>
+                        <i className="fas fa-file-alt fa-2x opacity-75"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-xl-3 col-md-6">
+                  <div className="card bg-info text-white">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h4 className="mb-0">{trendingCount}</h4>
+                          <p className="mb-0">Trending Hashtags</p>
+                        </div>
+                        <i className="fas fa-fire fa-2x opacity-75"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+        {/* Distribution Analytics */}
+        {analysisData && (
+          <div className="row mb-4">
+            <div className="col-md-4">
+              <ComponentContainerCard
+                id="gender-distribution"
+                title="Gender Distribution"
+                description="Breakdown by gender"
+              >
+                <div className="d-flex flex-column gap-2">
+                  {analysisData.gender_distribution.map((item, index) => (
+                    <div key={index} className="d-flex justify-content-between align-items-center">
+                      <span className="text-capitalize">{item.name}</span>
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="badge bg-primary">{item.count}</span>
+                        <span className="text-muted small">{item.percentage}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ComponentContainerCard>
+            </div>
+            <div className="col-md-4">
+              <ComponentContainerCard
+                id="er-distribution"
+                title="Engagement Rate Distribution"
+                description="ER ranges breakdown"
+              >
+                <div className="d-flex flex-column gap-2">
+                  {analysisData.er_distribution.map((item, index) => (
+                    <div key={index} className="d-flex justify-content-between align-items-center">
+                      <span>{item.name}%</span>
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="badge bg-success">{item.count}</span>
+                        <span className="text-muted small">{item.percentage.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ComponentContainerCard>
+            </div>
+            <div className="col-md-4">
+              <ComponentContainerCard
+                id="category-distribution"
+                title="Category Distribution"
+                description="Content creator categories"
+              >
+                <div className="d-flex flex-column gap-2">
+                  {analysisData.category_distribution.map((item, index) => (
+                    <div key={index} className="d-flex justify-content-between align-items-center">
+                      <span>{item.name}</span>
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="badge bg-info">{item.count}</span>
+                        <span className="text-muted small">{item.percentage}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ComponentContainerCard>
+            </div>
+          </div>
+        )}
+
+        {/* Top Influencers and Recent Posts sections */}
+        {campaignData.length > 0 && (campaignData[0] as any).topInfluencers && (
+          <div className="row mb-4">
+            {/* <div className="col-md-6">
+              <ComponentContainerCard
+                id="top-influencers"
+                title="Top Influencers"
+                description="Most active influencers for this hashtag"
+              >
+                <div className="list-group list-group-flush">
+                  {((campaignData[0] as any).topInfluencers || []).slice(0, 5).map((influencer: any, index: number) => (
+                    <div key={influencer.id} className="list-group-item border-0 px-0">
+                      <div className="d-flex align-items-center">
+                        <img 
+                          src={influencer.profile_pic_url} 
+                          alt={influencer.full_name}
+                          className="rounded-circle me-3"
+                          style={{ width: '40px', height: '40px' }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFOUVDRUYiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjNkI3MjgwIi8+CjxwYXRoIGQ9Ik0xMiAxNEM4LjEzNDAxIDE0IDUgMTcuMTM0IDUgMjFIMTlDMTkgMTcuMTM0IDE1Ljg2NiAxNCAxMiAxNFoiIGZpbGw9IiM2QjcyODAiLz4KPC9zdmc+Cjwvc3ZnPgo='
+                          }}
+                        />
+                        <div className="flex-grow-1">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                              <h6 className="mb-0">{influencer.full_name}</h6>
+                              <small className="text-muted">@{influencer.username}</small>
+                            </div>
+                            <div className="text-end">
+                              {influencer.is_verified && (
+                                <i className="fas fa-check-circle text-primary me-2" title="Verified"></i>
+                              )}
+                              <span className="badge bg-light text-dark">#{index + 1}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ComponentContainerCard>
+            </div>
+            
+            <div className="col-md-6">
+              <ComponentContainerCard
+                id="recent-posts"
+                title="Recent Posts"
+                description="Latest posts using this hashtag"
+              >
+                <div className="list-group list-group-flush">
+                  {((campaignData[0] as any).recentPosts || []).slice(0, 3).map((post: any) => (
+                    <div key={post._id} className="list-group-item border-0 px-0">
+                      <div className="d-flex">
+                        <img 
+                          src={post.display_url} 
+                          alt="Post"
+                          className="rounded me-3"
+                          style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                        />
+                        <div className="flex-grow-1">
+                          <div className="d-flex justify-content-between align-items-start">
+                            <div>
+                              <h6 className="mb-1">@{post.influencer.username}</h6>
+                              <p className="mb-1 text-muted small">
+                                {post.caption.length > 100 ? `${post.caption.substring(0, 100)}...` : post.caption}
+                              </p>
+                              <small className="text-muted">{post.created_date}</small>
+                            </div>
+                            <div className="text-end">
+                              <div className="d-flex flex-column small">
+                                <span><i className="fas fa-heart text-danger me-1"></i>{post.total_likes}</span>
+                                <span><i className="fas fa-comment text-info me-1"></i>{post.total_comments}</span>
+                                {post.is_video && (
+                                  <span><i className="fas fa-play text-success me-1"></i>{post.total_play || 0}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ComponentContainerCard>
+            </div> */}
+          </div>
+        )}
+
+        {/* Hashtag Posts Table */}
         <ComponentContainerCard
-          id="hashtag-performance"
-          title="Hashtag Analytics"
-          description="Detailed performance metrics for your hashtags"
+          id="hashtag-posts"
+          title="Hashtag Posts"
+          description="Detailed view of all posts using this hashtag"
         >
           <div className="row mb-3">
-            <div className="col-md-4">
+            <div className="col-md-6">
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search hashtags..."
+                placeholder="Search posts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="col-md-4">
-              <select 
-                className="form-select"
-                value={selectedPlatform}
-                onChange={(e) => setSelectedPlatform(e.target.value)}
-              >
-                <option value="all">All Platforms</option>
-                <option value="instagram">Instagram</option>
-                <option value="facebook">Facebook</option>
-                <option value="twitter">Twitter</option>
-                <option value="linkedin">LinkedIn</option>
-              </select>
-            </div>
-            <div className="col-md-4 text-end">
-              <button className="btn btn-primary me-2">
-                <i className="fas fa-plus me-2"></i>Track New Hashtag
-              </button>
-              <button className="btn btn-outline-primary">
-                <i className="fas fa-download me-2"></i>Export
-              </button>
+            <div className="col-md-6 text-end">
+              <div className="dropdown">
+                <button className="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <i className="fas fa-filter me-2"></i>Filters
+                </button>
+                <div className="dropdown-menu p-3" style={{ minWidth: '250px' }}>
+                  <h6 className="dropdown-header">Filter Options</h6>
+                  <div className="mb-2">
+                    <label className="form-label small">Sort By (Highest)</label>
+                    <select className="form-select form-select-sm">
+                      <option>Latest First</option>
+                      <option>Oldest First</option>
+                      <option>Highest Liked</option>
+                      <option>Highest Shared</option>
+                      <option>Highest Played</option>
+                    </select>
+                  </div>
+                  <div className="form-check">
+                    <input className="form-check-input" type="checkbox" id="verifiedOnly" />
+                    <label className="form-check-label small" htmlFor="verifiedOnly">
+                      Verified accounts only
+                    </label>
+                  </div>
+                  <div className="form-check">
+                    <input className="form-check-input" type="checkbox" id="videoOnly" />
+                    <label className="form-check-label small" htmlFor="videoOnly">
+                      Video posts only
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead className="table-dark">
-                <tr>
-                  <th>Hashtag</th>
-                  <th>Platform</th>
-                  <th>Posts</th>
-                  <th>Reach</th>
-                  <th>Engagement</th>
-                  <th>Impressions</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredHashtags.map((hashtag, index) => (
-                  <tr key={index}>
-                    <td>
-                      <span className="fw-semibold text-primary">{hashtag.hashtag}</span>
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <i className={`fab fa-${hashtag.platform.toLowerCase()} me-2`}></i>
-                        {hashtag.platform}
-                      </div>
-                    </td>
-                    <td>{hashtag.posts.toLocaleString()}</td>
-                    <td>{hashtag.reach.toLocaleString()}</td>
-                    <td>
-                      <span className="badge bg-success">
-                        {hashtag.engagement.toLocaleString()}
-                      </span>
-                    </td>
-                    <td>{hashtag.impressions.toLocaleString()}</td>
-                    <td>
-                      {hashtag.trending ? (
-                        <span className="badge bg-danger">
-                          <i className="fas fa-fire me-1"></i>Trending
-                        </span>
-                      ) : (
-                        <span className="badge bg-secondary">Normal</span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="btn-group" role="group">
-                        <button className="btn btn-sm btn-outline-primary">
-                          <i className="fas fa-chart-line"></i>
-                        </button>
-                        <button className="btn btn-sm btn-outline-success">
-                          <i className="fas fa-share"></i>
-                        </button>
-                        <button className="btn btn-sm btn-outline-danger">
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </td>
+
+
+          {/* Posts Table */}
+          {allPosts.length > 0 ? (
+            <div className="table-responsive">
+              <table className="table table-borderless" style={{ fontSize: '15px' }}>
+                <thead className="table-light">
+                  <tr>
+                    <th style={{ width: '60px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">#</th>
+                    <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Influencer</th>
+                    <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post</th>
+                    <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post Type</th>
+                    <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Engagement</th>
+                    <th style={{ padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Details</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {allPosts.map((post: any, index: number) => (
+                    <tr key={post._id} style={{ borderBottom: '1px solid #f8f9fa' }}>
+                      <td style={{ padding: '1.5rem', textAlign: 'center' }}>
+                        <span className="fw-semibold text-muted">{index + 1}</span>
+                      </td>
+                      <td style={{ padding: '1.5rem' }}>
+                        <div className="d-flex align-items-center">
+                          <img 
+                            src={post.influencer.profile_pic_url} 
+                            alt={post.influencer.full_name}
+                            className="rounded-circle me-3"
+                            style={{ width: '45px', height: '45px' }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFOUVDRUYiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA4IDEyIDRDOS43OTA4NiA4IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjNkI3MjgwIi8+CjxwYXRoIGQ9Ik0xMiAxNEM4LjEzNDAxIDE0IDUgMTcuMTM0IDUgMjFIMTlDMTkgMTcuMTM0IDE1Ljg2NiAxNCAxMiAxNFoiIGZpbGw9IiM2QjcyODAiLz4KPC9zdmc+Cjwvc3ZnPgo='
+                            }}
+                          />
+                          <div>
+                            <div className="fw-semibold" style={{ fontSize: '16px' }}>{post.influencer.username}</div>
+                            <div className="text-muted" style={{ fontSize: '14px' }}>{post.influencer.full_name}</div>
+                            <div className="mt-2">
+                              {post.influencer.is_verified && (
+                                <span className="badge bg-primary" style={{ fontSize: '12px' }}>
+                                  <i className="fas fa-check me-1"></i>Verified
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>  
+                      </td>
+                      <td style={{ padding: '1.5rem' }}>
+                        <div className="position-relative">
+                          <img 
+                            src={post.display_url} 
+                            alt="Post"
+                            className="rounded cursor-pointer"
+                            style={{ width: '90px', height: '90px', objectFit: 'cover', cursor: 'pointer' }}
+                            onClick={() => {
+                              // Open Instagram post in new tab
+                              const instagramUrl = `https://www.instagram.com/p/${post.post_shortcode}/`
+                              window.open(instagramUrl, '_blank', 'noopener,noreferrer')
+                            }}
+                            title="Click to view on Instagram"
+                          />
+                          {post.is_video && (
+                            <div 
+                              className="position-absolute top-50 start-50 translate-middle"
+                              style={{ pointerEvents: 'none' }}
+                            >
+                              <i className="fas fa-play-circle text-white" style={{ fontSize: '1.8rem' }}></i>
+                            </div>
+                          )}
+                          {/* Instagram overlay indicator */}
+                          <div 
+                            className="position-absolute top-0 end-0 m-1"
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            <i className="fab fa-instagram text-white" style={{ fontSize: '1rem', textShadow: '0 0 3px rgba(0,0,0,0.5)' }}></i>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ padding: '1.5rem' }}>
+                        <span className={`badge ${post.is_video ? 'bg-success' : post.is_carousel ? 'bg-info' : 'bg-secondary'}`} style={{ fontSize: '13px' }}>
+                          {post.is_video ? 'Video' : post.is_carousel ? 'Carousel' : 'Image'}
+                        </span>
+                        <div className="text-muted mt-2" style={{ fontSize: '13px' }}>Organic</div>
+                      </td>  
+                      <td style={{ padding: '1.5rem' }}>
+                        <div className="d-flex align-items-center justify-content-start gap-4">
+                                                  <div className="d-flex flex-column gap-3">
+                          <div className="d-flex align-items-center">
+                            <i className="far fa-eye text-primary me-2" style={{ fontSize: '16px', width: '20px' }}></i>
+                            <span className="fw-semibold" style={{ fontSize: '15px' }}>{(post.total_play || post.reach || 0).toLocaleString()}</span>
+                          </div>
+                          <div className="d-flex align-items-center">
+                            <i className="fas fa-heart text-danger me-2" style={{ fontSize: '16px', width: '20px' }}></i>
+                            <span className="fw-semibold" style={{ fontSize: '15px' }}>{post.total_likes || 0}</span>
+                          </div>
+                          <div className="d-flex align-items-center">
+                            <i className="fas fa-share text-success me-2" style={{ fontSize: '16px', width: '20px' }}></i>
+                            <span className="fw-semibold" style={{ fontSize: '15px' }}>{post.reshare_count || 0}</span>
+                          </div>
+                          <div className="d-flex align-items-center">
+                            <i className="fas fa-comment text-info me-2" style={{ fontSize: '16px', width: '20px' }}></i>
+                            <span className="fw-semibold" style={{ fontSize: '15px' }}>{post.total_comments || 0}</span>
+                          </div>
+                        </div>
+                        </div>
+                      </td>
+                      <td style={{ padding: '1.5rem', minWidth: '350px' }}>
+                        <div>
+                          <div className="d-flex align-items-center mb-3">
+                            <i className="far fa-calendar text-muted me-2" style={{ fontSize: '14px' }}></i>
+                            <span style={{ fontSize: '15px' }}>{post.created_date}</span>
+                          </div>
+                          <div className="d-flex align-items-center mb-3">
+                            <i className="fas fa-users text-muted me-2" style={{ fontSize: '14px' }}></i>
+                            <span style={{ fontSize: '15px' }}>{(post.total_play || 0).toLocaleString()}</span>
+                          </div>
+                          {post.location && post.location.name && (
+                            <div className="d-flex align-items-center mb-3">
+                              <i className="fas fa-map-marker-alt text-danger me-2" style={{ fontSize: '14px' }}></i>
+                              <span className="text-truncate" style={{ maxWidth: '250px', fontSize: '15px' }}>
+                                {post.location.name}
+                              </span>
+                            </div>
+                          )}
+                          <div className="mb-3">
+                            <div 
+                              style={{ 
+                                maxWidth: '300px', 
+                                fontSize: '15px', 
+                                lineHeight: '1.4',
+                                overflow: expandedCaptions.has(post._id) ? 'visible' : 'hidden',
+                                display: expandedCaptions.has(post._id) ? 'block' : '-webkit-box',
+                                WebkitLineClamp: expandedCaptions.has(post._id) ? 'none' : 3,
+                                WebkitBoxOrient: 'vertical' as const,
+                                textOverflow: 'ellipsis'
+                              }}
+                            >
+                              {expandedCaptions.has(post._id) 
+                                ? post.caption 
+                                : post.caption.length > 80 
+                                  ? `${post.caption.substring(0, 80)}...` 
+                                  : post.caption
+                              }
+                            </div>
+                          </div>
+                          <div className="d-flex flex-wrap gap-1 mb-3">
+                            {(expandedHashtags.has(post._id) ? post.hashtags : post.hashtags.slice(0, 4)).map((tag: string, tagIndex: number) => (
+                              <span key={tagIndex} className="badge bg-light text-primary" style={{ fontSize: '12px' }}>
+                                {tag}
+                              </span>
+                            ))}
+                            {post.hashtags.length > 4 && !expandedHashtags.has(post._id) && (
+                              <span 
+                                className="badge bg-light text-muted" 
+                                style={{ 
+                                  fontSize: '12px', 
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                  border: '1px solid transparent'
+                                }}
+                                onClick={() => toggleHashtagExpansion(post._id)}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#e9ecef'
+                                  e.currentTarget.style.borderColor = '#dee2e6'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#f8f9fa'
+                                  e.currentTarget.style.borderColor = 'transparent'
+                                }}
+                                role="button"
+                                title="Click to show all hashtags"
+                              >
+                                <i className="fas fa-hashtag me-1"></i>
+                                +{post.hashtags.length - 4}
+                              </span>
+                            )}
+                            {expandedHashtags.has(post._id) && post.hashtags.length > 4 && (
+                              <span 
+                                className="badge bg-light text-muted" 
+                                style={{ 
+                                  fontSize: '12px', 
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                  border: '1px solid transparent'
+                                }}
+                                onClick={() => toggleHashtagExpansion(post._id)}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#e9ecef'
+                                  e.currentTarget.style.borderColor = '#dee2e6'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#f8f9fa'
+                                  e.currentTarget.style.borderColor = 'transparent'
+                                }}
+                                role="button"
+                                title="Click to show less hashtags"
+                              >
+                                <i className="fas fa-minus me-1"></i>
+                                Show Less
+                              </span>
+                            )}
+                          </div>
+                          {post.caption.length > 80 && (
+                            <div>
+                              <button 
+                                className="btn btn-link btn-sm p-0 text-primary" 
+                                style={{ fontSize: '15px', cursor: 'pointer' }}
+                                onClick={() => toggleCaptionExpansion(post._id)}
+                              >
+                                {expandedCaptions.has(post._id) ? (
+                                  <>
+                                    <i className="fas fa-chevron-up me-1"></i>
+                                    View Less
+                                  </>
+                                ) : (
+                                  <>
+                                    <i className="fas fa-chevron-down me-1"></i>
+                                    View More
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-          {filteredHashtags.length === 0 && (
-            <div className="text-center py-4">
-              <p className="text-muted">No hashtags found matching your criteria.</p>
+              {/* Load More Button */}
+              {!loading && totalPages > 0 && currentPage < totalPages && (
+                <div className="text-center mt-4">
+                  <button 
+                    className="btn btn-outline-primary"
+                    onClick={loadMoreData}
+                    disabled={loading}
+                  >
+                    <i className="fas fa-chevron-down me-2"></i>
+                    Load {itemsPerPage} More
+                  </button>
+                </div>
+              )}
+
+              {/* Page Navigation */}
+              {!loading && totalPages > 1 && (
+                <div className="d-flex justify-content-center align-items-center mt-4 gap-3">
+                  <button 
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => {
+                      if (currentPage > 1) {
+                        setCurrentPage(1)
+                        // Reset to first page
+                        const loadFirstPage = async () => {
+                          try {
+                            setLoading(true)
+                            const response = await CampaignContentsService.getCampaignContents(currentHashtag, 1, itemsPerPage)
+                            if (response.success) {
+                              setAllPosts(response.data.posts)
+                              const analyticsData = processPostsIntoAnalytics(response.data.posts, currentHashtag)
+                              setCampaignData([analyticsData])
+                              setCurrentPage(1)
+                            }
+                          } catch (err) {
+                            console.error('Error loading first page:', err)
+                          } finally {
+                            setLoading(false)
+                          }
+                        }
+                        loadFirstPage()
+                      }
+                    }}
+                    disabled={currentPage === 1 || loading}
+                  >
+                    <i className="fas fa-chevron-left me-1"></i>
+                    First
+                  </button>
+                  
+                  <span className="badge bg-primary fs-6 px-3 py-2">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  
+                  <button 
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={loadMoreData}
+                    disabled={currentPage >= totalPages || loading}
+                  >
+                    Next
+                    <i className="fas fa-chevron-right ms-1"></i>
+                  </button>
+                </div>
+              )}
+
+              {/* Pagination Info */}
+              {!loading && totalCount > 0 && (
+                <div className="text-center mt-3">
+                  <small className="text-muted">
+                    Showing {allPosts.length} of {totalCount} posts
+                  </small>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-5">
+              <i className="fas fa-hashtag fa-3x text-muted mb-3"></i>
+              <h5 className="text-muted">No posts found</h5>
+              <p className="text-muted">Try searching for a different hashtag or check your API connection.</p>
             </div>
           )}
         </ComponentContainerCard>
+          </>
+        )}
       </div>
     </>
   )
