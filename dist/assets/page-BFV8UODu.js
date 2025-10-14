@@ -1,0 +1,1 @@
+import{e as t,u as n,r as o,j as e}from"./index-Cq64LKxS.js";const r=()=>{const a=t(),{changeMenu:s}=n();return o.useEffect(()=>{s.size("condensed"),a("/dashboards")},[a]),e.jsx(e.Fragment,{})},c=()=>e.jsx(r,{});export{c as default};
