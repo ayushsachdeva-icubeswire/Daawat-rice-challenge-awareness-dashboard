@@ -4,20 +4,43 @@ import { API_CONFIG } from '@/config/api'
 
 const BASE_URL = API_CONFIG.API_URL
 
+// Helper function to get authentication token from the session
+const getAuthToken = (fallbackToken?: string): string => {
+  try {
+    // Get the auth session from cookies (same as story service)
+    const authSession = getCookie('_DARKONE_AUTH_KEY_')?.toString()
+    
+    if (authSession) {
+      const userSession = JSON.parse(authSession)
+      if (userSession?.token) {
+        return userSession.token
+      }
+    }
+    
+    // Fallback to direct token cookie or localStorage
+    const directToken = getCookie('token')?.toString()
+    return fallbackToken || directToken || localStorage.getItem('authToken') || ''
+  } catch (error) {
+    console.warn('Failed to get auth token from session:', error)
+    const directToken = getCookie('token')?.toString()
+    return fallbackToken || directToken || localStorage.getItem('authToken') || ''
+  }
+}
+
 // Helper function to get auth headers
 const getAuthHeaders = (): HeadersInit => {
-  const token = getCookie('token')
+  const token = getAuthToken()
   return {
-    'Authorization': `Bearer ${token}`,
+    'authorization': token,
     'Content-Type': 'application/json'
   }
 }
 
 // Helper function to get auth headers for file upload
 const getAuthHeadersForUpload = (): HeadersInit => {
-  const token = getCookie('token')
+  const token = getAuthToken()
   return {
-    'Authorization': `Bearer ${token}`
+    'authorization': token
     // Don't set Content-Type for FormData, let browser set it
   }
 }
@@ -26,6 +49,12 @@ class DietPlanService {
   // Get all diet plans with pagination and filters
   static async getAllDietPlans(filters?: DietPlanFilters): Promise<DietPlanListResponse> {
     try {
+      // Check if auth token is available
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.')
+      }
+
       const queryParams = new URLSearchParams()
       
       if (filters?.category) queryParams.append('category', filters.category)
@@ -54,6 +83,12 @@ class DietPlanService {
   // Get specific diet plan by ID
   static async getDietPlanById(id: string): Promise<DietPlan> {
     try {
+      // Check if auth token is available
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.')
+      }
+
       const response = await fetch(`${BASE_URL}/dietplans/${id}`, {
         method: 'GET',
         headers: getAuthHeaders()
@@ -73,6 +108,12 @@ class DietPlanService {
   // Create new diet plan with PDF upload
   static async createDietPlan(data: DietPlanFormData): Promise<DietPlan> {
     try {
+      // Check if auth token is available
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.')
+      }
+
       const formData = new FormData()
       formData.append('name', data.name)
       formData.append('duration', data.duration)
@@ -112,6 +153,12 @@ class DietPlanService {
   // Update existing diet plan
   static async updateDietPlan(id: string, data: DietPlanFormData): Promise<DietPlan> {
     try {
+      // Check if auth token is available
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.')
+      }
+
       const formData = new FormData()
       formData.append('name', data.name)
       formData.append('duration', data.duration)
@@ -151,6 +198,12 @@ class DietPlanService {
   // Delete diet plan
   static async deleteDietPlan(id: string): Promise<void> {
     try {
+      // Check if auth token is available
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.')
+      }
+
       const response = await fetch(`${BASE_URL}/dietplans/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
@@ -168,6 +221,12 @@ class DietPlanService {
   // Delete all diet plans
   static async deleteAllDietPlans(): Promise<void> {
     try {
+      // Check if auth token is available
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.')
+      }
+
       const response = await fetch(`${BASE_URL}/dietplans`, {
         method: 'DELETE',
         headers: getAuthHeaders()
@@ -185,10 +244,16 @@ class DietPlanService {
   // Download PDF file
   static async downloadPDF(id: string): Promise<Blob> {
     try {
+      // Check if auth token is available
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.')
+      }
+
       const response = await fetch(`${BASE_URL}/dietplans/${id}/download`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${getCookie('token')}`
+          'authorization': token
         }
       })
 

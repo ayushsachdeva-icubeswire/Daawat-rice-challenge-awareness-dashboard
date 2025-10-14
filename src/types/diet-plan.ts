@@ -8,12 +8,18 @@ export interface DietPlan {
   subcategory?: string // e.g., "Beginner", "Advanced", "Low Sodium"
   pdfFile?: {
     filename: string
+    originalName: string
     path: string
     size: number
+    uploadDate: string
   }
   description?: string
   isActive: boolean
-  createdBy: string // User who created it (from JWT)
+  createdBy: {
+    _id: string
+    username: string
+    email: string
+  } // User who created it (from JWT)
   createdAt?: string
   updatedAt?: string
 }
@@ -30,13 +36,10 @@ export interface DietPlanFormData {
 }
 
 export interface DietPlanListResponse {
-  dietPlans: DietPlan[]
-  pagination?: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
+  data: DietPlan[]
+  currentPage: number
+  totalPages: number
+  totalItems: number
 }
 
 export interface DietPlanFilters {

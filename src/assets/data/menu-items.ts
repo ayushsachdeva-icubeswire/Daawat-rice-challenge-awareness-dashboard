@@ -22,11 +22,6 @@ export const MENU_ITEMS: MenuItemType[] = [
         label: 'Challenges',
         url: '/challenges',
       },
-      {
-        key: 'web-diet-plan',
-        label: 'Diet Plan',
-        url: '/diet-plan',
-      },
     ],
   },
   {
@@ -57,26 +52,15 @@ export const MENU_ITEMS: MenuItemType[] = [
     ],
   },
   {
-    key: 'recipes',
-    label: 'Recipes',
+    key: 'diet-plan',
+    label: 'Diet Plan',
     icon: 'solar:chef-hat-broken',
-    children: [
-      {
-        key: 'recipes-view',
-        label: 'View',
-        url: '/recipes/view',
-      },
-      {
-        key: 'recipes-create',
-        label: 'Create',
-        url: '/recipes/create',
-      },
-    ],
+    url: '/diet-plan',
   },
-  {
-    key: 'overall-performance',
-    label: 'Overall Performance',
-    icon: 'solar:chart-2-broken',
-    url: '/overall-performance',
-  },
+  // {
+  //   key: 'overall-performance',
+  //   label: 'Overall Performance',
+  //   icon: 'solar:chart-2-broken',
+  //   url: '/overall-performance',
+  // },
 ]

@@ -5,7 +5,6 @@ import { useNotificationContext } from '@/context/useNotificationContext'
 import DietPlanService from '@/services/dietPlanService'
 import { DietPlan, DietPlanFilters, DIET_CATEGORIES, DIET_TYPES, DIET_SUBCATEGORIES } from '@/types/diet-plan'
 import DietPlanForm from './components/DietPlanForm'
-import DeleteConfirmationModal from './components/DeleteConfirmationModal'
 
 const DietPlanPage = () => {
   
@@ -17,22 +16,13 @@ const DietPlanPage = () => {
     limit: 10
   })
   const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
   })
   const [showForm, setShowForm] = useState(false)
   const [editingPlan, setEditingPlan] = useState<DietPlan | null>(null)
-  const [deleteModal, setDeleteModal] = useState<{
-    show: boolean
-    plan: DietPlan | null
-    isDeleteAll: boolean
-  }>({
-    show: false,
-    plan: null,
-    isDeleteAll: false
-  })
 
   const { showNotification } = useNotificationContext()
 
@@ -42,10 +32,13 @@ const DietPlanPage = () => {
       // console.log('🔄 Manual: fetchDietPlans called with filters:', filters)
       setLoading(true)
       const response = await DietPlanService.getAllDietPlans(filters)
-      setDietPlans(response.dietPlans || [])
-      if (response.pagination) {
-        setPagination(response.pagination)
-      }
+      setDietPlans(response.data || [])
+      setPagination({
+        currentPage: response.currentPage || 1,
+        totalPages: response.totalPages || 1,
+        totalItems: response.totalItems || 0,
+        itemsPerPage: 10 // Default value since API doesn't return this
+      })
     } catch (error) {
       console.error('Error fetching diet plans:', error)
       showNotification({ message: 'Error fetching diet plans', variant: 'danger' })
@@ -61,10 +54,13 @@ const DietPlanPage = () => {
       try {
         setLoading(true)
         const response = await DietPlanService.getAllDietPlans(filters)
-        setDietPlans(response.dietPlans || [])
-        if (response.pagination) {
-          setPagination(response.pagination)
-        }
+        setDietPlans(response.data || [])
+        setPagination({
+          currentPage: response.currentPage || 1,
+          totalPages: response.totalPages || 1,
+          totalItems: response.totalItems || 0,
+          itemsPerPage: 10 // Default value since API doesn't return this
+        })
       } catch (error) {
         console.error('❌ Error fetching diet plans:', error)
         showNotification({ message: 'Error fetching diet plans', variant: 'danger' })
@@ -104,32 +100,7 @@ const DietPlanPage = () => {
     }
   }
 
-  // Handle delete diet plan
-  const handleDelete = async (plan: DietPlan) => {
-    try {
-      if (!plan._id) return
-      await DietPlanService.deleteDietPlan(plan._id)
-      showNotification({ message: 'Diet plan deleted successfully', variant: 'success' })
-      fetchDietPlans()
-      setDeleteModal({ show: false, plan: null, isDeleteAll: false })
-    } catch (error) {
-      console.error('Error deleting diet plan:', error)
-      showNotification({ message: 'Error deleting diet plan', variant: 'danger' })
-    }
-  }
 
-  // Handle delete all diet plans
-  const handleDeleteAll = async () => {
-    try {
-      await DietPlanService.deleteAllDietPlans()
-      showNotification({ message: 'All diet plans deleted successfully', variant: 'success' })
-      fetchDietPlans()
-      setDeleteModal({ show: false, plan: null, isDeleteAll: false })
-    } catch (error) {
-      console.error('Error deleting all diet plans:', error)
-      showNotification({ message: 'Error deleting all diet plans', variant: 'danger' })
-    }
-  }
 
   // Handle form submission
   const handleFormSubmit = () => {
@@ -251,6 +222,7 @@ const DietPlanPage = () => {
                       <th>Category</th>
                       <th>Subcategory</th>
                       <th>PDF</th>
+                      <th>Creator</th>
                       <th>Status</th>
                       <th>Created</th>
                       <th>Actions</th>
@@ -276,15 +248,31 @@ const DietPlanPage = () => {
                         </td>
                         <td>
                           {plan.pdfFile ? (
-                            <button
-                              className="btn btn-sm btn-outline-success"
-                              onClick={() => handleDownloadPDF(plan)}
-                              title="Download PDF"
-                            >
-                              <i className="fas fa-download"></i>
-                            </button>
+                            <div className="d-flex flex-column">
+                              <button
+                                className="btn btn-sm btn-outline-success mb-1"
+                                onClick={() => handleDownloadPDF(plan)}
+                                title="Download PDF"
+                              >
+                                <i className="fas fa-download me-1"></i>
+                                {plan.pdfFile.originalName}
+                              </button>
+                              <small className="text-muted">
+                                {(plan.pdfFile.size / 1024 / 1024).toFixed(2)} MB
+                              </small>
+                            </div>
                           ) : (
                             <span className="text-muted">No PDF</span>
+                          )}
+                        </td>
+                        <td>
+                          {plan.createdBy && typeof plan.createdBy === 'object' ? (
+                            <div className="d-flex flex-column">
+                              <span className="fw-semibold">{plan.createdBy.username}</span>
+                              <small className="text-muted">{plan.createdBy.email}</small>
+                            </div>
+                          ) : (
+                            <span className="text-muted">Unknown</span>
                           )}
                         </td>
                         <td>
@@ -307,13 +295,13 @@ const DietPlanPage = () => {
                             >
                               <i className="fas fa-edit"></i>
                             </button>
-                            <button 
+                            {/* <button 
                               className="btn btn-sm btn-outline-danger"
                               onClick={() => setDeleteModal({ show: true, plan, isDeleteAll: false })}
                               title="Delete"
                             >
                               <i className="fas fa-trash"></i>
-                            </button>
+                            </button> */}
                           </div>
                         </td>
                       </tr>
@@ -333,17 +321,17 @@ const DietPlanPage = () => {
               {pagination.totalPages > 1 && (
                 <nav aria-label="Diet plans pagination">
                   <ul className="pagination justify-content-center">
-                    <li className={`page-item ${pagination.page === 1 ? 'disabled' : ''}`}>
+                    <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
                       <button 
                         className="page-link"
-                        onClick={() => handlePageChange(pagination.page - 1)}
-                        disabled={pagination.page === 1}
+                        onClick={() => handlePageChange(pagination.currentPage - 1)}
+                        disabled={pagination.currentPage === 1}
                       >
                         Previous
                       </button>
                     </li>
                     {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
-                      <li key={page} className={`page-item ${pagination.page === page ? 'active' : ''}`}>
+                      <li key={page} className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}>
                         <button 
                           className="page-link"
                           onClick={() => handlePageChange(page)}
@@ -352,11 +340,11 @@ const DietPlanPage = () => {
                         </button>
                       </li>
                     ))}
-                    <li className={`page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}`}>
+                    <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
                       <button 
                         className="page-link"
-                        onClick={() => handlePageChange(pagination.page + 1)}
-                        disabled={pagination.page === pagination.totalPages}
+                        onClick={() => handlePageChange(pagination.currentPage + 1)}
+                        disabled={pagination.currentPage === pagination.totalPages}
                       >
                         Next
                       </button>
@@ -383,7 +371,7 @@ const DietPlanPage = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
+      {/* <DeleteConfirmationModal
         show={deleteModal.show}
         onHide={() => setDeleteModal({ show: false, plan: null, isDeleteAll: false })}
         onConfirm={deleteModal.isDeleteAll ? handleDeleteAll : () => deleteModal.plan && handleDelete(deleteModal.plan)}
@@ -393,7 +381,7 @@ const DietPlanPage = () => {
             ? 'Are you sure you want to delete all diet plans? This action cannot be undone.'
             : `Are you sure you want to delete "${deleteModal.plan?.name}"? This action cannot be undone.`
         }
-      />
+      /> */}
     </>
   )
 }
