@@ -1,91 +1,87 @@
 import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
-import { useState } from 'react'
+import CreateStoryModal from '@/components/CreateStoryModal'
+import { getStories, type Story } from '@/services/storyService'
+import { useState, useEffect } from 'react'
 
 const StoriesPage = () => {
-  const [selectedPlatform, setSelectedPlatform] = useState('all')
   const [selectedStatus, setSelectedStatus] = useState('all')
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [storiesData, setStoriesData] = useState<Story[]>([])
+  const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalStories, setTotalStories] = useState(0)
 
-  // Mock stories data
-  const storiesData = [
-    {
-      id: 1,
-      title: 'Today\'s Recipe Special',
-      platform: 'Instagram',
-      views: 15420,
-      likes: 892,
-      shares: 45,
-      comments: 23,
-      posted: '2024-10-10T08:00:00Z',
-      status: 'Active',
-      duration: 24,
-      type: 'Photo'
-    },
-    {
-      id: 2,
-      title: 'Cooking Tips & Tricks',
-      platform: 'Facebook',
-      views: 8950,
-      likes: 543,
-      shares: 67,
-      comments: 89,
-      posted: '2024-10-10T10:30:00Z',
-      status: 'Active',
-      duration: 24,
-      type: 'Video'
-    },
-    {
-      id: 3,
-      title: 'Behind the Scenes',
-      platform: 'Instagram',
-      views: 12300,
-      likes: 721,
-      shares: 34,
-      comments: 56,
-      posted: '2024-10-09T15:45:00Z',
-      status: 'Expired',
-      duration: 24,
-      type: 'Video'
-    },
-    {
-      id: 4,
-      title: 'Quick Snack Ideas',
-      platform: 'Facebook',
-      views: 6780,
-      likes: 412,
-      shares: 28,
-      comments: 34,
-      posted: '2024-10-09T12:20:00Z',
-      status: 'Expired',
-      duration: 24,
-      type: 'Photo'
-    },
-  ]
+  // Fetch stories from API
+  const fetchStories = async (page = 1) => {
+    try {
+      setLoading(true)
+      const response = await getStories({ page, limit: 10 })
+      
+      if (response.success) {
+        setStoriesData(response.data.stories)
+        setCurrentPage(response.data.pagination.currentPage)
+        setTotalPages(response.data.pagination.totalPages)
+        setTotalStories(response.data.pagination.total)
+      } else {
+        console.error('Failed to fetch stories:', response.message)
+        setStoriesData([])
+      }
+    } catch (error) {
+      console.error('Error fetching stories:', error)
+      setStoriesData([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const filteredStories = storiesData.filter(story => {
-    const matchesPlatform = selectedPlatform === 'all' || story.platform.toLowerCase() === selectedPlatform
-    const matchesStatus = selectedStatus === 'all' || story.status.toLowerCase() === selectedStatus
-    return matchesPlatform && matchesStatus
+  // Fetch stories on component mountx
+  useEffect(() => {
+    fetchStories(1)
+  }, [])
+
+  // Helper function to extract platform from story link
+  const getPlatformFromLink = (link: string): string => {
+    if (link.includes('instagram.com')) return 'Instagram'
+    if (link.includes('facebook.com')) return 'Facebook'
+    if (link.includes('twitter.com') || link.includes('x.com')) return 'Twitter'
+    if (link.includes('tiktok.com')) return 'TikTok'
+    return 'Other'
+  }
+
+  // Helper function to determine story status (simplified logic)
+  const getStoryStatus = (createdAt: string): 'Active' | 'Expired' => {
+    const storyDate = new Date(createdAt)
+    const now = new Date()
+    const hoursDiff = (now.getTime() - storyDate.getTime()) / (1000 * 60 * 60)
+    return hoursDiff < 24 ? 'Active' : 'Expired'
+  }
+
+  // Map API stories to include derived fields
+  const mappedStories = storiesData.map(story => ({
+    ...story,
+    platform: getPlatformFromLink(story.storyLink),
+    status: getStoryStatus(story.createdAt),
+    type: (Math.random() > 0.7 ? 'Video' : 'Photo') as 'Photo' | 'Video', // Random type assignment for demo
+    title: story.influencer.fullName, // Use influencer full name as title
+    posted: story.createdAt,
+    id: story._id,
+    duration: 24, // Stories typically last 24 hours
+    image: story.imageUrl // Map imageUrl to image for backward compatibility
+  }))
+
+  const filteredStories = mappedStories.filter(story => {
+    const matchesStatus = selectedStatus === 'all' || story.status.toLowerCase() === selectedStatus.toLowerCase()
+    return matchesStatus
   })
 
   const totalViews = storiesData.reduce((sum, story) => sum + story.views, 0)
   const totalLikes = storiesData.reduce((sum, story) => sum + story.likes, 0)
-  const totalShares = storiesData.reduce((sum, story) => sum + story.shares, 0)
-  const activeStories = storiesData.filter(story => story.status === 'Active').length
+  const totalInfluencers = new Set(storiesData.map(story => story.influencer.id)).size // Count unique influencers
+  const activeStories = mappedStories.filter(story => story.status === 'Active').length
 
-  const getTimeRemaining = (postedTime: string, duration: number) => {
-    const posted = new Date(postedTime)
-    const expires = new Date(posted.getTime() + duration * 60 * 60 * 1000)
-    const now = new Date()
-    const remaining = expires.getTime() - now.getTime()
-    
-    if (remaining <= 0) return 'Expired'
-    
-    const hours = Math.floor(remaining / (1000 * 60 * 60))
-    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
-    
-    return `${hours}h ${minutes}m`
-  }
+
 
   return (
     <>
@@ -125,10 +121,10 @@ const StoriesPage = () => {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 className="mb-0">{totalShares.toLocaleString()}</h4>
-                    <p className="mb-0">Total Shares</p>
+                    <h4 className="mb-0">{totalInfluencers}</h4>
+                    <p className="mb-0">Total Influencers</p>
                   </div>
-                  <i className="fas fa-share fa-2x opacity-75"></i>
+                  <i className="fas fa-users fa-2x opacity-75"></i>
                 </div>
               </div>
             </div>
@@ -155,19 +151,7 @@ const StoriesPage = () => {
           description="Track and manage your social media stories performance"
         >
           <div className="row mb-3">
-            <div className="col-md-4">
-              <select 
-                className="form-select"
-                value={selectedPlatform}
-                onChange={(e) => setSelectedPlatform(e.target.value)}
-              >
-                <option value="all">All Platforms</option>
-                <option value="instagram">Instagram</option>
-                <option value="facebook">Facebook</option>
-                <option value="twitter">Twitter</option>
-              </select>
-            </div>
-            <div className="col-md-4">
+            <div className="col-md-6">
               <select 
                 className="form-select"
                 value={selectedStatus}
@@ -178,12 +162,13 @@ const StoriesPage = () => {
                 <option value="expired">Expired</option>
               </select>
             </div>
-            <div className="col-md-4 text-end">
-              <button className="btn btn-primary me-2">
+            <div className="col-md-6 text-end">
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowCreateModal(true)}
+                disabled={loading}
+              >
                 <i className="fas fa-plus me-2"></i>Create Story
-              </button>
-              <button className="btn btn-outline-primary">
-                <i className="fas fa-sync me-2"></i>Refresh
               </button>
             </div>
           </div>
@@ -192,13 +177,11 @@ const StoriesPage = () => {
             <table className="table table-striped table-hover">
               <thead className="table-dark">
                 <tr>
-                  <th>Story</th>
-                  <th>Platform</th>
-                  <th>Type</th>
+                  <th>Influencer</th>
+                  <th>Handle</th>
                   <th>Views</th>
-                  <th>Engagement</th>
+                  <th>Likes</th>
                   <th>Posted</th>
-                  <th>Time Remaining</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -206,50 +189,62 @@ const StoriesPage = () => {
               <tbody>
                 {filteredStories.map((story) => (
                   <tr key={story.id}>
-                    <td className="fw-semibold">{story.title}</td>
                     <td>
                       <div className="d-flex align-items-center">
-                        <i className={`fab fa-${story.platform.toLowerCase()} me-2 text-primary`}></i>
-                        {story.platform}
+                        <div className="position-relative me-2">
+                          <img 
+                            src={story.influencer.profilePicUrl} 
+                            alt={story.influencer.fullName}
+                            className="rounded-circle"
+                            width="32"
+                            height="32"
+                            style={{ objectFit: 'cover' }}
+                          />
+                          <i 
+                            className={`fab fa-${story.platform.toLowerCase()} position-absolute text-primary`}
+                            style={{ 
+                              bottom: '-4px', 
+                              right: '-4px', 
+                              fontSize: '12px',
+                              backgroundColor: 'white',
+                              borderRadius: '50%',
+                              padding: '2px',
+                              border: '1px solid #dee2e6'
+                            }}
+                          ></i>
+                        </div>
+                        <div>
+                          <div className="fw-semibold">{story.influencer.fullName}</div>
+                          <small className="text-muted">
+                            {story.influencer.followerCount.toLocaleString()} followers
+                          </small>
+                        </div>
                       </div>
                     </td>
-                    <td>
-                      <span className={`badge ${story.type === 'Video' ? 'bg-info' : 'bg-secondary'}`}>
-                        <i className={`fas fa-${story.type === 'Video' ? 'video' : 'image'} me-1`}></i>
-                        {story.type}
-                      </span>
-                    </td>
+                    <td className="fw-semibold">@{story.handle}</td>
                     <td>{story.views.toLocaleString()}</td>
                     <td>
-                      <div className="d-flex gap-2">
-                        <span className="badge bg-success">{story.likes}</span>
-                        <span className="badge bg-info">{story.shares}</span>
-                        <span className="badge bg-warning">{story.comments}</span>
-                      </div>
+                      <span className="badge bg-success">{story.likes.toLocaleString()}</span>
                     </td>
                     <td>{new Date(story.posted).toLocaleDateString()}</td>
-                    <td>
-                      <span className={`badge ${story.status === 'Active' ? 'bg-success' : 'bg-danger'}`}>
-                        {getTimeRemaining(story.posted, story.duration)}
-                      </span>
-                    </td>
                     <td>
                       <span className={`badge ${story.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
                         {story.status}
                       </span>
                     </td>
                     <td>
-                      <div className="btn-group" role="group">
-                        <button className="btn btn-sm btn-outline-primary">
-                          <i className="fas fa-eye"></i>
-                        </button>
-                        <button className="btn btn-sm btn-outline-success">
-                          <i className="fas fa-chart-line"></i>
-                        </button>
-                        <button className="btn btn-sm btn-outline-danger">
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
+                      <button 
+                        className="btn btn-sm btn-outline-primary"
+                        title="Share Story"
+                        onClick={() => {
+                          // Copy story link to clipboard
+                          navigator.clipboard.writeText(story.storyLink).then(() => {
+                            alert('Story link copied to clipboard!')
+                          })
+                        }}
+                      >
+                        <i className="fas fa-share"></i>
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -257,12 +252,85 @@ const StoriesPage = () => {
             </table>
           </div>
 
-          {filteredStories.length === 0 && (
+          {loading && (
             <div className="text-center py-4">
-              <p className="text-muted">No stories found matching your criteria.</p>
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-muted mt-2">Loading stories...</p>
+            </div>
+          )}
+
+          {!loading && filteredStories.length === 0 && (
+            <div className="text-center py-4">
+              <i className="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <p className="text-muted">
+                {storiesData.length === 0 
+                  ? 'No stories available. Create your first story!' 
+                  : 'No stories found matching your criteria.'}
+              </p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && totalPages > 1 && (
+            <div className="d-flex justify-content-between align-items-center mt-4">
+              <div className="text-muted">
+                Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalStories)} of {totalStories} stories
+              </div>
+              <nav>
+                <ul className="pagination mb-0">
+                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                    <button 
+                      className="page-link"
+                      onClick={() => fetchStories(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <i className="fas fa-chevron-left"></i> Previous
+                    </button>
+                  </li>
+                  
+                  {[...Array(Math.min(5, totalPages))].map((_, index) => {
+                    const pageNum = Math.max(1, currentPage - 2) + index
+                    if (pageNum > totalPages) return null
+                    
+                    return (
+                      <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
+                        <button 
+                          className="page-link"
+                          onClick={() => fetchStories(pageNum)}
+                        >
+                          {pageNum}
+                        </button>
+                      </li>
+                    )
+                  })}
+                  
+                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <button 
+                      className="page-link"
+                      onClick={() => fetchStories(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next <i className="fas fa-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
             </div>
           )}
         </ComponentContainerCard>
+
+        {/* Create Story Modal */}
+        <CreateStoryModal
+          show={showCreateModal}
+          onHide={() => setShowCreateModal(false)}
+          onStoryCreated={() => {
+            // Refresh stories data after creating a new story
+            fetchStories(1) // Go back to first page to see the new story
+            setCurrentPage(1)
+          }}
+        />
       </div>
     </>
   )
