@@ -8,7 +8,7 @@ import ChatComponent from './ChatComponent'
 import { 
   getRecentInteractions, 
   getActiveChallenges, 
-  getRecentPosts, 
+  getRecentPostsData, 
   getChatMessagesByType 
 } from '../mockData'
 
@@ -114,7 +114,7 @@ const ActivityTabs = () => {
               <Row className="g-3 p-3">
                 <Col lg={6}>
                   <PostsList 
-                    posts={getRecentPosts(8)}
+                    posts={getRecentPostsData(8)}
                     title="Recent Posts"
                     showHeader={true}
                     maxHeight="350px"

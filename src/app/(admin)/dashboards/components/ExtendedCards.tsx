@@ -139,7 +139,7 @@ const ExtendedCards = ({ cardsData, onCardClick }: ExtendedCardsProps) => {
   return (
     <Row className="g-3">
       {cardsData.map((item, idx) => (
-        <Col sm={6} lg={3} key={idx}>
+        <Col sm={6} lg={4} key={idx}>
           <ExtendedStatCard 
             {...item} 
             onClick={onCardClick ? () => onCardClick(idx, item) : undefined}

@@ -179,6 +179,7 @@ const StoriesPage = () => {
                 <tr>
                   <th>Influencer</th>
                   <th>Handle</th>
+                  <th>Image</th>
                   <th>Views</th>
                   <th>Likes</th>
                   <th>Posted</th>
@@ -221,7 +222,75 @@ const StoriesPage = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="fw-semibold">@{story.handle}</td>
+                    <td>
+                      <span 
+                        className="fw-semibold text-primary cursor-pointer text-decoration-none"
+                        style={{ 
+                          cursor: 'pointer',
+                          transition: 'color 0.2s ease-in-out'
+                        }}
+                        onClick={() => {
+                          window.open(`https://www.instagram.com/${story.handle}/#`, '_blank', 'noopener,noreferrer')
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.textDecoration = 'underline'
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.textDecoration = 'none'
+                        }}
+                        title="Click to open Instagram profile"
+                      >
+                        @{story.handle}
+                      </span>
+                    </td>
+                    <td>
+                      {story.imageUrl ? (
+                        <img 
+                          src={story.imageUrl} 
+                          alt="Story"
+                          className="rounded cursor-pointer"
+                          width="60"
+                          height="60"
+                          style={{ 
+                            objectFit: 'cover',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s ease-in-out'
+                          }}
+                          onClick={() => {
+                            window.open(story.storyLink, '_blank', 'noopener,noreferrer')
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)'
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)'
+                          }}
+                          title="Click to open story on Instagram"
+                        />
+                      ) : (
+                        <div 
+                          className="d-flex align-items-center justify-content-center bg-light rounded cursor-pointer"
+                          style={{ 
+                            width: '60px', 
+                            height: '60px',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s ease-in-out'
+                          }}
+                          onClick={() => {
+                            window.open(story.storyLink, '_blank', 'noopener,noreferrer')
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = '#e9ecef'
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f8f9fa'
+                          }}
+                          title="Click to open story on Instagram"
+                        >
+                          <i className="fas fa-image text-muted"></i>
+                        </div>
+                      )}
+                    </td>
                     <td>{story.views.toLocaleString()}</td>
                     <td>
                       <span className="badge bg-success">{story.likes.toLocaleString()}</span>

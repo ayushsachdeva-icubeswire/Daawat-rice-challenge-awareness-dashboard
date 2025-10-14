@@ -1,4 +1,5 @@
 import { Interaction, Challenge, Post, ChatMessage, DashboardStats, ExtendedCardsType } from '@/types/dashboard'
+import { PostData } from '@/services/campaignContentsService'
 
 // Mock Rice Challenge Influencers Data
 export const mockUsers = [
@@ -380,15 +381,15 @@ export const getExtendedCardsData = (): ExtendedCardsType[] => {
   const stats = getDashboardStats()
 
   return [
-    {
-      title: 'Recent Interactions',
-      count: stats.recentInteractions,
-      icon: 'solar:chat-round-line-broken',
-      series: [12, 15, 18, 22, 28, 35, 42, 38, 45, 52, 48],
-      color: '#3b82f6',
-      trend: 'up',
-      trendValue: '+12%',
-    },
+    // {
+    //   title: 'Recent Interactions',
+    //   count: stats.recentInteractions,
+    //   icon: 'solar:chat-round-line-broken',
+    //   series: [12, 15, 18, 22, 28, 35, 42, 38, 45, 52, 48],
+    //   color: '#3b82f6',
+    //   trend: 'up',
+    //   trendValue: '+12%',
+    // },
     {
       title: 'Challenges Taken',
       count: stats.challengesTaken,
@@ -428,6 +429,45 @@ export const getActiveChallenges = (limit: number = 10) =>
 
 export const getRecentPosts = (limit: number = 10) => 
   mockPosts.slice(0, limit)
+
+// Function to convert Post[] to PostData[] for ActivityTabs component
+export const getRecentPostsData = (limit: number = 10): PostData[] => {
+  return mockPosts.slice(0, limit).map((post, index) => ({
+    _id: post.id,
+    hashtag: post.tags[0] || '#riceChallenge',
+    hashtags: post.tags,
+    post_shortcode: `p${post.id.replace('post-', '')}`,
+    influencer: {
+      pk: parseInt(post.author.id),
+      pk_id: post.author.id,
+      id: post.author.id,
+      username: post.author.name.toLowerCase().replace(' ', '_'),
+      full_name: post.author.name,
+      profile_pic_url: post.author.avatar,
+      is_private: false,
+      is_verified: Math.random() > 0.5
+    },
+    display_url: `/src/assets/images/small/small-${(index % 4) + 1}.jpg`,
+    is_video: Math.random() > 0.7,
+    is_carousel: Math.random() > 0.8,
+    caption: post.content,
+    total_comments: post.comments,
+    total_likes: post.likes,
+    video_duration: Math.random() > 0.7 ? Math.floor(Math.random() * 60) + 15 : undefined,
+    total_play: Math.random() > 0.7 ? Math.floor(Math.random() * 10000) + 1000 : undefined,
+    reach: post.views,
+    created_timestamp: post.createdAt.getTime(),
+    created_timestamp_formatted: post.createdAt.toISOString(),
+    created_date: post.createdAt.toISOString().split('T')[0],
+    reshare_count: post.shares,
+    ig_post_id: `ig_${post.id}`,
+    location: undefined,
+    usertags: [],
+    like_and_view_counts_disabled: false,
+    is_paid_partnership: Math.random() > 0.8,
+    sponsor_tags: []
+  }))
+}
 
 export const getRecentChatMessages = (limit: number = 10) => 
   mockChatMessages.slice(0, limit)

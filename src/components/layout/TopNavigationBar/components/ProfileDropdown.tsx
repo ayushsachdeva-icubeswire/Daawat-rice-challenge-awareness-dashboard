@@ -1,4 +1,4 @@
-import avatar1 from '@/assets/images/users/avatar-1.jpg'
+import avatar1 from '@/assets/images/Daawat-logo (1).png'
 import IconifyIcon from '@/components/wrapper/IconifyIcon'
 import { useAuthContext } from '@/context/useAuthContext'
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'react-bootstrap'
