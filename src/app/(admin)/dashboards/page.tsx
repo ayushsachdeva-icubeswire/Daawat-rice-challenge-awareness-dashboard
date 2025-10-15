@@ -23,7 +23,7 @@ const page = () => {
     const fetchCampaignContents = async () => {
       try {
         setIsLoading(true)
-        const response = await CampaignContentsService.getCampaignContents('itchotels', 1, 10)
+        const response = await CampaignContentsService.getCampaignContents('daawatbiryani', 1, 10)
         if (response.success && response.data.posts) {
           setCampaignPosts(response.data.posts)
         }

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { CampaignAnalyticsService, CampaignAnalyticsData, InfluencerListResponse, InfluencerData } from '@/services/campaignAnalyticsService'
 
 const SocialAnalyticsPage = () => {
-  const [selectedPlatform, setSelectedPlatform] = useState('all')
   const [analyticsData, setAnalyticsData] = useState<CampaignAnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,7 +43,7 @@ const SocialAnalyticsPage = () => {
       try {
         setLoading(true)
         setError(null)
-        const data = await CampaignAnalyticsService.getCampaignAnalysis('1052')
+        const data = await CampaignAnalyticsService.getCampaignAnalysis('837')
         console.log('API Response:', data) // Debug log to see the actual structure
         setAnalyticsData(data)
       } catch (err) {
@@ -64,7 +63,7 @@ const SocialAnalyticsPage = () => {
       try {
         setInfluencerLoading(true)
         setInfluencerError(null)
-        const data = await CampaignAnalyticsService.getInfluencerList('1052', currentPage, itemsPerPage)
+        const data = await CampaignAnalyticsService.getInfluencerList('837', currentPage, itemsPerPage)
         console.log('Influencer API Response:', data) // Debug log
         setInfluencerData(data)
       } catch (err) {
@@ -222,51 +221,7 @@ const SocialAnalyticsPage = () => {
           title="Influencer Performance"
           description="Detailed analytics by influencers in the campaign"
         >
-          <div className="row mb-3">
-            <div className="col-md-3">
-              <select 
-                className="form-select"
-                value={selectedPlatform}
-                onChange={(e) => setSelectedPlatform(e.target.value)}
-              >
-                <option value="all">All Instagram</option>
-                <option value="instagram">Instagram Only</option>
-              </select>
-            </div>
-            <div className="col-md-3">
-              <select className="form-select">
-                <option value="all">All Influencers</option>
-                <option value="verified">Verified Only</option>
-                <option value="high-er">High Engagement</option>
-                <option value="high-reach">High Reach</option>
-              </select>
-            </div>
-            <div className="col-md-3">
-              <input 
-                type="search" 
-                className="form-control" 
-                placeholder="Search by name or handle..."
-              />
-            </div>
-            <div className="col-md-3 text-end">
-              <div className="btn-group" role="group">
-                <button className="btn btn-outline-secondary">
-                  <i className="fas fa-filter me-1"></i>Filter
-                </button>
-                <button className="btn btn-primary">
-                  <i className="fas fa-download me-1"></i>Export
-                </button>
-                <button 
-                  className="btn btn-outline-primary"
-                  onClick={() => window.location.reload()}
-                  disabled={loading || influencerLoading}
-                >
-                  <i className={`fas ${loading || influencerLoading ? 'fa-spinner fa-spin' : 'fa-sync'} me-1`}></i>
-                  Refresh
-                </button>
-              </div>
-            </div>
-          </div>
+
 
           {/* Loading State for Influencers */}
           {influencerLoading && (
@@ -294,7 +249,7 @@ const SocialAnalyticsPage = () => {
                   <tr>
                     <th>S.No</th>
                     <th>Influencer</th>
-                    <th>Views <i className="fas fa-sort-down text-primary"></i></th>
+                    <th>Views </th>
                     <th>Likes</th>
                     <th>Comments</th>
                     <th>Content ER</th>
@@ -321,19 +276,18 @@ const SocialAnalyticsPage = () => {
                                 (e.target as HTMLImageElement).src = 'https://via.placeholder.com/40x40/6c757d/ffffff?text=' + influencer.fullname.charAt(0);
                               }}
                             />
-                            {influencer.platform.toLowerCase() === 'instagram' && (
-                              <img 
-                                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8xXzIpIi8+CjxwYXRoIGQ9Ik0yMC4wMDUgMTIuNzAzQzE3LjI4MiAxMi43MDMgMTQuODk4IDEyLjcwMyAxNC44OTcgMTIuNzAzQzEzLjA2MSAxMi43MDMgMTEuNTY2IDE0LjE5OCAxMS41NjYgMTYuMDM0VjI0LjAzNEMxMS41NjYgMjUuODcgMTMuMDYxIDI3LjM2NSAxNC44OTcgMjcuMzY1SDI1LjExNEMyNi45NSAyNy4zNjUgMjguNDQ1IDI1Ljg3IDI4LjQ0NSAyNC4wMzRWMTYuMDM0QzI4LjQ0NSAxNC4xOTggMjYuOTUgMTIuNzAzIDI1LjExNCAxMi43MDNIMjAuMDA1WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTIwLjAwNSAxNi4wMzVDMTcuODY4IDE2LjAzNSAxNi4xMzYgMTcuNzY3IDE2LjEzNiAxOS45MDRDMTYuMTM2IDIyLjA0MSAxNy44NjggMjMuNzczIDIwLjAwNSAyMy43NzNDMjIuMTQyIDIzLjc3MyAyMy44NzQgMjIuMDQxIDIzLjg3NCAxOS45MDRDMjMuODc0IDE3Ljc2NyAyMi4xNDIgMTYuMDM1IDIwLjAwNSAxNi4wMzVaTTIwLjAwNSAyMi4yM0MxOC43MjEgMjIuMjMgMTcuNjc4IDIxLjE4OCAxNy42NzggMTkuOTA0QzE3LjY3OCAxOC42MiAxOC43MjEgMTcuNTc4IDIwLjAwNSAxNy41NzhDMjEuMjg5IDE3LjU3OCAyMi4zMzEgMTguNjIgMjIuMzMxIDE5LjkwNEMyMi4zMzEgMjEuMTg4IDIxLjI4OSAyMi4yMyAyMC4wMDUgMjIuMjNaIiBmaWxsPSIjRTM0MDVGIi8+CjxwYXRoIGQ9Ik0yNC40NzYgMTYuOTI3QzI0Ljc5OSAxNi45MjcgMjUuMDYxIDE2LjY2NSAyNS4wNjEgMTYuMzQyQzI1LjA2MSAxNi4wMTkgMjQuNzk5IDE1Ljc1NyAyNC40NzYgMTUuNzU3QzI0LjE1MyAxNS43NTcgMjMuODkxIDE2LjAxOSAyMy44OTEgMTYuMzQyQzIzLjg5MSAxNi42NjUgMjQuMTUzIDE2LjkyNyAyNC40NzYgMTYuOTI3WiIgZmlsbD0iI0UzNDA1RiIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzFfMiIgeDE9IjgiIHkxPSI4IiB4Mj0iMzIiIHkyPSIzMiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkY0NTY4Ii8+CjxzdG9wIG9mZnNldD0iMC41IiBzdG9wLWNvbG9yPSIjRkY0NTY4Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZGNDQ0NCIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo="
-                                alt="Instagram"
-                                className="position-absolute bottom-0 end-0 rounded-circle"
-                                style={{ 
-                                  border: '2px solid white',
-                                  width: '20px',
-                                  height: '20px',
-                                  objectFit: 'cover'
-                                }}
-                              />
-                            )}
+                            <i 
+                              className="fab fa-instagram text-primary position-absolute"
+                              style={{ 
+                                fontSize: '12px',
+                                bottom: '-2px',
+                                right: '-2px',
+                                backgroundColor: 'white',
+                                borderRadius: '50%',
+                                padding: '2px',
+                                border: '1px solid #dee2e6'
+                              }}
+                            ></i>
                           </div>
                           <div>
                             <div className="fw-semibold text-dark">{influencer.fullname}</div>
@@ -361,7 +315,7 @@ const SocialAnalyticsPage = () => {
                         <span className="fw-semibold">{influencer.reach}</span>
                       </td>
                       <td>
-                        <span className="text-muted">NA</span>
+                        <span className="fw-semibold">{influencer.total_reshare_count}</span>
                       </td>
                       <td>
                         <img 
@@ -462,12 +416,12 @@ const SocialAnalyticsPage = () => {
                     <div className="mb-3">
                       <small className="text-muted">{selectedInfluencer.posts[0]?.post_date || 'Oct 10, 2025'}</small>
                       <div className="d-flex align-items-center justify-content-end">
-                        <button className="btn btn-link p-0 me-2" title="Refresh">
+                        {/* <button className="btn btn-link p-0 me-2" title="Refresh">
                           <i className="fas fa-sync text-primary"></i>
                         </button>
                         <button className="btn btn-link p-0" title="Delete">
                           <i className="fas fa-trash text-danger"></i>
-                        </button>
+                        </button> */}
                       </div>
                     </div>
 

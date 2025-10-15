@@ -173,13 +173,13 @@ export const processPostsIntoAnalytics = (posts: PostData[], hashtag: string): C
 export class CampaignContentsService {
   /**
    * Fetch campaign contents by hashtag
-   * @param hashtag - The hashtag to search for (default: 'itchotels')
+   * @param hashtag - The hashtag to search for (default: 'daawatbiryani')
    * @param page - Page number (default: 1)
    * @param limit - Number of items per page (default: 8)
    * @returns Promise with campaign contents data
    */
   static async getCampaignContents(
-    hashtag: string = 'itchotels',
+    hashtag: string = 'daawatbiryani',
     page: number = 1,
     limit: number = 8
   ): Promise<CampaignContentsResponse> {
@@ -246,11 +246,11 @@ export class CampaignContentsService {
 
   /**
    * Get campaign analysis data
-   * @param hashtag - The hashtag to analyze (default: 'itchotels')
+   * @param hashtag - The hashtag to analyze (default: 'daawatbiryani')
    * @returns Promise with campaign analysis data
    */
   static async getCampaignAnalysis(
-    hashtag: string = 'itchotels'
+    hashtag: string = 'daawatbiryani'
   ): Promise<CampaignAnalysisResponse> {
     try {
       const response = await fetch(

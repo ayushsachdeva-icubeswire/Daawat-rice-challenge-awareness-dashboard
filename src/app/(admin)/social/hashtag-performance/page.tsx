@@ -8,7 +8,7 @@ const HashtagPerformancePage = () => {
   const [campaignData, setCampaignData] = useState<CampaignContent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [currentHashtag] = useState('itchotels')
+  const [currentHashtag] = useState('daawatbiryani')
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(8)
   const [totalCount, setTotalCount] = useState(0)
@@ -245,7 +245,7 @@ const HashtagPerformancePage = () => {
                       id="hashtagInput"
                       type="text"
                       className="form-control"
-                      placeholder="Enter hashtag (e.g., itchotels)"
+                      placeholder="Enter hashtag (e.g., daawatbiryani)"
                       value={currentHashtag}
                       onChange={(e) => setCurrentHashtag(e.target.value)}
                     />
