@@ -1,0 +1,1 @@
+import{r as m,d as x,j as p,e as l}from"./index-CGTelMHW.js";const c=m.forwardRef(({bsPrefix:s,className:t,as:a="small",muted:e,...r},o)=>(s=x(s,"form-text"),p.jsx(a,{...r,ref:o,className:l(t,s,e&&"text-muted")})));c.displayName="FormText";export{c as F};

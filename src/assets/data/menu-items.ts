@@ -20,7 +20,7 @@ export const MENU_ITEMS: MenuItemType[] = [
       {
         key: 'web-challenges',
         label: 'Challenges',
-        url: '/challenges',
+        url: '/challengers',
       },
     ],
   },

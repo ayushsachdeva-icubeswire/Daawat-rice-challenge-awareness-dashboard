@@ -1,0 +1,1 @@
+import{r as i,d as m,j as x,e as l}from"./index-CGTelMHW.js";const n=i.forwardRef(({bsPrefix:e,bg:s="primary",pill:r=!1,text:a,className:o,as:t="span",...p},d)=>{const f=m(e,"badge");return x.jsx(t,{ref:d,...p,className:l(o,f,r&&"rounded-pill",a&&`text-${a}`,s&&`bg-${s}`)})});n.displayName="Badge";export{n as B};

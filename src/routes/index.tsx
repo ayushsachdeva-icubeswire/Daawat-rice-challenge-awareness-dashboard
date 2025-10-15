@@ -3,7 +3,7 @@ import { Navigate, type RouteProps } from 'react-router-dom'
 
 const Dashboards = lazy(() => import('@/app/(admin)/dashboards/page'))
 // const Interactions = lazy(() => import('@/app/(admin)/interactions/page'))
-const Challenges = lazy(() => import('@/app/(admin)/challenges/page'))
+// const Challenges = lazy(() => import('@/app/(admin)/challenges/page'))
 const Posts = lazy(() => import('@/app/(admin)/posts/page'))
 const DietPlan = lazy(() => import('@/app/(admin)/diet-plan/page'))
 const SocialAnalytics = lazy(() => import('@/app/(admin)/social/analytics/page'))
@@ -101,9 +101,9 @@ const generalRoutes: RoutesProps[] = [
   //   element: <Interactions />,
   // },
   {
-    path: '/challenges',
+    path: '/challengers',
     name: 'Challenges',
-    element: <Challenges />,
+    element: <Challengers />,
   },
   {
     path: '/posts',
@@ -145,11 +145,11 @@ const generalRoutes: RoutesProps[] = [
     name: 'Overall Performance',
     element: <OverallPerformance />,
   },
-  {
-    path: '/challengers',
-    name: 'Challengers',
-    element: <Challengers />,
-  },
+  // {
+  //   path: '/challengers',
+  //   name: 'Challengers',
+  //   element: <Challengers />,
+  // },
 ]
 
 export const authRoutes: RoutesProps[] = [

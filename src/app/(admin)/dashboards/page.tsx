@@ -44,13 +44,13 @@ const page = () => {
       //   navigate('/interactions')
       //   break
       case 'Challenges Taken':
-        navigate('/challenges')
+        navigate('/challengers')
         break
       case 'Total Posts':
         navigate('/posts')
         break
       case 'Completed Challenges':
-        navigate('/challenges')
+        navigate('/challengers')
         break
       default:
         console.log('Card clicked:', cardData.title)
