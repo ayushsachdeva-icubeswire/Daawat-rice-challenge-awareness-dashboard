@@ -6,8 +6,10 @@ export interface Influencer {
   pk: number
   pk_id: string
   id: string
-  full_name: string
-  username: string
+  full_name?: string
+  fullname?: string
+  username?: string
+  handle?: string
   is_private: boolean
   is_verified: boolean
   profile_pic_url: string
@@ -35,7 +37,7 @@ export interface PostData {
   display_url: string
   is_video: boolean
   is_carousel: boolean
-  caption: string
+  caption: string | { [key: string]: string } | Array<{ text: string }>
   total_comments: number
   total_likes: number
   video_duration?: number
@@ -51,6 +53,7 @@ export interface PostData {
   like_and_view_counts_disabled: boolean
   is_paid_partnership: boolean
   sponsor_tags: any[]
+  total_followers?: number
 }
 
 // Interface for aggregated campaign content analytics

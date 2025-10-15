@@ -26,8 +26,16 @@ const PostsList = ({
 }: PostsListProps) => {
 
 
-  const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp * 1000)
+    const formatTimestamp = (timestamp: number | string | any): string => {
+    if (!timestamp) return '';
+    
+    // Convert to number if it's a string
+    const timestampNum = typeof timestamp === 'string' ? parseInt(timestamp) : Number(timestamp);
+    
+    // Validate timestamp
+    if (isNaN(timestampNum) || timestampNum <= 0) return '';
+    
+    const date = new Date(timestampNum * 1000)
     const now = new Date()
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
     
@@ -45,9 +53,7 @@ const PostsList = ({
     }
   }
 
-  const truncateContent = (content: string, maxLength: number = 100) => {
-    return content.length > maxLength ? `${content.substring(0, maxLength)}...` : content
-  }
+
 
   const handleInstagramRedirect = (username: string) => {
     const instagramUrl = `https://www.instagram.com/${username}/#`
@@ -163,49 +169,72 @@ const PostsList = ({
                             <span 
                               className="text-primary"
                               style={{ cursor: 'pointer', textDecoration: 'none' }}
-                              onClick={() => handleInstagramRedirect(post.influencer.username)}
+                              onClick={() => handleInstagramRedirect(post.influencer?.handle || post.influencer?.username || '')}
                               onMouseEnter={(e) => {
                                 e.currentTarget.style.textDecoration = 'underline'
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.textDecoration = 'none'
                               }}
-                              title={`Open @${post.influencer.username} on Instagram`}
+                              title={`Open @${post.influencer?.handle || post.influencer?.username || ''} on Instagram`}
                             >
-                              @{post.influencer.username}
+                              @{String(post.influencer?.handle || post.influencer?.username || 'Unknown')}
                             </span>
                           </h6>
                           <div className="d-flex align-items-center text-muted small mb-1">
-                            <span className="me-2"> {post.influencer.full_name}</span>
+                            <span className="me-2">{String(post.influencer?.fullname || post.influencer?.full_name || '')}</span>
                             <Badge bg="outline-primary" text="primary" className="me-2">
                               {post.is_video ? 'Video' : post.is_carousel ? 'Carousel' : 'Photo'}
                             </Badge>
                           </div>
                         </div>
-                        {/* <div className="text-end">
-                          <div className="badge bg-success">
-                            Published
+                        <div className="text-end">
+                          <div className="badge bg-success-subtle text-success small">
+                            {String(formatNumber(Number(post.total_followers) || 0))} followers
                           </div>
-                        </div> */}
+                        </div>
                       </div>
                       
                       <p className="text-muted mb-2 small">
-                        {truncateContent(post.caption)}
+                        {(() => {
+                          let captionText = '';
+                          
+                          // Handle caption structure: {0: {text: "content"}}
+                          if (post.caption) {
+                            const caption = post.caption as any;
+                            
+                            // The structure is {0: {text: "content"}}
+                            if (typeof caption === 'object' && caption['0'] && caption['0'].text) {
+                              captionText = String(caption['0'].text);
+                            }
+                            // Fallback: try direct string
+                            else if (typeof caption === 'string') {
+                              captionText = caption;
+                            }
+                          }
+                          
+                          // Truncate if too long
+                          if (captionText && captionText.length > 150) {
+                            captionText = captionText.substring(0, 150) + '...';
+                          }
+                          
+                          return captionText || 'No caption available';
+                        })()}
                       </p>
                       
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <div className="d-flex align-items-center">
-                          {post.hashtags.slice(0, 2).map((tag: string, index: number) => (
+                          {Array.isArray(post.hashtags) && post.hashtags.slice(0, 2).map((tag: any, index: number) => (
                             <Badge key={index} bg="light" text="dark" className="me-1 small">
-                              {tag}
+                              {String(tag || '')}
                             </Badge>
                           ))}
-                          {post.hashtags.length > 2 && (
+                          {Array.isArray(post.hashtags) && post.hashtags.length > 2 && (
                             <span className="text-muted small">+{post.hashtags.length - 2} more</span>
                           )}
                         </div>
                         <small className="text-muted">
-                          {formatTimestamp(post.created_timestamp)}
+                          {String(formatTimestamp(post.created_timestamp) || '')}
                         </small>
                       </div>
                       
@@ -213,19 +242,19 @@ const PostsList = ({
                         <div className="d-flex align-items-center">
                           <div className="d-flex align-items-center me-3">
                             <IconifyIcon icon="solar:heart-broken" className="fs-12 me-1 text-danger" />
-                            <span className="small text-muted">{post.total_likes}</span>
+                            <span className="small text-muted">{String(formatNumber(Number(post.total_likes) || 0))}</span>
                           </div>
                           <div className="d-flex align-items-center me-3">
                             <IconifyIcon icon="solar:chat-round-line-broken" className="fs-12 me-1 text-primary" />
-                            <span className="small text-muted">{post.total_comments}</span>
+                            <span className="small text-muted">{String(formatNumber(Number(post.total_comments) || 0))}</span>
                           </div>
                           <div className="d-flex align-items-center me-3">
                             <IconifyIcon icon="solar:share-broken" className="fs-12 me-1 text-success" />
-                            <span className="small text-muted">{post.reshare_count || 0}</span>
+                            <span className="small text-muted">{String(formatNumber(Number(post.reshare_count) || 0))}</span>
                           </div>
                           <div className="d-flex align-items-center">
                             <IconifyIcon icon="solar:eye-broken" className="fs-12 me-1 text-muted" />
-                            <span className="small text-muted">{formatNumber(post.reach)}</span>
+                            <span className="small text-muted">{String(formatNumber(Number(post.reach) || 0))}</span>
                           </div>
                         </div>
                       </div>
