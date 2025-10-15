@@ -57,6 +57,13 @@ export const MENU_ITEMS: MenuItemType[] = [
     icon: 'solar:chef-hat-broken',
     url: '/diet-plan',
   },
+  {
+    key: 'challengers',
+    label: 'Challengers',
+    icon: 'solar:cardholder-outline',
+    url: '/challengers',
+  },
+
   // {
   //   key: 'overall-performance',
   //   label: 'Overall Performance',

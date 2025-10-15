@@ -12,6 +12,7 @@ const Stories = lazy(() => import('@/app/(admin)/social/stories/page'))
 const RecipeView = lazy(() => import('@/app/(admin)/recipes/view/page'))
 const RecipeCreate = lazy(() => import('@/app/(admin)/recipes/create/page'))
 const OverallPerformance = lazy(() => import('@/app/(admin)/overall-performance/page'))
+const Challengers = lazy(() => import('@/app/(admin)/challengers/page'))
 
 // Base UI Routes
 const Accordions = lazy(() => import('@/app/(admin)/base-ui/accordion/page'))
@@ -143,6 +144,11 @@ const generalRoutes: RoutesProps[] = [
     path: '/overall-performance',
     name: 'Overall Performance',
     element: <OverallPerformance />,
+  },
+  {
+    path: '/challengers',
+    name: 'Challengers',
+    element: <Challengers />,
   },
 ]
 

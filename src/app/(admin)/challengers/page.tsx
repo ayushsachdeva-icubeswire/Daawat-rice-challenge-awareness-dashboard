@@ -1,14 +1,33 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Card, CardBody, CardHeader, Row, Col, Button, Badge, Form, InputGroup, ProgressBar } from 'react-bootstrap'
 import PageTitle from '@/components/PageTitle'
 import Footer from '@/components/layout/Footer'
 import IconifyIcon from '@/components/wrapper/IconifyIcon'
 import { mockChallenges } from '@/app/(admin)/dashboards/mockData'
 import { Challenge } from '@/types/dashboard'
-
+import { useNotificationContext } from '@/context/useNotificationContext'
+import { Challenger, ChallengerFilters } from '@/types/challenger';
+import ChallengerService from '@/services/challengerService';
+import moment from "moment-timezone";
 
 
 const ChallengesPage = () => {
+
+  const { showNotification } = useNotificationContext()
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<Challenger[]>([])
+  const [filters, setFilters] = useState<ChallengerFilters>({
+    page: 1,
+    limit: 10,
+    search: "",
+    duration: ""
+  });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  })
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
   const [searchTerm, setSearchTerm] = useState('')
@@ -101,6 +120,30 @@ const ChallengesPage = () => {
   const startIndex = (currentPage - 1) * itemsPerPage
   const paginatedChallenges = sortedChallenges.slice(startIndex, startIndex + itemsPerPage)
 
+  useEffect(() => {
+    const loadChallenger = async () => {
+      try {
+        setLoading(true)
+        const response = await ChallengerService.getAllChallengers(filters)
+        setData(response.data || [])
+        setPagination({
+          currentPage: response.currentPage || 1,
+          totalPages: response.totalPages || 1,
+          totalItems: response.totalItems || 0,
+          itemsPerPage: 10 // Default value since API doesn't return this
+        })
+      } catch (error) {
+        console.error('❌ Error fetching diet plans:', error)
+        showNotification({ message: 'Error fetching diet plans', variant: 'danger' })
+        setData([]) // Ensure dietPlans is always an array even on error
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadChallenger();
+  }, [filters])
+
   const handleSort = (field: keyof Challenge) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
@@ -108,6 +151,10 @@ const ChallengesPage = () => {
       setSortField(field)
       setSortDirection('asc')
     }
+  }
+
+  const handlePageChange = (page: number) => {
+    setFilters(prev => ({ ...prev, page }))
   }
 
   const getDifficultyVariant = (difficulty: Challenge['difficulty']) => {
@@ -187,19 +234,19 @@ const ChallengesPage = () => {
 
   return (
     <>
-      <PageTitle subName="Daawat" title="Challenges" />
+      <PageTitle subName="Daawat" title="Challengers" />
 
       <Card>
         <CardHeader>
           <Row className="align-items-center">
             <Col>
-              <h5 className="card-title mb-0">All Challenges</h5>
+              <h5 className="card-title mb-0">All Challengers</h5>
               <small className="text-muted">
-                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, sortedChallenges.length)} of {sortedChallenges.length} challenges
+                Users who have completed the challenge and got a diet plan.
               </small>
             </Col>
             <Col xs="auto">
-              <Badge bg="primary" pill>{sortedChallenges.length}</Badge>
+              <Badge bg="primary" pill>{pagination.totalItems}</Badge>
             </Col>
           </Row>
         </CardHeader>
@@ -214,25 +261,24 @@ const ChallengesPage = () => {
                 </InputGroup.Text>
                 <Form.Control
                   type="text"
-                  placeholder="Search challenges..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search challengers by name, mobile..."
+                  value={filters.search}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 />
               </InputGroup>
             </Col>
             <Col md={2}>
               <Form.Select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as Challenge['status'] | 'all')}
+                value={filters.duration}
+                onChange={(e) => setFilters({ ...filters, duration: e.target.value })}
               >
-                <option value="all">All Status</option>
-                <option value="not-started">Not Started</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="failed">Failed</option>
+                <option value="">Duration</option>
+                <option value="7 days">7 Days</option>
+                <option value="1 months">1 Month</option>
+                <option value="3 months">3 Months</option>
               </Form.Select>
             </Col>
-            <Col md={2}>
+            {/* <Col md={2}>
               <Form.Select
                 value={filterDifficulty}
                 onChange={(e) => setFilterDifficulty(e.target.value as Challenge['difficulty'] | 'all')}
@@ -256,159 +302,166 @@ const ChallengesPage = () => {
                 <option value={25}>25 per page</option>
                 <option value={50}>50 per page</option>
               </Form.Select>
-            </Col>
+            </Col> */}
           </Row>
 
           {/* Data Table */}
-          <div className="table-responsive">
-            <table className="table table-hover">
-              <thead className="table-light">
-                <tr>
-                  <th
-                    scope="col"
-                    className="cursor-pointer"
-                    onClick={() => handleSort('title')}
-                  >
-                    Challenge {sortField === 'title' && (
-                      <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
-                    )}
-                  </th>
-                  <th
-                    scope="col"
-                    className="cursor-pointer"
-                    onClick={() => handleSort('difficulty')}
-                  >
-                    Difficulty {sortField === 'difficulty' && (
-                      <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
-                    )}
-                  </th>
-                  <th
-                    scope="col"
-                    className="cursor-pointer"
-                    onClick={() => handleSort('category')}
-                  >
-                    Category {sortField === 'category' && (
-                      <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
-                    )}
-                  </th>
-                  <th
-                    scope="col"
-                    className="cursor-pointer"
-                    onClick={() => handleSort('status')}
-                  >
-                    Status {sortField === 'status' && (
-                      <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
-                    )}
-                  </th>
-                  <th
-                    scope="col"
-                    className="cursor-pointer"
-                    onClick={() => handleSort('points')}
-                  >
-                    Points {sortField === 'points' && (
-                      <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
-                    )}
-                  </th>
-                  <th
-                    scope="col"
-                    className="cursor-pointer"
-                    onClick={() => handleSort('participantCount')}
-                  >
-                    Participants {sortField === 'participantCount' && (
-                      <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
-                    )}
-                  </th>
-                  <th scope="col">Progress</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedChallenges.map((challenge) => (
-                  <tr key={challenge.id}>
-                    <td>
-                      <div>
-                        <h6 className="mb-1">{challenge.title}</h6>
-                        <small className="text-muted text-truncate d-block" style={{ maxWidth: '200px' }}>
-                          {challenge.description}
-                        </small>
-                      </div>
-                    </td>
-                    <td>
-                      <Badge bg={getDifficultyVariant(challenge.difficulty)}>
-                        {challenge.difficulty}
-                      </Badge>
-                    </td>
-                    <td>
-                      <span className="text-muted">{challenge.category}</span>
-                    </td>
-                    <td>
-                      <Badge bg={getStatusVariant(challenge.status)} className="d-flex align-items-center w-fit">
-                        <IconifyIcon
-                          icon={getStatusIcon(challenge.status)}
-                          className="fs-12 me-1"
-                        />
-                        {challenge.status.replace('-', ' ')}
-                      </Badge>
-                    </td>
-                    <td>
-                      <strong className="text-primary">{challenge.points}</strong>
-                    </td>
-                    <td>
-                      <span className="text-muted">{challenge.participantCount}</span>
-                    </td>
-                    <td style={{ width: '150px' }}>
-                      {challenge.status === 'in-progress' && (
-                        <div>
-                          <div className="d-flex justify-content-between mb-1">
-                            <small>Progress</small>
-                            <small>65%</small>
-                          </div>
-                          <ProgressBar now={65} variant="primary" style={{ height: '4px' }} />
-                        </div>
+          {loading ? (
+            <div className="text-center py-4">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-hover">
+                <thead className="table-light">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="cursor-pointer"
+                      onClick={() => handleSort('title')}
+                    >
+                      Name {sortField === 'title' && (
+                        <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
                       )}
-                      {challenge.status === 'completed' && (
-                        <div className="text-success small">
-                          <IconifyIcon icon="solar:check-circle-broken" className="me-1" />
-                          Completed
-                        </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="cursor-pointer"
+                      onClick={() => handleSort('difficulty')}
+                    >
+                      Mobile {sortField === 'difficulty' && (
+                        <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
                       )}
-                      {challenge.status === 'not-started' && (
-                        <div className="text-muted small">
-                          <IconifyIcon icon="solar:pause-circle-broken" className="me-1" />
-                          Not Started
-                        </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="cursor-pointer"
+                      onClick={() => handleSort('category')}
+                    >
+                      Duration {sortField === 'category' && (
+                        <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
                       )}
-                      {challenge.status === 'failed' && (
-                        <div className="text-danger small">
-                          <IconifyIcon icon="solar:close-circle-broken" className="me-1" />
-                          Failed
-                        </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="cursor-pointer"
+                      onClick={() => handleSort('status')}
+                    >
+                      Category {sortField === 'status' && (
+                        <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
                       )}
-                    </td>
+                    </th>
+                    <th
+                      scope="col"
+                      className="cursor-pointer"
+                      onClick={() => handleSort('points')}
+                    >
+                      Subcategory {sortField === 'points' && (
+                        <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
+                      )}
+                    </th>
+                    <th
+                      scope="col"
+                      className="cursor-pointer"
+                      onClick={() => handleSort('participantCount')}
+                    >
+                      Type {sortField === 'participantCount' && (
+                        <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
+                      )}
+                    </th>
+                    <th
+                      scope="col"
+                      className="cursor-pointer"
+                      onClick={() => handleSort('participantCount')}
+                    >
+                      CreatedAt {sortField === 'participantCount' && (
+                        <IconifyIcon icon={sortDirection === 'asc' ? 'solar:alt-arrow-up-broken' : 'solar:alt-arrow-down-broken'} />
+                      )}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
+                </thead>
+                <tbody>
+                  {data.map((challenge) => (
+                    <tr key={challenge._id}>
+                      <td>
+                        <div>
+                          <h6 className="mb-1">{challenge.name}</h6>
+                          {/* <small className="text-muted text-truncate d-block" style={{ maxWidth: '200px' }}>
+                          {challenge.description}
+                        </small> */}
+                        </div>
+                      </td>
+                      <td>
+                        <a href={`tel:${challenge.mobile}`}><h6 className="mb-1">{challenge.mobile}</h6></a>
+                      </td>
+                      <td>
+                        <span className="text-muted">{challenge.duration}</span>
+                      </td>
+                      <td>
+                        <span className="text-muted">{challenge.category}</span>
+                      </td>
+                      <td>
+                        <span className="text-muted">{challenge.subcategory}</span>
+                      </td>
+                      <td>
+                        <span className="text-muted">{challenge.type}</span>
+                      </td>
+                      <td>
+                        <span className="text-muted">{moment(challenge.createdAt).format("DD MMM, YYYY hh:mm a")}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           {/* Pagination */}
-          {totalPages > 1 && (
-            <Row className="mt-4">
-              <Col className="d-flex justify-content-center">
-                <div className="d-flex align-items-center">
-                  {renderPagination()}
-                </div>
-              </Col>
-            </Row>
+          {pagination.totalPages > 1 && (
+            <nav aria-label="Diet plans pagination">
+              <ul className="pagination justify-content-center">
+                <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                </li>
+                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
+                  <li key={page} className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}>
+                    <button
+                      className="page-link"
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  </li>
+                ))}
+                <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
           )}
 
-          {paginatedChallenges.length === 0 && (
+          {data.length === 0 && (
             <div className="text-center py-5">
               <IconifyIcon icon="solar:cup-star-broken" className="fs-48 text-muted mb-3" />
-              <h5 className="text-muted">No challenges found</h5>
+              <h5 className="text-muted">No challengers found</h5>
               <p className="text-muted">Try adjusting your search or filter criteria.</p>
             </div>
           )}
         </CardBody>
+
       </Card>
 
       <Footer />

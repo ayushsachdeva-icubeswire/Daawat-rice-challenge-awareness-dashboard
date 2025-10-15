@@ -3,12 +3,12 @@
 
 // Determine base URL based on environment
 const getBaseUrl = (): string => {
-  if (typeof window !== 'undefined' && window.location.href.includes('localhost:5174')) {
+  if (typeof window !== 'undefined' && window.location.href.includes('localhost:5173')) {
     return 'http://localhost:8080'
-  }else{
+  } else {
     return 'http://13.201.26.193'
   }
-  }
+}
 
 const API_BASE_URL = getBaseUrl()
 const API_VERSION = import.meta.env.VITE_API_VERSION || 'api'
