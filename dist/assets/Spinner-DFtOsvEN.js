@@ -1,1 +1,0 @@
-import{r as m,d as x,j as c,e as d}from"./index-CGTelMHW.js";const $=m.forwardRef(({bsPrefix:s,variant:r,animation:t="border",size:e,as:n="div",className:o,...p},i)=>{s=x(s,"spinner");const a=`${s}-${t}`;return c.jsx(n,{ref:i,...p,className:d(o,a,e&&`${a}-${e}`,r&&`text-${r}`)})});$.displayName="Spinner";export{$ as S};

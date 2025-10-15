@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { Card, CardBody, CardHeader, Row, Col, Button, Badge, Form, InputGroup, Table, Spinner } from 'react-bootstrap'
+import { useState, useEffect } from 'react'
+import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
 import Footer from '@/components/layout/Footer'
-import IconifyIcon from '@/components/wrapper/IconifyIcon'
 import { useNotificationContext } from '@/context/useNotificationContext'
 import { Challenger, ChallengerFilters } from '@/types/challenger'
 import ChallengerService from '@/services/challengerService'
@@ -12,12 +11,10 @@ const ChallengersPage = () => {
   const { showNotification } = useNotificationContext()
   const [loading, setLoading] = useState(false)
   const [challengers, setChallengers] = useState<Challenger[]>([])
-  const [searchInput, setSearchInput] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<ChallengerFilters>({
     page: 1,
-    limit: 10,
-    search: "",
-    duration: ""
+    limit: 10
   })
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -25,15 +22,17 @@ const ChallengersPage = () => {
     totalItems: 0,
     itemsPerPage: 10
   })
-  
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Load challengers from API
   useEffect(() => {
     const loadChallengers = async () => {
       try {
         setLoading(true)
-        const response = await ChallengerService.getAllChallengers(filters)
+        const combinedFilters = {
+          ...filters,
+          search: searchTerm
+        }
+        const response = await ChallengerService.getAllChallengers(combinedFilters)
         setChallengers(response.data || [])
         setPagination({
           currentPage: response.currentPage || 1,
@@ -50,322 +49,263 @@ const ChallengersPage = () => {
       }
     }
 
-    loadChallengers()
-  }, [filters.page, filters.limit, filters.search, filters.duration, filters.category, filters.subcategory, filters.type, showNotification])
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  // Handle search with debouncing
-  const handleSearch = useCallback((searchValue: string) => {
-    setSearchInput(searchValue)
-    
-    // Clear existing timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current)
-    }
-    
-    // Set new timeout for debouncing
-    searchTimeoutRef.current = setTimeout(() => {
-      setFilters(prev => ({
-        ...prev,
-        search: searchValue,
-        page: 1 // Reset to first page when searching
-      }))
-    }, 500) // 500ms debounce
-  }, [])
-
-  // Handle filter changes
-  const handleFilterChange = (key: keyof ChallengerFilters, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value,
-      page: 1 // Reset to first page when filtering
-    }))
-  }
+    const timeoutId = setTimeout(loadChallengers, 300) // Debounce search
+    return () => clearTimeout(timeoutId)
+  }, [filters.page, filters.limit, filters.category, filters.subcategory, filters.type, filters.duration, searchTerm, showNotification])
 
   // Handle pagination
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({
-      ...prev,
-      page
-    }))
+    setFilters(prev => ({ ...prev, page }))
   }
 
-  // Handle items per page change
-  const handleItemsPerPageChange = (limit: number) => {
-    setFilters(prev => ({
-      ...prev,
-      limit,
-      page: 1 // Reset to first page when changing items per page
-    }))
-  }
-
-  // Delete challenger
-  const handleDeleteChallenger = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this challenger?')) {
-      return
-    }
-
+  // Handle PDF viewing
+  const handleViewPDF = (pdfUrl: string) => {
     try {
-      setLoading(true)
-      await ChallengerService.deleteChallenger(id)
-      showNotification({ message: 'Challenger deleted successfully', variant: 'success' })
+      console.log('Original PDF URL:', pdfUrl);
       
-      // Reload challengers
-      const response = await ChallengerService.getAllChallengers(filters)
-      setChallengers(response.data || [])
-      setPagination({
-        currentPage: response.currentPage || 1,
-        totalPages: response.totalPages || 1,
-        totalItems: response.totalItems || 0,
-        itemsPerPage: filters.limit || 10
-      })
+      // Check if URL is already absolute
+      if (pdfUrl.startsWith('http://') || pdfUrl.startsWith('https://')) {
+        console.log('Opening absolute URL:', pdfUrl);
+        window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      
+      // For relative URLs, use the API base URL
+      let fullUrl = pdfUrl;
+      if (pdfUrl.startsWith('/')) {
+        fullUrl = `http://localhost:8080/${pdfUrl}`;
+      } else {
+        fullUrl = `http://localhost:8080/${pdfUrl}`;
+      }
+      
+      console.log('Opening constructed URL:', fullUrl);
+      window.open(fullUrl, '_blank', 'noopener,noreferrer');
+      
     } catch (error) {
-      console.error('❌ Error deleting challenger:', error)
-      showNotification({ message: 'Error deleting challenger', variant: 'danger' })
-    } finally {
-      setLoading(false)
+      console.error('Error opening PDF:', error);
+      alert(`Error opening PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
-
-  // Get status badge variant
-  const getStatusBadgeVariant = (isActive: boolean) => {
-    return isActive ? 'success' : 'secondary'
-  }
-
-  // Format date
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString()
-  }
-
-
 
   return (
     <>
       <PageTitle subName="Daawat" title="Challengers" />
       
-      <Row>
-        <Col xs={12}>
-          <Card>
-            <CardHeader className="d-flex justify-content-between align-items-center">
-              <div>
-                <h5 className="card-title mb-0">All Challengers</h5>
-                <p className="text-muted mb-0">
-                  Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to{' '}
-                  {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
-                  {pagination.totalItems} challengers
-                </p>
-              </div>
-            </CardHeader>
-            
-            <CardBody>
-              {/* Filters */}
-              <Row className="mb-4">
-                <Col lg={6}>
-                  <InputGroup>
-                    <Form.Control
-                      type="text"
-                      placeholder="Search challengers..."
-                      value={searchInput}
-                      onChange={(e) => handleSearch(e.target.value)}
-                    />
-                    <Button variant="outline-secondary">
-                      <IconifyIcon icon="solar:magnifer-linear" />
-                    </Button>
-                  </InputGroup>
-                </Col>
-                
-                <Col lg={2}>
-                  <Form.Select
-                    value={filters.category || ''}
-                    onChange={(e) => handleFilterChange('category', e.target.value)}
-                  >
-                    <option value="">All Categories</option>
-                    <option value="Vegetarian">Vegetarian</option>
-                    <option value="Keto">Keto</option>
-                    <option value="High Protein">High Protein</option>
-                  </Form.Select>
-                </Col>
-                
-                <Col lg={2}>
-                  <Form.Select
-                    value={filters.duration || ''}
-                    onChange={(e) => handleFilterChange('duration', e.target.value)}
-                  >
-                    <option value="">All Durations</option>
-                    <option value="7 days">7 days</option>
-                    <option value="1 month">1 month</option>
-                    <option value="3 months">3 months</option>
-                  </Form.Select>
-                </Col>
-                
-                <Col lg={2}>
-                  <Form.Select
-                    value={filters.limit?.toString() || '10'}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                  >
-                    <option value="5">5 per page</option>
-                    <option value="10">10 per page</option>
-                    <option value="25">25 per page</option>
-                    <option value="50">50 per page</option>
-                  </Form.Select>
-                </Col>
-              </Row>
+      <ComponentContainerCard id="challengers-list" title="All Challengers" description="Manage and view all registered challengers">
+        {/* Search and Filters */}
+        <div className="row mb-4">
+          <div className="col-md-4">
+            <div className="input-group">
+              <span className="input-group-text">
+                <i className="fas fa-search"></i>
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search challengers..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="col-md-2">
+            <select
+              className="form-select"
+              value={filters.category || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value || undefined }))}
+            >
+              <option value="">All Categories</option>
+              <option value="Vegetarian">Vegetarian</option>
+              <option value="Keto">Keto</option>
+              <option value="High Protein">High Protein</option>
+            </select>
+          </div>
+          <div className="col-md-2">
+            <select
+              className="form-select"
+              value={filters.duration || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, duration: e.target.value || undefined }))}
+            >
+              <option value="">All Durations</option>
+              <option value="7 days">7 days</option>
+              <option value="1 month">1 month</option>
+              <option value="3 months">3 months</option>
+            </select>
+          </div>
+          <div className="col-md-2">
+            <select
+              className="form-select"
+              value={filters.type || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value || undefined }))}
+            >
+              <option value="">All Types</option>
+              <option value="Weight Loss">Weight Loss</option>
+              <option value="Muscle Building">Muscle Building</option>
+              <option value="General Health">General Health</option>
+            </select>
+          </div>
+          <div className="col-md-2">
+            <select
+              className="form-select"
+              value={filters.limit?.toString() || '10'}
+              onChange={(e) => setFilters(prev => ({ ...prev, limit: parseInt(e.target.value), page: 1 }))}
+            >
+              <option value="5">5 per page</option>
+              <option value="10">10 per page</option>
+              <option value="25">25 per page</option>
+              <option value="50">50 per page</option>
+            </select>
+          </div>
+        </div>
 
-              {/* Loading State */}
-              {loading && (
-                <div className="text-center py-5">
-                  <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </Spinner>
-                  <p className="mt-2">Loading challengers...</p>
-                </div>
-              )}
-
-              {/* Empty State */}
-              {!loading && challengers.length === 0 && (
-                <div className="text-center py-5">
-                  <IconifyIcon icon="solar:user-cross-rounded-bold" className="fs-1 text-muted mb-3" />
-                  <h5 className="text-muted">No challengers found</h5>
-                  <p className="text-muted">Try adjusting your search criteria or filters.</p>
-                </div>
-              )}
-
-              {/* Challengers Table */}
-              {!loading && challengers.length > 0 && (
-                <div className="table-responsive">
-                  <Table className="table-hover">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Mobile</th>
-                        <th>Category</th>
-                        <th>Type</th>
-                        <th>Duration</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {challengers.map((challenger) => (
-                        <tr key={challenger._id}>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div className="avatar-md me-2">
-                                <div className="avatar-title bg-light-primary text-primary rounded-circle">
-                                  {challenger.name.charAt(0).toUpperCase()}
-                                </div>
-                              </div>
-                              <div>
-                                <h6 className="mb-0">{challenger.name}</h6>
-                                {challenger.subcategory && (
-                                  <small className="text-muted">{challenger.subcategory}</small>
-                                )}
-                              </div>
+        {/* Data Table */}
+        {loading ? (
+          <div className="text-center py-4">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-2">Loading challengers...</p>
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-hover">
+              <thead className="table-light">
+                <tr>
+                  <th>Name & Contact</th>
+                  <th>Category & Type</th>
+                  <th>Duration</th>
+                  <th>Subcategory</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>PDF</th>
+                </tr>
+              </thead>
+              <tbody>
+                {challengers.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-4">
+                      <i className="fas fa-users fa-3x text-muted mb-3"></i>
+                      <h5 className="text-muted">No challengers found</h5>
+                      <p className="text-muted">Try adjusting your search or filter criteria.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  challengers.map((challenger) => (
+                    <tr key={challenger._id}>
+                      <td>
+                        <div className="d-flex align-items-center">
+                          <div className="avatar-md me-2">
+                            <div className="avatar-title bg-primary-subtle text-primary rounded-circle">
+                              {challenger.name.charAt(0).toUpperCase()}
                             </div>
-                          </td>
-                          <td>{challenger.mobile}</td>
-                          <td>
-                            <Badge bg="light" text="dark">{challenger.category}</Badge>
-                          </td>
-                          <td>{challenger.type}</td>
-                          <td>{challenger.duration}</td>
-                          <td>
-                            <Badge bg={getStatusBadgeVariant(challenger.isActive)}>
-                              {challenger.isActive ? 'Active' : 'Inactive'}
-                            </Badge>
-                          </td>
-                          <td>{formatDate(challenger.createdAt)}</td>
-                          <td>
-                            <div className="d-flex gap-2">
-                              {challenger.pdf && (
-                                <Button
-                                  size="sm"
-                                  variant="outline-primary"
-                                  onClick={() => window.open(challenger.pdf, '_blank')}
-                                  title="View PDF"
-                                >
-                                  <IconifyIcon icon="solar:document-text-linear" />
-                                </Button>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="outline-danger"
-                                onClick={() => challenger._id && handleDeleteChallenger(challenger._id)}
-                                title="Delete Challenger"
-                              >
-                                <IconifyIcon icon="solar:trash-bin-minimalistic-linear" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
-              )}
-
-              {/* Pagination */}
-              {!loading && challengers.length > 0 && pagination.totalPages > 1 && (
-                <Row className="mt-4">
-                  <Col className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <small className="text-muted">
-                        Page {pagination.currentPage} of {pagination.totalPages}
-                      </small>
-                    </div>
-                    <div className="d-flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline-primary"
-                        disabled={pagination.currentPage <= 1}
-                        onClick={() => handlePageChange(pagination.currentPage - 1)}
-                      >
-                        <IconifyIcon icon="solar:alt-arrow-left-linear" />
-                        Previous
-                      </Button>
-                      
-                      {/* Page Numbers */}
-                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                        const pageNum = i + 1
-                        return (
-                          <Button
-                            key={pageNum}
-                            size="sm"
-                            variant={pageNum === pagination.currentPage ? 'primary' : 'outline-primary'}
-                            onClick={() => handlePageChange(pageNum)}
+                          </div>
+                          <div>
+                            <h6 className="mb-0">{challenger.name}</h6>
+                            <small className="text-muted">
+                              <i className="fas fa-phone me-1"></i>
+                              <a href={`tel:${challenger.mobile}`} className="text-decoration-none">
+                                {challenger.mobile}
+                              </a>
+                            </small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          <span className={`badge ${challenger.category === 'Vegetarian' ? 'bg-success' : challenger.category === 'Keto' ? 'bg-warning' : 'bg-info'} mb-1`}>
+                            {challenger.category}
+                          </span>
+                          <br />
+                          <small className="text-muted">{challenger.type}</small>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="badge bg-secondary">{challenger.duration}</span>
+                      </td>
+                      <td>
+                        <span className="text-muted">{challenger.subcategory || 'N/A'}</span>
+                      </td>
+                      <td>
+                        <span className={`badge ${challenger.isActive ? 'bg-success' : 'bg-secondary'}`}>
+                          {challenger.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="text-muted">
+                          {challenger.createdAt ? new Date(challenger.createdAt).toLocaleDateString() : 'N/A'}
+                        </span>
+                      </td>
+                      <td>
+                        {challenger.pdf ? (
+                          <button
+                            className="btn btn-sm btn-outline-success"
+                            onClick={() => handleViewPDF(challenger.pdf)}
+                            title="View PDF"
                           >
-                            {pageNum}
-                          </Button>
-                        )
-                      })}
-                      
-                      <Button
-                        size="sm"
-                        variant="outline-primary"
-                        disabled={pagination.currentPage >= pagination.totalPages}
-                        onClick={() => handlePageChange(pagination.currentPage + 1)}
-                      >
-                        Next
-                        <IconifyIcon icon="solar:alt-arrow-right-linear" />
-                      </Button>
-                    </div>
-                  </Col>
-                </Row>
-              )}
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
+                            <i className="fas fa-file-pdf me-1"></i>
+                            View
+                          </button>
+                        ) : (
+                          <span className="text-muted">No PDF</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <nav aria-label="Challengers pagination">
+            <ul className="pagination justify-content-center">
+              <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
+                <button
+                  className="page-link"
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1}
+                >
+                  Previous
+                </button>
+              </li>
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
+                <li key={page} className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
+                <button
+                  className="page-link"
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
+        )}
+
+        {/* Stats */}
+        {!loading && challengers.length > 0 && (
+          <div className="row mt-3">
+            <div className="col-md-6">
+              <small className="text-muted">
+                Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to{' '}
+                {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
+                {pagination.totalItems} challengers
+              </small>
+            </div>
+          </div>
+        )}
+      </ComponentContainerCard>
       
       <Footer />
     </>

@@ -19,7 +19,7 @@ export const MENU_ITEMS: MenuItemType[] = [
     children: [
       {
         key: 'web-challenges',
-        label: 'Challenges',
+        label: 'Challengers',
         url: '/challengers',
       },
     ],
@@ -56,12 +56,6 @@ export const MENU_ITEMS: MenuItemType[] = [
     label: 'Diet Plan',
     icon: 'solar:chef-hat-broken',
     url: '/diet-plan',
-  },
-  {
-    key: 'challengers',
-    label: 'Challengers',
-    icon: 'solar:cardholder-outline',
-    url: '/challengers',
   },
 
   // {
