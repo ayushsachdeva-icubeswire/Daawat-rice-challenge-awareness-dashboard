@@ -1,8 +1,51 @@
 import { Card, CardBody, CardHeader } from 'react-bootstrap'
 import ReactApexChart from 'react-apexcharts'
 import { ApexOptions } from 'apexcharts'
+import Spinner from '@/components/Spinner'
+import { DashboardStats } from '@/services/dashboardService'
+import { formatNumber } from '@/utils/numberFormat'
 
-const PostsChart = () => {
+interface PostsChartProps {
+  dashboardData?: DashboardStats | null
+  isLoading?: boolean
+  error?: string | null
+}
+
+const PostsChart: React.FC<PostsChartProps> = ({ 
+  dashboardData, 
+  isLoading = false, 
+  error = null 
+}) => {
+  // Prepare chart data from API response or use fallback data
+  const getChartData = () => {
+    if (dashboardData?.postGraphData?.itchotels && Array.isArray(dashboardData.postGraphData.itchotels)) {
+      // Convert timestamps to dates and prepare data for ApexCharts
+      const chartData = dashboardData.postGraphData.itchotels
+        .filter(point => point.y !== null)
+        .map(point => ({
+          timestamp: point.x,
+          date: new Date(point.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          value: point.y || 0
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp)
+
+      return {
+        categories: chartData.map(item => item.date),
+        publishedData: chartData.map(item => item.value),
+        timestamps: chartData.map(item => item.timestamp)
+      }
+    }
+    
+    // Fallback data if API data is not available
+    return {
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      publishedData: [5, 8, 12, 15, 18, 22, 25, 28, 32, 35, 38, 42],
+      timestamps: []
+    }
+  }
+
+  const chartData = getChartData()
+
   const chartOptions: ApexOptions = {
     chart: {
       type: 'area',
@@ -13,18 +56,13 @@ const PostsChart = () => {
     },
     series: [
       {
-        name: 'Published Posts',
-        data: [5, 8, 12, 15, 18, 22, 25, 28, 32, 35, 38, 42],
+        name: 'Posts Count',
+        data: chartData.publishedData,
         color: '#f59e0b',
-      },
-      {
-        name: 'Draft Posts',
-        data: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
-        color: '#8b5cf6',
       },
     ],
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      categories: chartData.categories,
       labels: {
         style: {
           colors: '#8e8da4',
@@ -62,22 +100,44 @@ const PostsChart = () => {
       horizontalAlign: 'right',
     },
     tooltip: {
-      theme: 'dark',
+      theme: 'light',
     },
   }
 
   return (
     <Card>
       <CardHeader>
-        <h5 className="card-title mb-0">Posts Analytics</h5>
+        <div className="d-flex justify-content-between align-items-center">
+          <h5 className="card-title mb-0">Post Analytics</h5>
+          {dashboardData && (
+            <div className="d-flex gap-3 text-muted small">
+              <span>Stories: <strong>{dashboardData.totalStories}</strong></span>
+              <span>Views: <strong>{formatNumber(dashboardData.totalViews)}</strong></span>
+              <span>Likes: <strong>{formatNumber(dashboardData.totalLikes)}</strong></span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardBody>
-        <ReactApexChart
-          options={chartOptions}
-          series={chartOptions.series}
-          type="area"
-          height={350}
-        />
+        {isLoading ? (
+          <div className="d-flex justify-content-center align-items-center" style={{ height: '350px' }}>
+            <Spinner />
+          </div>
+        ) : error ? (
+          <div className="d-flex justify-content-center align-items-center text-danger" style={{ height: '350px' }}>
+            <div className="text-center">
+              <i className="mdi mdi-alert-circle-outline fs-2 mb-2"></i>
+              <p className="mb-0">{error}</p>
+            </div>
+          </div>
+        ) : (
+          <ReactApexChart
+            options={chartOptions}
+            series={chartOptions.series}
+            type="area"
+            height={350}
+          />
+        )}
       </CardBody>
     </Card>
   )
