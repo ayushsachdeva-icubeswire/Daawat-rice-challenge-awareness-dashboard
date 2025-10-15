@@ -1,5 +1,5 @@
 import Footer from '@/components/layout/Footer'
-import ExtendedCards from './components/ExtendedCards'
+// import ExtendedCards from './components/ExtendedCards'
 
 import RecentChallengers from './components/RecentChallengers'
 import PostsList from './components/PostsList'
@@ -8,16 +8,16 @@ import ChallengesChart from './components/ChallengesChart'
 import PostsChart from './components/PostsChart'
 import PageTitle from '@/components/PageTitle'
 import { Row, Col } from 'react-bootstrap'
-import { useNavigate } from 'react-router-dom'
-import { getExtendedCardsData } from './mockData'
+// import { useNavigate } from 'react-router-dom'
+// import { getExtendedCardsData } from './mockData'
 import { CampaignContentsService, PostData } from '@/services/campaignContentsService'
 import ChallengerService from '@/services/challengerService'
 import { Challenger } from '@/types/challenger'
 import { useState, useEffect } from 'react'
 
 const page = () => {
-  const navigate = useNavigate()
-  const extendedCardsData = getExtendedCardsData()
+  // const navigate = useNavigate()
+  // const extendedCardsData = getExtendedCardsData()
   const [campaignPosts, setCampaignPosts] = useState<PostData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -70,24 +70,24 @@ const page = () => {
     fetchChallengers()
   }, [])
 
-  const handleCardClick = (_: number, cardData: any) => {
-    switch (cardData.title) {
-      // case 'Recent Interactions':
-      //   navigate('/interactions')
-      //   break
-      case 'Challenges Taken':
-        navigate('/challengers')
-        break
-      case 'Total Posts':
-        navigate('/posts')
-        break
-      case 'Completed Challenges':
-        navigate('/challengers')
-        break
-      default:
-        console.log('Card clicked:', cardData.title)
-    }
-  }
+  // const handleCardClick = (_: number, cardData: any) => {
+  //   switch (cardData.title) {
+  //     // case 'Recent Interactions':
+  //     //   navigate('/interactions')
+  //     //   break
+  //     case 'Challenges Taken':
+  //       navigate('/challengers')
+  //       break
+  //     case 'Total Posts':
+  //       navigate('/posts')
+  //       break
+  //     case 'Completed Challenges':
+  //       navigate('/challengers')
+  //       break
+  //     default:
+  //       console.log('Card clicked:', cardData.title)
+  //   }
+  // }
 
   return (
     <>
@@ -95,10 +95,10 @@ const page = () => {
       
       {/* Counter Cards */}
       <div className="mb-4">
-        <ExtendedCards 
+        {/* <ExtendedCards 
           cardsData={extendedCardsData}
           onCardClick={handleCardClick}
-        />
+        /> */}
       </div>
 
       {/* Charts Section */}

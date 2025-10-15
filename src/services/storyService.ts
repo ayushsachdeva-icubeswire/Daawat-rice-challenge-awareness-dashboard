@@ -1,4 +1,5 @@
 import { getCookie } from 'cookies-next'
+import { API_CONFIG } from '@/config/api'
 
 interface CreateStoryData {
   handle: string
@@ -107,7 +108,7 @@ export const createStory = async (data: CreateStoryData, authToken?: string): Pr
       throw new Error('Authentication token not found. Please login again.')
     }
 
-    const response = await fetch('http://localhost:8080/api/stories', {
+    const response = await fetch(`${API_CONFIG.API_URL}/stories`, {
       method: 'POST',
       headers: {
         'authorization': token
@@ -153,7 +154,7 @@ export const getStories = async (params: GetStoriesParams = {}, authToken?: stri
       limit: limit.toString()
     })
     
-    const response = await fetch(`http://localhost:8080/api/stories?${queryParams}`, {
+    const response = await fetch(`${API_CONFIG.API_URL}/stories?${queryParams}`, {
       method: 'GET',
       headers: {
         'authorization': token
@@ -201,7 +202,7 @@ export const deleteStory = async (storyId: string, authToken?: string) => {
       throw new Error('Authentication token not found. Please login again.')
     }
     
-    const response = await fetch(`http://localhost:8080/api/stories/${storyId}`, {
+    const response = await fetch(`${API_CONFIG.API_URL}/stories/${storyId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

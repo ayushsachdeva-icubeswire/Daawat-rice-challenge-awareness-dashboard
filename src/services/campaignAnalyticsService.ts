@@ -110,7 +110,7 @@ export class CampaignAnalyticsService {
    */
   static async getCampaignAnalysisWithHttpClient(campaignId: string | number): Promise<CampaignAnalyticsData> {
     try {
-      const response = await HttpClient.get(`/v1/campaign-analytics/analysis/${campaignId}`)
+      const response = await HttpClient.get(`https://apis.icubeswire.co/api/v1/campaign-analytics/analysis/${campaignId}`)
       return response.data
     } catch (error) {
       console.error('Error fetching campaign analytics with HttpClient:', error)

@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer'
 import { useNotificationContext } from '@/context/useNotificationContext'
 import { Challenger, ChallengerFilters } from '@/types/challenger'
 import ChallengerService from '@/services/challengerService'
+import { API_CONFIG } from '@/config/api'
 
 
 const ChallengersPage = () => {
@@ -73,9 +74,9 @@ const ChallengersPage = () => {
       // For relative URLs, use the API base URL
       let fullUrl = pdfUrl;
       if (pdfUrl.startsWith('/')) {
-        fullUrl = `http://localhost:8080/${pdfUrl}`;
+        fullUrl = `${API_CONFIG.BASE_URL}/${pdfUrl}`;
       } else {
-        fullUrl = `http://localhost:8080/${pdfUrl}`;
+        fullUrl = `${API_CONFIG.BASE_URL}/${pdfUrl}`;
       }
       
       console.log('Opening constructed URL:', fullUrl);

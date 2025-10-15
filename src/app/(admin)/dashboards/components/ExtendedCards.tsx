@@ -3,9 +3,35 @@ import { ApexOptions } from 'apexcharts'
 import ReactApexChart from 'react-apexcharts'
 import { Card, CardBody, Col, Row } from 'react-bootstrap'
 import { ExtendedCardsType } from '@/types/dashboard'
-
 interface ExtendedStatCardProps extends ExtendedCardsType {
   onClick?: () => void
+}
+
+// Safe chart wrapper component
+const SafeChart = ({ options, series, height, type, color }: {
+  options: ApexOptions
+  series: any[]
+  height: number
+  type: string
+  color: string
+}) => {
+  try {
+    return (
+      <ReactApexChart 
+        options={options} 
+        series={series} 
+        height={height} 
+        type={type as any} 
+      />
+    )
+  } catch (error) {
+    console.error('Chart rendering error:', error)
+    return (
+      <div style={{ height, backgroundColor: `${color}10` }} className="d-flex align-items-center justify-content-center">
+        <span className="text-muted small">Chart error</span>
+      </div>
+    )
+  }
 }
 
 const ExtendedStatCard = ({ 
@@ -18,6 +44,19 @@ const ExtendedStatCard = ({
   trendValue,
   onClick 
 }: ExtendedStatCardProps) => {
+  // Ensure series data is valid and contains proper numbers
+  const chartSeries = Array.isArray(series) && series.length > 0 
+    ? series.filter(val => typeof val === 'number' && !isNaN(val))
+    : []
+  
+  // Use fallback data if series is empty or invalid
+  const finalSeries = chartSeries.length > 0 ? chartSeries : [0, 0, 0, 0, 0]
+  
+  // Add error boundary for chart rendering
+  if (!Array.isArray(series) || series.length === 0) {
+    console.warn('Invalid chart series data for card:', title, series)
+  }
+  
   const salesChart: ApexOptions = {
     chart: {
       type: 'area',
@@ -26,11 +65,6 @@ const ExtendedStatCard = ({
         enabled: true,
       },
     },
-    series: [
-      {
-        data: series,
-      },
-    ],
     stroke: {
       width: 2,
       curve: 'smooth',
@@ -125,7 +159,13 @@ const ExtendedStatCard = ({
           </Col>
         </Row>
       </CardBody>
-      <ReactApexChart options={salesChart} series={salesChart.series} height={50} type="area" />
+      <SafeChart 
+        options={salesChart} 
+        series={[{ data: finalSeries }]} 
+        height={50} 
+        type="area"
+        color={color}
+      />
     </Card>
   )
 }
@@ -136,6 +176,19 @@ interface ExtendedCardsProps {
 }
 
 const ExtendedCards = ({ cardsData, onCardClick }: ExtendedCardsProps) => {
+  // Ensure cardsData is valid
+  if (!Array.isArray(cardsData) || cardsData.length === 0) {
+    return (
+      <Row className="g-3">
+        <Col xs={12}>
+          <div className="text-center py-4">
+            <span className="text-muted">Loading dashboard cards...</span>
+          </div>
+        </Col>
+      </Row>
+    )
+  }
+
   return (
     <Row className="g-3">
       {cardsData.map((item, idx) => (

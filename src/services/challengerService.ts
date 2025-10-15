@@ -1,8 +1,6 @@
 import { Challenger, ChallengerFilters, ChallengerListResponse } from '@/types/challenger';
 import { getCookie } from 'cookies-next'
-// import { API_CONFIG } from '@/config/api'
-
-// const BASE_URL = API_CONFIG.API_URL
+import { API_CONFIG } from '@/config/api'
 
 // Helper function to get authentication token from the session
 const getAuthToken = (fallbackToken?: string): string => {
@@ -56,7 +54,7 @@ class ChallengerService {
       if (filters?.page) queryParams.append('page', filters.page.toString())
       if (filters?.limit) queryParams.append('limit', filters.limit.toString())
 
-      const response = await fetch(`http://localhost:8080/api/challenger?${queryParams.toString()}`, {
+      const response = await fetch(`${API_CONFIG.API_URL}/challenger?${queryParams.toString()}`, {
         method: 'GET',
         headers: getAuthHeaders()
       })
@@ -80,7 +78,7 @@ class ChallengerService {
         throw new Error('Authentication token not found. Please login again.')
       }
 
-      const response = await fetch(`http://localhost:8080/api/challenger/${id}`, {
+      const response = await fetch(`${API_CONFIG.API_URL}/challenger/${id}`, {
         method: 'GET',
         headers: getAuthHeaders()
       })

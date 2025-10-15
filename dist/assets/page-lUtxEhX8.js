@@ -1,0 +1,1 @@
+import{a8 as t,u as o,r,j as a}from"./index-Bh85SR9Q.js";const n=()=>{const e=t(),{changeTheme:s}=o();return console.log("bvdfbgd",s),r.useEffect(()=>{s("dark"),e("/dashboards")},[e]),a.jsx(a.Fragment,{})},d=()=>a.jsx(a.Fragment,{children:a.jsx(n,{})});export{d as default};
