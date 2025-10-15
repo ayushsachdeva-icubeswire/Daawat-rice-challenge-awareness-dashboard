@@ -1,6 +1,7 @@
 import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
 import { useState } from 'react'
+import { formatNumber } from '@/utils/numberFormat'
 
 const RecipeViewPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -212,7 +213,7 @@ const RecipeViewPage = () => {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 className="mb-0">{totalReviews.toLocaleString()}</h4>
+                    <h4 className="mb-0">{formatNumber(totalReviews)}</h4>
                     <p className="mb-0">Total Reviews</p>
                   </div>
                   <i className="fas fa-comments fa-2x opacity-75"></i>

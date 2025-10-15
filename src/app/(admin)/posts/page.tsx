@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer'
 import IconifyIcon from '@/components/wrapper/IconifyIcon'
 import { mockPosts } from '@/app/(admin)/dashboards/mockData'
 import { Post } from '@/types/dashboard'
+import { formatNumber } from '@/utils/numberFormat'
 
 // Simple time formatter
 const formatTimeAgo = (date: Date): string => {
@@ -376,7 +377,7 @@ const PostsPage = () => {
                       <div className="d-flex align-items-center">
                         <div className="d-flex align-items-center me-3">
                           <IconifyIcon icon="solar:heart-broken" className="fs-12 me-1 text-danger" />
-                          <span className="small">{post.likes}</span>
+                          <span className="small">{formatNumber(post.likes)}</span>
                         </div>
                         <div className="d-flex align-items-center me-3">
                           <IconifyIcon icon="solar:chat-round-line-broken" className="fs-12 me-1 text-primary" />
@@ -384,7 +385,7 @@ const PostsPage = () => {
                         </div>
                         <div className="d-flex align-items-center me-3">
                           <IconifyIcon icon="solar:eye-broken" className="fs-12 me-1 text-muted" />
-                          <span className="small">{post.views}</span>
+                          <span className="small">{formatNumber(post.views)}</span>
                         </div>
                       </div>
                     </td>

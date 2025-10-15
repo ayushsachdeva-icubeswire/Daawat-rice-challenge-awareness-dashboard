@@ -1,6 +1,7 @@
 import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
 import { useState, useEffect } from 'react'
+import { formatNumber } from '@/utils/numberFormat'
 
 const OverallPerformancePage = () => {
   const [likes] = useState(15420)
@@ -59,7 +60,7 @@ const OverallPerformancePage = () => {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 className="mb-0">{likes.toLocaleString()}</h4>
+                    <h4 className="mb-0">{formatNumber(likes)}</h4>
                     <p className="mb-0">Total Likes</p>
                   </div>
                   <i className="fas fa-heart fa-2x opacity-75"></i>
@@ -79,7 +80,7 @@ const OverallPerformancePage = () => {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 className="mb-0">{shares.toLocaleString()}</h4>
+                    <h4 className="mb-0">{formatNumber(shares)}</h4>
                     <p className="mb-0">Total Shares</p>
                   </div>
                   <i className="fas fa-share-alt fa-2x opacity-75"></i>
@@ -99,7 +100,7 @@ const OverallPerformancePage = () => {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 className="mb-0">{comments.toLocaleString()}</h4>
+                    <h4 className="mb-0">{formatNumber(comments)}</h4>
                     <p className="mb-0">Total Comments</p>
                   </div>
                   <i className="fas fa-comments fa-2x opacity-75"></i>
@@ -119,7 +120,7 @@ const OverallPerformancePage = () => {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 className="mb-0">{totalInteractions.toLocaleString()}</h4>
+                    <h4 className="mb-0">{formatNumber(totalInteractions)}</h4>
                     <p className="mb-0">Total Interactions</p>
                   </div>
                   <i className="fas fa-chart-line fa-2x opacity-75"></i>
@@ -239,23 +240,23 @@ const OverallPerformancePage = () => {
                         <td>
                           <span className="text-primary">
                             <i className="fas fa-heart me-1"></i>
-                            {day.likes.toLocaleString()}
+                            {formatNumber(day.likes)}
                           </span>
                         </td>
                         <td>
                           <span className="text-success">
                             <i className="fas fa-share-alt me-1"></i>
-                            {day.shares.toLocaleString()}
+                            {formatNumber(day.shares)}
                           </span>
                         </td>
                         <td>
                           <span className="text-warning">
                             <i className="fas fa-comments me-1"></i>
-                            {day.comments.toLocaleString()}
+                            {formatNumber(day.comments)}
                           </span>
                         </td>
                         <td>
-                          <span className="badge bg-info">{day.total.toLocaleString()}</span>
+                          <span className="badge bg-info">{formatNumber(day.total)}</span>
                         </td>
                         <td>
                           <span className="text-success">
@@ -288,7 +289,7 @@ const OverallPerformancePage = () => {
                           <div className="col-4">
                             <small className="text-muted">
                               <i className="fas fa-heart text-primary me-1"></i>
-                              {post.likes}
+                              {formatNumber(post.likes)}
                             </small>
                           </div>
                           <div className="col-4">
@@ -305,7 +306,7 @@ const OverallPerformancePage = () => {
                           </div>
                         </div>
                         <small className="text-muted">
-                          Total: {(post.likes + post.shares + post.comments).toLocaleString()} interactions
+                          Total: {formatNumber(post.likes + post.shares + post.comments)} interactions
                         </small>
                       </div>
                       <span className={`badge ${index < 2 ? 'bg-success' : index < 4 ? 'bg-warning' : 'bg-secondary'}`}>

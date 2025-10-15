@@ -1,6 +1,7 @@
 import Footer from '@/components/layout/Footer'
 import ExtendedCards from './components/ExtendedCards'
-import ChallengesList from './components/ChallengesList'
+
+import RecentChallengers from './components/RecentChallengers'
 import PostsList from './components/PostsList'
 // import InteractionsChart from './components/InteractionsChart'
 import ChallengesChart from './components/ChallengesChart'
@@ -8,8 +9,10 @@ import PostsChart from './components/PostsChart'
 import PageTitle from '@/components/PageTitle'
 import { Row, Col } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
-import { getExtendedCardsData, getActiveChallenges } from './mockData'
+import { getExtendedCardsData } from './mockData'
 import { CampaignContentsService, PostData } from '@/services/campaignContentsService'
+import ChallengerService from '@/services/challengerService'
+import { Challenger } from '@/types/challenger'
 import { useState, useEffect } from 'react'
 
 const page = () => {
@@ -18,6 +21,11 @@ const page = () => {
   const [campaignPosts, setCampaignPosts] = useState<PostData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Challengers state
+  const [challengers, setChallengers] = useState<Challenger[]>([])
+  const [challengersLoading, setChallengersLoading] = useState(true)
+  const [challengersError, setChallengersError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchCampaignContents = async () => {
@@ -36,6 +44,30 @@ const page = () => {
     }
 
     fetchCampaignContents()
+  }, [])
+
+  // Fetch challengers on component mount
+  useEffect(() => {
+    const fetchChallengers = async () => {
+      try {
+        setChallengersLoading(true)
+        setChallengersError(null)
+        const response = await ChallengerService.getAllChallengers({ 
+          limit: 10,
+          page: 1 
+        })
+        if (response.data) {
+          setChallengers(response.data)
+        }
+      } catch (err) {
+        setChallengersError('Failed to fetch challengers')
+        console.error('Error fetching challengers:', err)
+      } finally {
+        setChallengersLoading(false)
+      }
+    }
+
+    fetchChallengers()
   }, [])
 
   const handleCardClick = (_: number, cardData: any) => {
@@ -84,22 +116,26 @@ const page = () => {
 
       {/* Lists Section */}
       <Row className="mb-4 g-3">
-        {/* <Col xl={4} lg={6} md={12}>
-          <InteractionsList 
-            interactions={getRecentInteractions(10)}
-            title="Recent Interactions"
+        <Col xl={6} lg={6} md={12}>
+          <RecentChallengers 
+            challengers={challengers}
+            title="Recent Challengers"
             showHeader={true}
             maxHeight="400px"
+            isLoading={challengersLoading}
+            error={challengersError}
+            onTitleClick={() => window.open('/challengers', '_blank')}
+
           />
-        </Col> */}
-        <Col xl={6} lg={6} md={12}>
+        </Col>
+        {/* <Col xl={4} lg={6} md={12}>
           <ChallengesList 
             challenges={getActiveChallenges(10)}
             title="Recent Challenges"
             showHeader={true}
             maxHeight="400px"
           />
-        </Col>
+        </Col> */}
         <Col xl={6} lg={12} md={12}>
           <PostsList 
             posts={campaignPosts}

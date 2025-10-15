@@ -2,6 +2,7 @@ import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
 import { useState, useEffect } from 'react'
 import { CampaignAnalyticsService, CampaignAnalyticsData, InfluencerListResponse, InfluencerData } from '@/services/campaignAnalyticsService'
+import { formatNumber } from '@/utils/numberFormat'
 
 const SocialAnalyticsPage = () => {
   const [analyticsData, setAnalyticsData] = useState<CampaignAnalyticsData | null>(null)
@@ -204,7 +205,7 @@ const SocialAnalyticsPage = () => {
                 <div className="card-body">
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
-                      <h4 className="mb-0">{displayData.influencerCount.toLocaleString()}</h4>
+                      <h4 className="mb-0">{formatNumber(displayData.influencerCount)}</h4>
                       <p className="mb-0">Influencers</p>
                     </div>
                     <i className="fas fa-user-friends fa-2x opacity-75"></i>
@@ -312,7 +313,7 @@ const SocialAnalyticsPage = () => {
                         <span className="fw-semibold">{parseFloat(influencer.er).toFixed(2)}</span>
                       </td>
                       <td>
-                        <span className="fw-semibold">{influencer.reach}</span>
+                        <span className="fw-semibold">{typeof influencer.reach === 'number' ? formatNumber(influencer.reach) : influencer.reach}</span>
                       </td>
                       <td>
                         <span className="fw-semibold">{influencer.total_reshare_count}</span>

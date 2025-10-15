@@ -1,6 +1,7 @@
 import { Card, CardBody, CardHeader, ListGroup, Badge, Row, Col } from 'react-bootstrap'
 import IconifyIcon from '@/components/wrapper/IconifyIcon'
 import { PostData } from '@/services/campaignContentsService'
+import { formatNumber } from '@/utils/numberFormat'
 
 
 
@@ -224,7 +225,7 @@ const PostsList = ({
                           </div>
                           <div className="d-flex align-items-center">
                             <IconifyIcon icon="solar:eye-broken" className="fs-12 me-1 text-muted" />
-                            <span className="small text-muted">{post.reach}</span>
+                            <span className="small text-muted">{formatNumber(post.reach)}</span>
                           </div>
                         </div>
                       </div>

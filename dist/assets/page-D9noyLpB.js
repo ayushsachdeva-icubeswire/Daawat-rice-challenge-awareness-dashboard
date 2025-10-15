@@ -1,1 +1,0 @@
-import{h as t,u as o,r,j as e}from"./index-1uISpN7Y.js";const n=()=>{const a=t(),{changeTheme:s}=o();return console.log("bvdfbgd",s),r.useEffect(()=>{s("dark"),a("/dashboards")},[a]),e.jsx(e.Fragment,{})},d=()=>e.jsx(e.Fragment,{children:e.jsx(n,{})});export{d as default};

@@ -2,6 +2,7 @@ import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
 import { useState, useEffect } from 'react'
 import { CampaignContentsService, CampaignContent, processPostsIntoAnalytics, CampaignAnalysisData } from '@/services/campaignContentsService'
+import { formatNumber } from '@/utils/numberFormat'
 
 const HashtagPerformancePage = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -310,7 +311,7 @@ const HashtagPerformancePage = () => {
                       <div className="card-body text-white">
                         <div className="d-flex justify-content-between align-items-center">
                           <div>
-                            <h3 className="mb-1 fw-bold">{analysisData.total_followers.toLocaleString()}</h3>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_followers)}</h3>
                             <p className="mb-0 opacity-75">Total Followers</p>
                             <small className="opacity-75">Cumulative reach</small>
                           </div>
@@ -327,7 +328,7 @@ const HashtagPerformancePage = () => {
                       <div className="card-body text-white">
                         <div className="d-flex justify-content-between align-items-center">
                           <div>
-                            <h3 className="mb-1 fw-bold">{analysisData.total_engagements.toLocaleString()}</h3>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_engagements)}</h3>
                             <p className="mb-0 opacity-75">Total Engagements</p>
                             <small className="opacity-75">Likes + Comments + Shares</small>
                           </div>
@@ -344,7 +345,7 @@ const HashtagPerformancePage = () => {
                       <div className="card-body text-white">
                         <div className="d-flex justify-content-between align-items-center">
                           <div>
-                            <h3 className="mb-1 fw-bold">{analysisData.total_plays.toLocaleString()}</h3>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_plays)}</h3>
                             <p className="mb-0 opacity-75">Total Video Plays</p>
                             <small className="opacity-75">Video content views</small>
                           </div>
@@ -405,7 +406,7 @@ const HashtagPerformancePage = () => {
                       <div className="card-body">
                         <div className="text-center">
                           <i className="fas fa-thumbs-up fa-2x mb-2 opacity-75"></i>
-                          <h4 className="mb-1 fw-bold">{analysisData.avg_likes.toLocaleString()}</h4>
+                          <h4 className="mb-1 fw-bold">{formatNumber(analysisData.avg_likes)}</h4>
                           <p className="mb-0 small">Avg Likes</p>
                         </div>
                       </div>
@@ -457,7 +458,7 @@ const HashtagPerformancePage = () => {
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-center">
                         <div>
-                          <h4 className="mb-0">{totalReach.toLocaleString()}</h4>
+                          <h4 className="mb-0">{formatNumber(totalReach)}</h4>
                           <p className="mb-0">Total Reach</p>
                         </div>
                         <i className="fas fa-hashtag fa-2x opacity-75"></i>
@@ -470,7 +471,7 @@ const HashtagPerformancePage = () => {
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-center">
                         <div>
-                          <h4 className="mb-0">{totalEngagement.toLocaleString()}</h4>
+                          <h4 className="mb-0">{formatNumber(totalEngagement)}</h4>
                           <p className="mb-0">Total Engagement</p>
                         </div>
                         <i className="fas fa-heart fa-2x opacity-75"></i>
@@ -483,7 +484,7 @@ const HashtagPerformancePage = () => {
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-center">
                         <div>
-                          <h4 className="mb-0">{totalPosts.toLocaleString()}</h4>
+                          <h4 className="mb-0">{formatNumber(totalPosts)}</h4>
                           <p className="mb-0">Total Posts</p>
                         </div>
                         <i className="fas fa-file-alt fa-2x opacity-75"></i>
@@ -549,12 +550,12 @@ const HashtagPerformancePage = () => {
               </ComponentContainerCard>
             </div>
             <div className="col-md-4">
-              <ComponentContainerCard
+              {/* <ComponentContainerCard
                 id="category-distribution"
                 title="Category Distribution"
                 description="Content creator categories"
-              >
-                <div className="d-flex flex-column gap-2">
+              > */}
+                {/* <div className="d-flex flex-column gap-2">
                   {analysisData.category_distribution.map((item, index) => (
                     <div key={index} className="d-flex justify-content-between align-items-center">
                       <span>{item.name}</span>
@@ -564,8 +565,8 @@ const HashtagPerformancePage = () => {
                       </div>
                     </div>
                   ))}
-                </div>
-              </ComponentContainerCard>
+                </div> */}
+              {/* </ComponentContainerCard> */}
             </div>
           </div>
         )}
@@ -796,7 +797,7 @@ const HashtagPerformancePage = () => {
                                                   <div className="d-flex flex-column gap-3">
                           <div className="d-flex align-items-center">
                             <i className="far fa-eye text-primary me-2" style={{ fontSize: '16px', width: '20px' }}></i>
-                            <span className="fw-semibold" style={{ fontSize: '15px' }}>{(post.total_play || post.reach || 0).toLocaleString()}</span>
+                            <span className="fw-semibold" style={{ fontSize: '15px' }}>{formatNumber(post.total_play || post.reach || 0)}</span>
                           </div>
                           <div className="d-flex align-items-center">
                             <i className="fas fa-heart text-danger me-2" style={{ fontSize: '16px', width: '20px' }}></i>
@@ -821,7 +822,7 @@ const HashtagPerformancePage = () => {
                           </div>
                           <div className="d-flex align-items-center mb-3">
                             <i className="fas fa-users text-muted me-2" style={{ fontSize: '14px' }}></i>
-                            <span style={{ fontSize: '15px' }}>{(post.total_play || 0).toLocaleString()}</span>
+                            <span style={{ fontSize: '15px' }}>{formatNumber(post.total_play || 0)}</span>
                           </div>
                           {post.location && post.location.name && (
                             <div className="d-flex align-items-center mb-3">

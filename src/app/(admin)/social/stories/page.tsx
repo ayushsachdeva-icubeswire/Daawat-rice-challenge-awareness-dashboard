@@ -3,6 +3,7 @@ import PageTitle from '@/components/PageTitle'
 import CreateStoryModal from '@/components/CreateStoryModal'
 import { getStories, type Story } from '@/services/storyService'
 import { useState, useEffect } from 'react'
+import { formatNumber } from '@/utils/numberFormat'
 
 const StoriesPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('all')
@@ -95,7 +96,7 @@ const StoriesPage = () => {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 className="mb-0">{totalViews.toLocaleString()}</h4>
+                    <h4 className="mb-0">{formatNumber(totalViews)}</h4>
                     <p className="mb-0">Total Views</p>
                   </div>
                   <i className="fas fa-eye fa-2x opacity-75"></i>
@@ -108,7 +109,7 @@ const StoriesPage = () => {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 className="mb-0">{totalLikes.toLocaleString()}</h4>
+                    <h4 className="mb-0">{formatNumber(totalLikes)}</h4>
                     <p className="mb-0">Total Likes</p>
                   </div>
                   <i className="fas fa-heart fa-2x opacity-75"></i>
@@ -217,7 +218,7 @@ const StoriesPage = () => {
                         <div>
                           <div className="fw-semibold">{story.influencer.fullName}</div>
                           <small className="text-muted">
-                            {story.influencer.followerCount.toLocaleString()} followers
+                            {formatNumber(story.influencer.followerCount)} followers
                           </small>
                         </div>
                       </div>
@@ -291,9 +292,9 @@ const StoriesPage = () => {
                         </div>
                       )}
                     </td>
-                    <td>{story.views.toLocaleString()}</td>
+                    <td>{formatNumber(story.views)}</td>
                     <td>
-                      <span className="badge bg-success">{story.likes.toLocaleString()}</span>
+                      <span className="badge bg-success">{formatNumber(story.likes)}</span>
                     </td>
                     <td>{new Date(story.posted).toLocaleDateString()}</td>
                     <td>
