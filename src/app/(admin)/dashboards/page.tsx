@@ -12,6 +12,7 @@ import { Row, Col } from 'react-bootstrap'
 // import { getExtendedCardsData } from './mockData'
 import { CampaignContentsService, PostData } from '@/services/campaignContentsService'
 import ChallengerService from '@/services/challengerService'
+import DashboardService, { DashboardStats } from '@/services/dashboardService'
 import { Challenger } from '@/types/challenger'
 import { useState, useEffect } from 'react'
 
@@ -22,10 +23,36 @@ const page = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
+  // Dashboard data state
+  const [dashboardData, setDashboardData] = useState<DashboardStats | null>(null)
+  const [dashboardLoading, setDashboardLoading] = useState(true)
+  const [dashboardError, setDashboardError] = useState<string | null>(null)
+  
   // Challengers state
   const [challengers, setChallengers] = useState<Challenger[]>([])
   const [challengersLoading, setChallengersLoading] = useState(true)
   const [challengersError, setChallengersError] = useState<string | null>(null)
+
+  // Fetch dashboard data on component mount
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setDashboardLoading(true)
+        setDashboardError(null)
+        const response = await DashboardService.getDashboardData()
+        
+        // Response is direct dashboard stats
+        setDashboardData(response)
+      } catch (err) {
+        setDashboardError('Failed to fetch dashboard data')
+        console.error('Error fetching dashboard data:', err)
+      } finally {
+        setDashboardLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
 
   useEffect(() => {
     const fetchCampaignContents = async () => {
@@ -85,6 +112,7 @@ const page = () => {
   //       navigate('/challengers')
   //       break
   //     default:
+  //       console.log('Card clicked:', cardData.title)
   //   }
   // }
 
@@ -109,7 +137,11 @@ const page = () => {
           <ChallengesChart />
         </Col>
         <Col xl={6} lg={12} md={12}>
-          <PostsChart />
+          <PostsChart 
+            dashboardData={dashboardData}
+            isLoading={dashboardLoading}
+            error={dashboardError}
+          />
         </Col>
       </Row>
 
