@@ -29,7 +29,6 @@ const DietPlanPage = () => {
   // Fetch diet plans function for manual calls
   const fetchDietPlans = async () => {
     try {
-      // console.log('🔄 Manual: fetchDietPlans called with filters:', filters)
       setLoading(true)
       const response = await DietPlanService.getAllDietPlans(filters)
       setDietPlans(response.data || [])

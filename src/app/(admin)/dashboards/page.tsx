@@ -85,7 +85,6 @@ const page = () => {
   //       navigate('/challengers')
   //       break
   //     default:
-  //       console.log('Card clicked:', cardData.title)
   //   }
   // }
 

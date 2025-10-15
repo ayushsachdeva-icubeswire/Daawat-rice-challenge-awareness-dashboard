@@ -80,14 +80,12 @@ const HashtagPerformancePage = () => {
         
         try {
           contentsResponse = await CampaignContentsService.getCampaignContents(currentHashtag, 1, itemsPerPage)
-          console.log('Campaign Contents API Response:', contentsResponse) // Debug log
         } catch (contentsError) {
           console.error('Contents API Error:', contentsError)
         }
         
         try {
           analysisResponse = await CampaignContentsService.getCampaignAnalysis(currentHashtag)
-          console.log('Campaign Analysis API Response:', analysisResponse) // Debug log
         } catch (analysisError) {
           console.error('Analysis API Error:', analysisError)
         }

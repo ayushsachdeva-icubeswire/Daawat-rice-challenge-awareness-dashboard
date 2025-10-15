@@ -136,7 +136,6 @@ const CreateStoryModal = ({ show, onHide, onStoryCreated }: CreateStoryModalProp
         throw new Error(result.message || 'Failed to create story')
       }
 
-      console.log('Story created successfully:', result.data)
       setSubmitSuccess(true)
       
       // Reset form after successful submission

@@ -45,7 +45,6 @@ const SocialAnalyticsPage = () => {
         setLoading(true)
         setError(null)
         const data = await CampaignAnalyticsService.getCampaignAnalysis('837')
-        console.log('API Response:', data) // Debug log to see the actual structure
         setAnalyticsData(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch analytics data')
@@ -65,7 +64,6 @@ const SocialAnalyticsPage = () => {
         setInfluencerLoading(true)
         setInfluencerError(null)
         const data = await CampaignAnalyticsService.getInfluencerList('837', currentPage, itemsPerPage)
-        console.log('Influencer API Response:', data) // Debug log
         setInfluencerData(data)
       } catch (err) {
         setInfluencerError(err instanceof Error ? err.message : 'Failed to fetch influencer data')

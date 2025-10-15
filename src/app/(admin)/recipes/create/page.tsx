@@ -67,9 +67,7 @@ const RecipeCreatePage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Handle form submission here
-    console.log('Recipe Data:', recipeData)
-    console.log('Ingredients:', ingredients)
-    console.log('Instructions:', instructions)
+
   }
 
   return (

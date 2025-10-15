@@ -62,11 +62,9 @@ const ChallengersPage = () => {
   // Handle PDF viewing
   const handleViewPDF = (pdfUrl: string) => {
     try {
-      console.log('Original PDF URL:', pdfUrl);
       
       // Check if URL is already absolute
       if (pdfUrl.startsWith('http://') || pdfUrl.startsWith('https://')) {
-        console.log('Opening absolute URL:', pdfUrl);
         window.open(pdfUrl, '_blank', 'noopener,noreferrer');
         return;
       }
@@ -79,7 +77,6 @@ const ChallengersPage = () => {
         fullUrl = `${API_CONFIG.BASE_URL}/${pdfUrl}`;
       }
       
-      console.log('Opening constructed URL:', fullUrl);
       window.open(fullUrl, '_blank', 'noopener,noreferrer');
       
     } catch (error) {
