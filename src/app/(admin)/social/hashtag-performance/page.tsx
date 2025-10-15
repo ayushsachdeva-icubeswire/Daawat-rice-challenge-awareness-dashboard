@@ -375,19 +375,7 @@ const HashtagPerformancePage = () => {
 
                 {/* Secondary Metrics Row */}
                 <div className="row mb-4">
-                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
-                    <div className="card bg-primary text-white border-0 shadow-sm">
-                      <div className="card-body">
-                        <div className="text-center">
-                          <i className="fas fa-file-alt fa-2x mb-2 opacity-75"></i>
-                          <h4 className="mb-1 fw-bold">{analysisData.post_count}</h4>
-                          <p className="mb-0 small">Total Posts</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                  <div className="col-lg-3 col-md-4 col-sm-6 mb-3">
                     <div className="card bg-success text-white border-0 shadow-sm">
                       <div className="card-body">
                         <div className="text-center">
@@ -399,7 +387,19 @@ const HashtagPerformancePage = () => {
                     </div>
                   </div>
                   
-                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                  <div className="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-primary text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-file-alt fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{analysisData.post_count}</h4>
+                          <p className="mb-0 small">Total Posts</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-3 col-md-4 col-sm-6 mb-3">
                     <div className="card bg-info text-white border-0 shadow-sm">
                       <div className="card-body">
                         <div className="text-center">
@@ -411,7 +411,7 @@ const HashtagPerformancePage = () => {
                     </div>
                   </div>
                   
-                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                  {/* <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
                     <div className="card bg-warning text-white border-0 shadow-sm">
                       <div className="card-body">
                         <div className="text-center">
@@ -433,9 +433,9 @@ const HashtagPerformancePage = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                   
-                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+                  <div className="col-lg-3 col-md-4 col-sm-6 mb-3">
                     <div className="card bg-dark text-white border-0 shadow-sm">
                       <div className="card-body">
                         <div className="text-center">
@@ -507,7 +507,7 @@ const HashtagPerformancePage = () => {
             )}
 
         {/* Distribution Analytics */}
-        {analysisData && (
+        {/* {analysisData && (
           <div className="row mb-4">
             <div className="col-md-4">
               <ComponentContainerCard
@@ -548,12 +548,12 @@ const HashtagPerformancePage = () => {
               </ComponentContainerCard>
             </div>
             <div className="col-md-4">
-              {/* <ComponentContainerCard
+              <ComponentContainerCard
                 id="category-distribution"
                 title="Category Distribution"
                 description="Content creator categories"
-              > */}
-                {/* <div className="d-flex flex-column gap-2">
+              >
+                <div className="d-flex flex-column gap-2">
                   {analysisData.category_distribution.map((item, index) => (
                     <div key={index} className="d-flex justify-content-between align-items-center">
                       <span>{item.name}</span>
@@ -563,11 +563,11 @@ const HashtagPerformancePage = () => {
                       </div>
                     </div>
                   ))}
-                </div> */}
-              {/* </ComponentContainerCard> */}
+                </div>
+              </ComponentContainerCard>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Top Influencers and Recent Posts sections */}
         {campaignData.length > 0 && (campaignData[0] as any).topInfluencers && (
