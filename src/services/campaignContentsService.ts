@@ -1,18 +1,49 @@
 // Campaign Contents Service for Hashtag Performance
 // This service handles all API calls related to campaign contents and hashtag data
 
+// Interface for Instagram profile data
+export interface InstagramProfile {
+  influencer_type: {
+    category: string
+    type: string
+  }
+  handle: string
+  is_private: boolean
+  profile_pic_url: string
+  is_verified: boolean
+  media_count: number
+  follower_count: string
+  following_count: string
+  follower_count_actual: number
+  following_count_actual: number
+  biography: string
+  external_url?: string
+  engagement_ratio: number
+  average_likes: number
+  average_comments: number
+  average_reach: number
+  gender?: string
+  language?: string
+}
+
 // Interface for influencer data
 export interface Influencer {
-  pk: number
-  pk_id: string
-  id: string
-  full_name?: string
-  fullname?: string
+  _id: {
+    $oid: string
+  }
+  first_name: string
+  last_name: string
+  fullname: string
   username?: string
-  handle?: string
-  is_private: boolean
-  is_verified: boolean
-  profile_pic_url: string
+  handle: string
+  platform: string
+  phone?: string
+  email?: string
+  created_by: number
+  role_id: number
+  categories: string[]
+  instagram?: InstagramProfile
+  is_iq: boolean
 }
 
 // Interface for location data
@@ -30,30 +61,44 @@ export interface Location {
 // Interface for individual post data
 export interface PostData {
   _id: string
-  hashtag: string
-  hashtags: string[]
   post_shortcode: string
-  influencer: Influencer
+  influencer_id: string
   display_url: string
+  video_url?: string
   is_video: boolean
   is_carousel: boolean
-  caption: string | { [key: string]: string } | Array<{ text: string }>
+  caption: { [key: string]: { text: string } }
   total_comments: number
   total_likes: number
   video_duration?: number
+  total_views: number
   total_play?: number
+  total_followers: number
+  is_pinned: boolean
+  er: number
   reach: number
   created_timestamp: number
   created_timestamp_formatted: string
-  created_date: string
+  created_date?: {
+    $date: {
+      $numberLong: string
+    }
+  }
+  updated_at: string
+  negative_content: any
   reshare_count: number | null
   ig_post_id: string | number
-  location?: Location | Location[]
+  location: any[]
   usertags: any[]
-  like_and_view_counts_disabled: boolean
+  hashtags: string[]
+  offer_id: number
+  content_id: number
+  created_at: string
   is_paid_partnership: boolean
-  sponsor_tags: any[]
-  total_followers?: number
+  sponsor_tags?: any[]
+  influencer_id_object: string
+  influencer: Influencer
+  like_and_view_counts_disabled?: boolean
 }
 
 // Interface for aggregated campaign content analytics
@@ -132,8 +177,9 @@ export const processPostsIntoAnalytics = (posts: PostData[], hashtag: string): C
   // Get unique influencers
   const influencerMap = new Map<string, Influencer>()
   posts.forEach(post => {
-    if (!influencerMap.has(post.influencer.id)) {
-      influencerMap.set(post.influencer.id, post.influencer)
+    const influencerId = post.influencer._id?.$oid || post.influencer_id
+    if (!influencerMap.has(influencerId)) {
+      influencerMap.set(influencerId, post.influencer)
     }
   })
   

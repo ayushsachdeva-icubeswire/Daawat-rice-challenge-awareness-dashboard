@@ -129,8 +129,8 @@ const PostsList = ({
                         }}
                       >
                         <img 
-                          src={post.influencer.profile_pic_url}
-                          alt={post.influencer.full_name}
+                          src={post.influencer.instagram?.profile_pic_url || '/images/users/user-1.jpg'}
+                          alt={post.influencer.fullname}
                           style={{ 
                             width: '100%', 
                             height: '100%', 
@@ -182,7 +182,7 @@ const PostsList = ({
                             </span>
                           </h6>
                           <div className="d-flex align-items-center text-muted small mb-1">
-                            <span className="me-2">{String(post.influencer?.fullname || post.influencer?.full_name || '')}</span>
+                            <span className="me-2">{String(post.influencer?.fullname || '')}</span>
                             <Badge bg="outline-primary" text="primary" className="me-2">
                               {post.is_video ? 'Video' : post.is_carousel ? 'Carousel' : 'Photo'}
                             </Badge>
