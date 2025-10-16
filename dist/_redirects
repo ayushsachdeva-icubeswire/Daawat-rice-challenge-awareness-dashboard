@@ -1,8 +1,0 @@
-# Netlify redirect rules for SPA
-/*    /index.html   200
-
-# Optional: Redirect HTTP to HTTPS
-# http://your-domain.com/*    https://your-domain.com/:splat    301!
-
-# Handle API routes (if you have a backend)
-# /api/*    https://your-api-backend.com/api/:splat    200
