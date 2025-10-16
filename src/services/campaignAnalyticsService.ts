@@ -1,4 +1,5 @@
 import HttpClient from '@/helpers/httpClient'
+import { API_CONFIG } from '@/config/api'
 
 // Define the interface for campaign analytics response
 export interface CampaignAnalyticsData {
@@ -152,6 +153,36 @@ export class CampaignAnalyticsService {
       return data
     } catch (error) {
       console.error('Error fetching influencer list:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get post interactions data
+   * @param postId - The ID of the post to get interactions for
+   * @returns Promise with post interaction data
+   */
+  static async getPostInteractions(postId: string) {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.CAMPAIGN_ANALYTICS_API_URL}/campaign-analytics/post-intraction?id=${postId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error fetching post interactions:', error)
       throw error
     }
   }

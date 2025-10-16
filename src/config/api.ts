@@ -13,10 +13,22 @@ const getBaseUrl = (): string => {
 const API_BASE_URL = getBaseUrl()
 const API_VERSION = import.meta.env.VITE_API_VERSION || 'api'
 
+// Campaign Analytics API runs on a different port
+const getCampaignAnalyticsBaseUrl = (): string => {
+  if (typeof window !== 'undefined' && window.location.href.includes('localhost:5173')) {
+    return 'http://127.0.0.1:8000'
+  } else {
+    // You can update this for production environment
+    return 'http://127.0.0.1:8000'
+  }
+}
+
 // Construct the full API URL
 export const API_CONFIG = {
   BASE_URL: API_BASE_URL,
   API_URL: `${API_BASE_URL}/${API_VERSION}`,
+  CAMPAIGN_ANALYTICS_BASE_URL: getCampaignAnalyticsBaseUrl(),
+  CAMPAIGN_ANALYTICS_API_URL: `${getCampaignAnalyticsBaseUrl()}/api/v1`,
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/auth/login',

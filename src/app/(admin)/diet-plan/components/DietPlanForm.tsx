@@ -242,7 +242,7 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
 
             <Col md={4}>
               <Form.Group className="mb-3">
-                <Form.Label>Subcategory</Form.Label>
+                <Form.Label>Subcategory (Optional)</Form.Label>
                 <Form.Select
                   value={formData.subcategory}
                   onChange={(e) => handleInputChange('subcategory', e.target.value)}
@@ -253,7 +253,7 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
                   ))}
                 </Form.Select>
                 <Form.Text className="text-muted">
-                  Optional additional classification for the diet plan.
+                  {/* Optional */}
                 </Form.Text>
               </Form.Group>
             </Col>

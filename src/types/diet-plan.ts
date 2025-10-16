@@ -54,13 +54,8 @@ export interface DietPlanFilters {
 // Common diet plan categories and types
 export const DIET_CATEGORIES = [
   'Vegetarian',
-  'Vegan',
-  'Keto',
-  'High Protein',
-  'Low Carb',
-  'Mediterranean',
-  'Paleo',
-  'Intermittent Fasting'
+  'Veg+ Egg',
+  'Veg+ Meat',
 ] as const
 
 export const DIET_TYPES = [
@@ -75,25 +70,20 @@ export const DIET_TYPES = [
 export const DURATION_OPTIONS = [
   '7 days',
   '14 days',
-  '1 month',
-  '2 months',
-  '3 months',
-  '6 months'
+  '21 days',
+  '30 days',
+ 
 ] as const
 
 export const DIET_SUBCATEGORIES = [
-  'Beginner',
-  'Intermediate',
-  'Advanced',
-  'Low Sodium',
-  'High Fiber',
-  'Gluten Free',
-  'Dairy Free',
-  'Low Sugar',
-  'Heart Healthy',
-  'Anti-Inflammatory',
-  'Quick Prep',
-  'Budget Friendly'
+  'Weight Loss Meal Plan',
+  'High Protein Meal Plan',
+  'North Indian Meal Plan',
+  'South Indian Meal Plan',
+  'Asian Meal Plan',
+  'Fusion Meal Plan',
+  'Maharashtra Meal Plan',
+  'Sattvikk Meal Plan'
 ] as const
 
 export type DietCategory = typeof DIET_CATEGORIES[number]

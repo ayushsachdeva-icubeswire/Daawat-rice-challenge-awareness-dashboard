@@ -3,7 +3,7 @@ import ReactApexChart from 'react-apexcharts'
 import { ApexOptions } from 'apexcharts'
 import Spinner from '@/components/Spinner'
 import { DashboardStats } from '@/services/dashboardService'
-import { formatNumber } from '@/utils/numberFormat'
+// import { formatNumber } from '@/utils/numberFormat'
 
 interface PostsChartProps {
   dashboardData?: DashboardStats | null
@@ -109,13 +109,13 @@ const PostsChart: React.FC<PostsChartProps> = ({
       <CardHeader>
         <div className="d-flex justify-content-between align-items-center">
           <h5 className="card-title mb-0">Post Analytics</h5>
-          {dashboardData && (
+          {/* {dashboardData && (
             <div className="d-flex gap-3 text-muted small">
-              <span>Stories: <strong>{dashboardData.totalStories}</strong></span>
+              <span>Stories: <strong>{dashboardData.totalStories ?? 0}</strong></span>
               <span>Views: <strong>{formatNumber(dashboardData.totalViews)}</strong></span>
               <span>Likes: <strong>{formatNumber(dashboardData.totalLikes)}</strong></span>
             </div>
-          )}
+          )} */}
         </div>
       </CardHeader>
       <CardBody>

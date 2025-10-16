@@ -7,7 +7,12 @@
  * @param num - The number to format
  * @returns Formatted string with appropriate suffix
  */
-export const formatNumber = (num: number): string => {
+export const formatNumber = (num: number | undefined | null): string => {
+  // Handle undefined, null, or invalid numbers
+  if (num === undefined || num === null || isNaN(num)) {
+    return '0'
+  }
+  
   if (num >= 1000000000) {
     return (num / 1000000000).toFixed(1) + 'B'
   } else if (num >= 1000000) {
@@ -23,7 +28,11 @@ export const formatNumber = (num: number): string => {
  * @param num - The number to format
  * @returns Formatted string with commas
  */
-export const formatNumberWithCommas = (num: number): string => {
+export const formatNumberWithCommas = (num: number | undefined | null): string => {
+  // Handle undefined, null, or invalid numbers
+  if (num === undefined || num === null || isNaN(num)) {
+    return '0'
+  }
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 

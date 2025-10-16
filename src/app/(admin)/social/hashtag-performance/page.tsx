@@ -2,6 +2,7 @@ import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
 import { useState, useEffect } from 'react'
 import { CampaignContentsService, CampaignContent, processPostsIntoAnalytics, CampaignAnalysisData } from '@/services/campaignContentsService'
+import { CampaignAnalyticsService } from '@/services/campaignAnalyticsService'
 import { formatNumber } from '@/utils/numberFormat'
 
 const HashtagPerformancePage = () => {
@@ -204,6 +205,29 @@ const HashtagPerformancePage = () => {
       }
       return newSet
     })
+  }
+
+  // Handler for viewing post interactions
+  const handleViewInteractions = async (postId: string) => {
+    if (!postId) {
+      alert('Post ID is not available')
+      return
+    }
+
+    try {
+      const response = await CampaignAnalyticsService.getPostInteractions(postId)
+      
+      if (response.success) {
+        // Display the interaction data in an alert or modal
+        // You can customize this to show the data in a better format
+        alert(`Post Interactions Data:\n${JSON.stringify(response.data, null, 2)}`)
+      } else {
+        alert(`Failed to fetch interactions: ${response.message || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error fetching post interactions:', error)
+      alert('Failed to fetch post interactions. Please try again.')
+    }
   }
 
   // Helper function to safely get caption text
@@ -789,6 +813,7 @@ const HashtagPerformancePage = () => {
                     <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Influencer</th>
                     <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post</th>
                     <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post Type</th>
+                    <th style={{ width: '150px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Interactions</th>
                     <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Engagement</th>
                     <th style={{ padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Details</th>
                   </tr>
@@ -862,6 +887,17 @@ const HashtagPerformancePage = () => {
                           {post.is_video ? 'Video' : post.is_carousel ? 'Carousel' : 'Image'}
                         </span>
                         <div className="text-muted mt-2" style={{ fontSize: '13px' }}>Organic</div>
+                      </td>
+                      <td style={{ padding: '1.5rem' }}>
+                        <button 
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => handleViewInteractions(post._id?.$oid || post._id)}
+                          style={{ fontSize: '12px' }}
+                          title="Click to view post interactions"
+                        >
+                          <i className="fas fa-chart-line me-1"></i>
+                          View Interactions
+                        </button>
                       </td>  
                       <td style={{ padding: '1.5rem' }}>
                         <div className="d-flex align-items-center justify-content-start gap-4">
