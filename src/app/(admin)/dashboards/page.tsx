@@ -23,6 +23,20 @@ const page = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
+  // Challengers graph data
+  const challengrsGraphData = [
+    {
+      "date": "2025-10-13T00:00:00.000Z",
+      "Completed": 0,
+      "InProgress": 1
+    },
+    {
+      "date": "2025-10-16T00:00:00.000Z",
+      "Completed": 0,
+      "InProgress": 2
+    }
+  ]
+  
   // Dashboard data state
   const [dashboardData, setDashboardData] = useState<DashboardStats | null>(null)
   const [dashboardLoading, setDashboardLoading] = useState(true)
@@ -134,7 +148,11 @@ const page = () => {
           <InteractionsChart />
         </Col> */}
         <Col xl={6} lg={6} md={12}>
-          <ChallengesChart />
+          <ChallengesChart 
+            challengrsGraphData={challengrsGraphData}
+            isLoading={false}
+            error={null}
+          />
         </Col>
         <Col xl={6} lg={12} md={12}>
           <PostsChart 
@@ -156,7 +174,7 @@ const page = () => {
             isLoading={challengersLoading}
             error={challengersError}
             onTitleClick={() => window.open('/challengers', '_blank')}
-
+            challengrsGraphData={challengrsGraphData}
           />
         </Col>
         {/* <Col xl={4} lg={6} md={12}>

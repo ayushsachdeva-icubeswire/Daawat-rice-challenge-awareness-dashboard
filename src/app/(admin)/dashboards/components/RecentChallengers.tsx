@@ -22,6 +22,12 @@ const formatTimeAgo = (dateString: string): string => {
   }
 }
 
+interface ChallengerGraphData {
+  date: string
+  Completed: number
+  InProgress: number
+}
+
 interface RecentChallengersProps {
   challengers: Challenger[]
   title?: string
@@ -30,6 +36,7 @@ interface RecentChallengersProps {
   isLoading?: boolean
   error?: string | null
   onTitleClick?: () => void
+  challengrsGraphData?: ChallengerGraphData[]
 }
 
 const RecentChallengers = ({ 
@@ -39,7 +46,8 @@ const RecentChallengers = ({
   maxHeight = "400px",
   isLoading = false,
   error = null,
-  onTitleClick
+  onTitleClick,
+  challengrsGraphData
 }: RecentChallengersProps) => {
   
   const getTypeColor = (type: string) => {
@@ -97,6 +105,21 @@ const RecentChallengers = ({
     return isActive ? 'success' : 'secondary'
   }
 
+  // Calculate totals from graph data
+  const getTotalsFromGraphData = () => {
+    if (!challengrsGraphData || challengrsGraphData.length === 0) {
+      return { totalCompleted: 0, totalInProgress: 0 }
+    }
+    
+    const latest = challengrsGraphData[challengrsGraphData.length - 1]
+    return {
+      totalCompleted: latest.Completed,
+      totalInProgress: latest.InProgress
+    }
+  }
+
+  const { totalCompleted, totalInProgress } = getTotalsFromGraphData()
+
   return (
     <Card className="h-100">
       {showHeader && (
@@ -110,6 +133,20 @@ const RecentChallengers = ({
           </h5>
           <Badge bg="primary" pill>{challengers.length}</Badge>
         </CardHeader>
+      )}
+      {challengrsGraphData && challengrsGraphData.length > 0 && (
+        <div className="px-3 py-2 bg-light border-bottom">
+          <Row className="text-center">
+            <Col>
+              <div className="text-success fw-bold">{totalCompleted}</div>
+              <small className="text-muted">Completed</small>
+            </Col>
+            <Col>
+              <div className="text-primary fw-bold">{totalInProgress}</div>
+              <small className="text-muted">In Progress</small>
+            </Col>
+          </Row>
+        </div>
       )}
       <CardBody className="p-0">
         <div style={{ maxHeight, overflowY: 'auto' }}>

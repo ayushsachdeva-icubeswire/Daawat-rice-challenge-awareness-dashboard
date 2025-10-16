@@ -1,9 +1,11 @@
 import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
+import InstagramCommentsModal from '@/components/InstagramCommentsModal'
 import { useState, useEffect } from 'react'
 import { CampaignContentsService, CampaignContent, processPostsIntoAnalytics, CampaignAnalysisData } from '@/services/campaignContentsService'
 import { CampaignAnalyticsService } from '@/services/campaignAnalyticsService'
 import { formatNumber } from '@/utils/numberFormat'
+import { PostInteraction } from '@/types/post-interactions'
 
 const HashtagPerformancePage = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -19,6 +21,11 @@ const HashtagPerformancePage = () => {
   const [expandedCaptions, setExpandedCaptions] = useState<Set<string>>(new Set())
   const [expandedHashtags, setExpandedHashtags] = useState<Set<string>>(new Set())
   const [analysisData, setAnalysisData] = useState<CampaignAnalysisData | null>(null)
+  
+  // Modal state for Instagram-style comments
+  const [showCommentsModal, setShowCommentsModal] = useState(false)
+  const [modalInteractions, setModalInteractions] = useState<PostInteraction[]>([])
+  const [modalLoading, setModalLoading] = useState(false)
 
   // Mock hashtag performance data
   const hashtagData = [
@@ -214,19 +221,25 @@ const HashtagPerformancePage = () => {
       return
     }
 
+    setModalLoading(true)
+    setShowCommentsModal(true)
+    setModalInteractions([])
+
     try {
       const response = await CampaignAnalyticsService.getPostInteractions(postId)
       
       if (response.success) {
-        // Display the interaction data in an alert or modal
-        // You can customize this to show the data in a better format
-        alert(`Post Interactions Data:\n${JSON.stringify(response.data, null, 2)}`)
+        // Set the interactions data for the modal
+        setModalInteractions(response.data.intractions || [])
       } else {
-        alert(`Failed to fetch interactions: ${response.message || 'Unknown error'}`)
+        console.error('Failed to fetch interactions:', response.message || 'Unknown error')
+        setModalInteractions([])
       }
     } catch (error) {
       console.error('Error fetching post interactions:', error)
-      alert('Failed to fetch post interactions. Please try again.')
+      setModalInteractions([])
+    } finally {
+      setModalLoading(false)
     }
   }
 
@@ -812,7 +825,7 @@ const HashtagPerformancePage = () => {
                     <th style={{ width: '60px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">#</th>
                     <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Influencer</th>
                     <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post</th>
-                    <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post Type</th>
+                    {/* <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post Type</th> */}
                     <th style={{ width: '150px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Interactions</th>
                     <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Engagement</th>
                     <th style={{ padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Details</th>
@@ -882,12 +895,12 @@ const HashtagPerformancePage = () => {
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: '1.5rem' }}>
+                      {/* <td style={{ padding: '1.5rem' }}>
                         <span className={`badge ${post.is_video ? 'bg-success' : post.is_carousel ? 'bg-info' : 'bg-secondary'}`} style={{ fontSize: '13px' }}>
                           {post.is_video ? 'Video' : post.is_carousel ? 'Carousel' : 'Image'}
                         </span>
                         <div className="text-muted mt-2" style={{ fontSize: '13px' }}>Organic</div>
-                      </td>
+                      </td> */}
                       <td style={{ padding: '1.5rem' }}>
                         <button 
                           className="btn btn-outline-primary btn-sm"
@@ -1130,6 +1143,14 @@ const HashtagPerformancePage = () => {
           </>
         )}
       </div>
+
+      {/* Instagram-style Comments Modal */}
+      <InstagramCommentsModal
+        show={showCommentsModal}
+        onHide={() => setShowCommentsModal(false)}
+        interactions={modalInteractions}
+        loading={modalLoading}
+      />
     </>
   )
 }

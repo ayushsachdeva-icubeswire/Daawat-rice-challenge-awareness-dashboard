@@ -1,5 +1,4 @@
 import HttpClient from '@/helpers/httpClient'
-import { API_CONFIG } from '@/config/api'
 
 // Define the interface for campaign analytics response
 export interface CampaignAnalyticsData {
@@ -165,7 +164,7 @@ export class CampaignAnalyticsService {
   static async getPostInteractions(postId: string) {
     try {
       const response = await fetch(
-        `${API_CONFIG.CAMPAIGN_ANALYTICS_API_URL}/campaign-analytics/post-intraction?id=${postId}`,
+        `https://apis.icubeswire.co/api/v1/campaign-analytics/post-intraction?id=${postId}`,
         {
           method: 'GET',
           headers: {

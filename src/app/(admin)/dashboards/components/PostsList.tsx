@@ -169,23 +169,23 @@ const PostsList = ({
                             <span 
                               className="text-primary"
                               style={{ cursor: 'pointer', textDecoration: 'none' }}
-                              onClick={() => handleInstagramRedirect(post.influencer?.handle || post.influencer?.username || '')}
+                              onClick={() => handleInstagramRedirect(post.influencer?.instagram?.handle || post.influencer?.username || '')}
                               onMouseEnter={(e) => {
                                 e.currentTarget.style.textDecoration = 'underline'
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.textDecoration = 'none'
                               }}
-                              title={`Open @${post.influencer?.handle || post.influencer?.username || ''} on Instagram`}
+                              title={`Open @${post.influencer?.instagram?.handle || post.influencer?.username || ''} on Instagram`}
                             >
-                              @{String(post.influencer?.handle || post.influencer?.username || 'Unknown')}
+                              @{String(post.influencer?.instagram?.handle || post.influencer?.username || 'Unknown')}
                             </span>
                           </h6>
                           <div className="d-flex align-items-center text-muted small mb-1">
                             <span className="me-2">{String(post.influencer?.fullname || '')}</span>
-                            <Badge bg="outline-primary" text="primary" className="me-2">
+                            {/* <Badge bg="outline-primary" text="primary" className="me-2">
                               {post.is_video ? 'Video' : post.is_carousel ? 'Carousel' : 'Photo'}
-                            </Badge>
+                            </Badge> */}
                           </div>
                         </div>
                         <div className="text-end">

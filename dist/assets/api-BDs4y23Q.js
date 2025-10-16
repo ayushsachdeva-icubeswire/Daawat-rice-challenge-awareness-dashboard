@@ -1,1 +1,0 @@
-const o=()=>typeof window<"u"&&window.location.href.includes("localhost:5173")?"http://localhost:8080":"http://13.201.26.193",t=o(),e="api",n={BASE_URL:t,API_URL:`${t}/${e}`,ENDPOINTS:{AUTH:{LOGIN:"/auth/login",LOGOUT:"/auth/logout",REGISTER:"/auth/register"}}};export{n as A};

@@ -1,8 +1,48 @@
-import { Card, CardBody, CardHeader } from 'react-bootstrap'
+import { Card, CardBody, CardHeader, Spinner } from 'react-bootstrap'
 import ReactApexChart from 'react-apexcharts'
 import { ApexOptions } from 'apexcharts'
+import IconifyIcon from '@/components/wrapper/IconifyIcon'
 
-const ChallengesChart = () => {
+interface ChallengerGraphData {
+  date: string
+  Completed: number
+  InProgress: number
+}
+
+interface ChallengesChartProps {
+  challengrsGraphData?: ChallengerGraphData[]
+  isLoading?: boolean
+  error?: string | null
+}
+
+const ChallengesChart = ({ challengrsGraphData, isLoading = false, error = null }: ChallengesChartProps) => {
+  // Process the graph data for chart display
+  const processChartData = () => {
+    if (!challengrsGraphData || challengrsGraphData.length === 0) {
+      return {
+        categories: ['No Data'],
+        completedData: [0],
+        inProgressData: [0]
+      }
+    }
+
+    const categories = challengrsGraphData.map(item => {
+      const date = new Date(item.date)
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    })
+
+    const completedData = challengrsGraphData.map(item => item.Completed)
+    const inProgressData = challengrsGraphData.map(item => item.InProgress)
+
+    return {
+      categories,
+      completedData,
+      inProgressData
+    }
+  }
+
+  const chartData = processChartData()
+
   const chartOptions: ApexOptions = {
     chart: {
       type: 'bar',
@@ -14,22 +54,17 @@ const ChallengesChart = () => {
     series: [
       {
         name: 'Completed',
-        data: [8, 12, 15, 18, 22, 25, 28, 32, 35, 38, 42, 45],
+        data: chartData.completedData,
         color: '#10b981',
       },
       {
         name: 'In Progress',
-        data: [5, 8, 10, 12, 15, 18, 20, 23, 25, 28, 30, 32],
+        data: chartData.inProgressData,
         color: '#3b82f6',
-      },
-      {
-        name: 'Not Started',
-        data: [12, 18, 22, 25, 28, 30, 32, 35, 38, 40, 42, 45],
-        color: '#6b7280',
       },
     ],
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      categories: chartData.categories,
       labels: {
         style: {
           colors: '#8e8da4',
@@ -61,7 +96,7 @@ const ChallengesChart = () => {
       horizontalAlign: 'right',
     },
     tooltip: {
-      theme: 'dark',
+      theme: 'light',
     },
   }
 
@@ -71,12 +106,24 @@ const ChallengesChart = () => {
         <h5 className="card-title mb-0">Challenges Progress</h5>
       </CardHeader>
       <CardBody>
-        <ReactApexChart
-          options={chartOptions}
-          series={chartOptions.series}
-          type="bar"
-          height={350}
-        />
+        {isLoading ? (
+          <div className="text-center py-4">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-2 text-muted">Loading chart data...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-4 text-danger">
+            <IconifyIcon icon="solar:danger-circle-broken" className="fs-48 mb-2" />
+            <p>{error}</p>
+          </div>
+        ) : (
+          <ReactApexChart
+            options={chartOptions}
+            series={chartOptions.series}
+            type="bar"
+            height={350}
+          />
+        )}
       </CardBody>
     </Card>
   )
