@@ -34,11 +34,18 @@ export interface PostGraphData {
   [key: string]: PostDataPoint[] | number
 }
 
+export interface ChallengerGraphData {
+  date: string
+  Completed: number
+  InProgress: number
+}
+
 export interface DashboardResponse {
   totalStories: number
   totalViews: number
   totalLikes: number
   postGraphData: PostGraphData
+  challengrsGraphData: ChallengerGraphData[]
 }
 
 export interface DashboardStats {
@@ -46,6 +53,7 @@ export interface DashboardStats {
   totalViews: number
   totalLikes: number
   postGraphData: PostGraphData
+  challengrsGraphData: ChallengerGraphData[]
 }
 
 class DashboardService {
@@ -119,6 +127,18 @@ class DashboardService {
       totalStories: 25,
       totalViews: 15000,
       totalLikes: 12500,
+      challengrsGraphData: [
+        {
+          "date": "2025-10-13T00:00:00.000Z",
+          "Completed": 0,
+          "InProgress": 1
+        },
+        {
+          "date": "2025-10-16T00:00:00.000Z",
+          "Completed": 0,
+          "InProgress": 2
+        }
+      ],
       postGraphData: {
         itchotels: [
           { x: 1704240000000, y: 2 },

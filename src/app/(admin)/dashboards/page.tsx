@@ -7,6 +7,7 @@ import PostsList from './components/PostsList'
 import ChallengesChart from './components/ChallengesChart'
 import PostsChart from './components/PostsChart'
 import PageTitle from '@/components/PageTitle'
+import FlipCounter from '@/components/FlipCounter'
 import { Row, Col } from 'react-bootstrap'
 // import { useNavigate } from 'react-router-dom'
 // import { getExtendedCardsData } from './mockData'
@@ -23,20 +24,6 @@ const page = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  // Challengers graph data
-  const challengrsGraphData = [
-    {
-      "date": "2025-10-13T00:00:00.000Z",
-      "Completed": 0,
-      "InProgress": 1
-    },
-    {
-      "date": "2025-10-16T00:00:00.000Z",
-      "Completed": 0,
-      "InProgress": 2
-    }
-  ]
-  
   // Dashboard data state
   const [dashboardData, setDashboardData] = useState<DashboardStats | null>(null)
   const [dashboardLoading, setDashboardLoading] = useState(true)
@@ -46,6 +33,7 @@ const page = () => {
   const [challengers, setChallengers] = useState<Challenger[]>([])
   const [challengersLoading, setChallengersLoading] = useState(true)
   const [challengersError, setChallengersError] = useState<string | null>(null)
+  const [totalChallengers, setTotalChallengers] = useState<number>(0)
 
   // Fetch dashboard data on component mount
   useEffect(() => {
@@ -99,6 +87,7 @@ const page = () => {
         })
         if (response.data) {
           setChallengers(response.data)
+          setTotalChallengers(response.totalItems || response.data.length)
         }
       } catch (err) {
         setChallengersError('Failed to fetch challengers')
@@ -134,6 +123,24 @@ const page = () => {
     <>
       <PageTitle subName="Daawat" title="Dashboard Analytics" />
       
+      {/* Flip Counters */}
+      <Row className="mb-4">
+        <Col xl={6} lg={6} md={12}>
+          <FlipCounter 
+            value={totalChallengers} 
+            label="Challenges Taken"
+            className="h-100"
+          />
+        </Col>
+        <Col xl={6} lg={6} md={12}>
+          <FlipCounter 
+            value={dashboardData?.totalLikes || 0} 
+            label="Interactions"
+            className="h-100"
+          />
+        </Col>
+      </Row>
+      
       {/* Counter Cards */}
       <div className="mb-4">
         {/* <ExtendedCards 
@@ -149,9 +156,9 @@ const page = () => {
         </Col> */}
         <Col xl={6} lg={6} md={12}>
           <ChallengesChart 
-            challengrsGraphData={challengrsGraphData}
-            isLoading={false}
-            error={null}
+            challengrsGraphData={dashboardData?.challengrsGraphData || []}
+            isLoading={dashboardLoading}
+            error={dashboardError}
           />
         </Col>
         <Col xl={6} lg={12} md={12}>
@@ -174,7 +181,7 @@ const page = () => {
             isLoading={challengersLoading}
             error={challengersError}
             onTitleClick={() => window.open('/challengers', '_blank')}
-            challengrsGraphData={challengrsGraphData}
+            challengrsGraphData={dashboardData?.challengrsGraphData || []}
           />
         </Col>
         {/* <Col xl={4} lg={6} md={12}>
