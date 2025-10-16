@@ -7,13 +7,14 @@ import PostsList from './components/PostsList'
 import ChallengesChart from './components/ChallengesChart'
 import PostsChart from './components/PostsChart'
 import PageTitle from '@/components/PageTitle'
-import FlipCounter from '@/components/FlipCounter'
+import AnimatedFlipCounter from '@/components/AnimatedFlipCounter'
 import { Row, Col } from 'react-bootstrap'
 // import { useNavigate } from 'react-router-dom'
 // import { getExtendedCardsData } from './mockData'
 import { CampaignContentsService, PostData } from '@/services/campaignContentsService'
 import ChallengerService from '@/services/challengerService'
 import DashboardService, { DashboardStats } from '@/services/dashboardService'
+// ProgressService is now used directly in AnimatedFlipCounter
 import { Challenger } from '@/types/challenger'
 import { useState, useEffect } from 'react'
 
@@ -33,7 +34,6 @@ const page = () => {
   const [challengers, setChallengers] = useState<Challenger[]>([])
   const [challengersLoading, setChallengersLoading] = useState(true)
   const [challengersError, setChallengersError] = useState<string | null>(null)
-  const [totalChallengers, setTotalChallengers] = useState<number>(0)
 
   // Fetch dashboard data on component mount
   useEffect(() => {
@@ -87,7 +87,6 @@ const page = () => {
         })
         if (response.data) {
           setChallengers(response.data)
-          setTotalChallengers(response.totalItems || response.data.length)
         }
       } catch (err) {
         setChallengersError('Failed to fetch challengers')
@@ -99,6 +98,8 @@ const page = () => {
 
     fetchChallengers()
   }, [])
+
+  // Progress data is now handled by AnimatedFlipCounter components
 
   // const handleCardClick = (_: number, cardData: any) => {
   //   switch (cardData.title) {
@@ -123,20 +124,24 @@ const page = () => {
     <>
       <PageTitle subName="Daawat" title="Dashboard Analytics" />
       
-      {/* Flip Counters */}
+      {/* Animated Flip Counters */}
       <Row className="mb-4">
         <Col xl={6} lg={6} md={12}>
-          <FlipCounter 
-            value={totalChallengers} 
+          <AnimatedFlipCounter 
+            progressType="challengerProgress"
             label="Challenges Taken"
             className="h-100"
+            animationDuration={5000}
+            pollInterval={15000}
           />
         </Col>
         <Col xl={6} lg={6} md={12}>
-          <FlipCounter 
-            value={dashboardData?.totalLikes || 0} 
+          <AnimatedFlipCounter 
+            progressType="erProgress"
             label="Interactions"
             className="h-100"
+            animationDuration={5000}
+            pollInterval={15000}
           />
         </Col>
       </Row>
