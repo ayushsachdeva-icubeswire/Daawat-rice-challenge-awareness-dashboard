@@ -687,7 +687,7 @@ const HashtagPerformancePage = () => {
                     <div key={post._id} className="list-group-item border-0 px-0">
                       <div className="d-flex">
                         <img 
-                          src={post.thumbnail_url || post.display_url || post.media_url || '/images/placeholder.jpg'} 
+                          src={post.display_url || post.thumbnail_url || post.media_url || post.video_url || '/images/placeholder.jpg'} 
                           alt="Post"
                           className="rounded me-3"
                           style={{ width: '60px', height: '60px', objectFit: 'cover' }}
@@ -802,19 +802,19 @@ const HashtagPerformancePage = () => {
                       <td style={{ padding: '1.5rem' }}>
                         <div className="d-flex align-items-center">
                           <img 
-                            src={post.influencer.instagram.profile_pic_url} 
-                            alt={post.influencer.fullname}
+                            src={post.influencer?.instagram?.profile_pic_url || '/images/default-avatar.jpg'} 
+                            alt={post.influencer?.fullname || 'User Profile'}
                             className="rounded-circle me-3"
-                            style={{ width: '45px', height: '45px' }}
+                            style={{ width: '45px', height: '45px', objectFit: 'cover' }}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFOUVDRUYiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA4IDEyIDRDOS43OTA4NiA4IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjNkI3MjgwIi8+CjxwYXRoIGQ9Ek0xMiAxNEM4LjEzNDAxIDE0IDUgMTcuMTM0IDUgMjFIMTlDMTkgMTcuMTM0IDE1Ljg2NiAxNCAxMiAxNFoiIGZpbGw9IiM2QjcyODAiLz4KPC9zdmc+Cjwvc3ZnPgo='
                             }}
                           />
                           <div>
-                            <div className="fw-semibold" style={{ fontSize: '16px' }}>{post.influencer.handle}</div>
-                            <div className="text-muted" style={{ fontSize: '14px' }}>{post.influencer.fullname}</div>
+                            <div className="fw-semibold" style={{ fontSize: '16px' }}>{post.influencer?.handle || post.influencer?.instagram?.handle || 'Unknown'}</div>
+                            <div className="text-muted" style={{ fontSize: '14px' }}>{post.influencer?.fullname || 'No name available'}</div>
                             <div className="mt-2">
-                              {post.influencer.is_verified && (
+                              {(post.influencer?.is_verified || post.influencer?.instagram?.is_verified) && (
                                 <span className="badge bg-primary" style={{ fontSize: '12px' }}>
                                   <i className="fas fa-check me-1"></i>Verified
                                 </span>
@@ -826,7 +826,7 @@ const HashtagPerformancePage = () => {
                       <td style={{ padding: '1.5rem' }}>
                         <div className="position-relative">
                           <img 
-                            src={post.thumbnail_url || post.display_url || post.media_url ||post.video_url|| '/images/placeholder.jpg'} 
+                            src={post.display_url || post.thumbnail_url || post.media_url || post.video_url || '/images/placeholder.jpg'} 
                             alt="Post"
                             className="rounded cursor-pointer"
                             style={{ width: '90px', height: '90px', objectFit: 'cover', cursor: 'pointer' }}
