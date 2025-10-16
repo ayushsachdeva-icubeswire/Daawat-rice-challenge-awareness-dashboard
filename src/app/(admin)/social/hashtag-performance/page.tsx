@@ -802,7 +802,7 @@ const HashtagPerformancePage = () => {
                       <td style={{ padding: '1.5rem' }}>
                         <div className="d-flex align-items-center">
                           <img 
-                            src={post.influencer.profile_pic_url} 
+                            src={post.influencer.instagram.profile_pic_url} 
                             alt={post.influencer.fullname}
                             className="rounded-circle me-3"
                             style={{ width: '45px', height: '45px' }}
@@ -811,7 +811,7 @@ const HashtagPerformancePage = () => {
                             }}
                           />
                           <div>
-                            <div className="fw-semibold" style={{ fontSize: '16px' }}>{post.influencer.username}</div>
+                            <div className="fw-semibold" style={{ fontSize: '16px' }}>{post.influencer.handle}</div>
                             <div className="text-muted" style={{ fontSize: '14px' }}>{post.influencer.fullname}</div>
                             <div className="mt-2">
                               {post.influencer.is_verified && (
@@ -826,7 +826,7 @@ const HashtagPerformancePage = () => {
                       <td style={{ padding: '1.5rem' }}>
                         <div className="position-relative">
                           <img 
-                            src={post.thumbnail_url || post.display_url || post.media_url || '/images/placeholder.jpg'} 
+                            src={post.thumbnail_url || post.display_url || post.media_url ||post.video_url|| '/images/placeholder.jpg'} 
                             alt="Post"
                             className="rounded cursor-pointer"
                             style={{ width: '90px', height: '90px', objectFit: 'cover', cursor: 'pointer' }}
