@@ -127,6 +127,19 @@ const SocialAnalyticsPage = () => {
         {/* Overview Cards */}
         {!loading && (
           <div className="row mb-4">
+               <div className="col-xl-3 col-md-6">
+              <div className="card bg-dark text-white">
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 className="mb-0">{formatNumber(displayData.influencerCount)}</h4>
+                      <p className="mb-0">Influencers</p>
+                    </div>
+                    <i className="fas fa-user-friends fa-2x opacity-75"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="col-xl-3 col-md-6">
               <div className="card bg-primary text-white">
                 <div className="card-body">
@@ -166,19 +179,7 @@ const SocialAnalyticsPage = () => {
                 </div>
               </div>
             </div>
-            <div className="col-xl-3 col-md-6">
-              <div className="card bg-info text-white">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h4 className="mb-0">{displayData.totalComments}</h4>
-                      <p className="mb-0">Total Comments</p>
-                    </div>
-                    <i className="fas fa-comments fa-2x opacity-75"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
+           
           </div>
         )}
 
@@ -198,19 +199,20 @@ const SocialAnalyticsPage = () => {
                 </div>
               </div>
             </div>
-            <div className="col-xl-3 col-md-6">
-              <div className="card bg-dark text-white">
+             <div className="col-xl-3 col-md-6">
+              <div className="card bg-info text-white">
                 <div className="card-body">
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
-                      <h4 className="mb-0">{formatNumber(displayData.influencerCount)}</h4>
-                      <p className="mb-0">Influencers</p>
+                      <h4 className="mb-0">{displayData.totalComments}</h4>
+                      <p className="mb-0">Total Comments</p>
                     </div>
-                    <i className="fas fa-user-friends fa-2x opacity-75"></i>
+                    <i className="fas fa-comments fa-2x opacity-75"></i>
                   </div>
                 </div>
               </div>
             </div>
+         
           </div>
         )}
 
@@ -365,8 +367,16 @@ const SocialAnalyticsPage = () => {
 
       {/* Post Details Modal */}
       {showModal && selectedInfluencer && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg">
+        <div 
+          className="modal fade show d-block" 
+          tabIndex={-1} 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="modal-dialog modal-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-content">
               <div className="modal-header border-0 pb-0">
                 <button 
@@ -384,6 +394,7 @@ const SocialAnalyticsPage = () => {
                       className="img-fluid rounded"
                       style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
                     />
+
                   </div>
                   <div className="col-md-6">
                     <div className="d-flex align-items-center mb-3">
@@ -394,17 +405,18 @@ const SocialAnalyticsPage = () => {
                           className="rounded-circle"
                           style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                         />
-                        <img 
-                          src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8xXzIpIi8+CjxwYXRoIGQ9Ik0yMC4wMDUgMTIuNzAzQzE3LjI4MiAxMi43MDMgMTQuODk4IDEyLjcwMyAxNC44OTcgMTIuNzAzQzEzLjA2MSAxMi43MDMgMTEuNTY2IDE0LjE5OCAxMS1NjYgMTYuMDM0VjI0LjAzNEMxMS41NjYgMjUuODcgMTMuMDYxIDI3LjM2NSAxNC44OTcgMjcuMzY1SDI1LjExNEMyNi45NSAyNy4zNjUgMjguNDQ1IDI1Ljg3IDI4LjQ0NSAyNC4wMzRWMTYuMDM0QzI4LjQ0NSAxNC4xOTggMjYuOTUgMTIuNzAzIDI1LjExNCAxMi43MDNIMjAuMDA1WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTIwLjAwNSAxNi4wMzVDMTcuODY4IDE2LjAzNSAxNi4xMzYgMTcuNzY3IDE2LjEzNiAxOS45MDRDMTYuMTM2IDIyLjA0MSAxNy44NjggMjMuNzczIDIwLjAwNSAyMy43NzNDMjIuMTQyIDIzLjc3MyAyMy44NzQgMjIuMDQxIDIzLjg3NCAxOS45MDRDMjMuODc0IDE3Ljc2NyAyMi4xNDIgMTYuMDM1IDIwLjAwNSAxNi4wMzVaTTIwLjAwNSAyMi4yM0MxOC43MjEgMjIuMjMgMTcuNjc4IDIxLjE4OCAxNy42NzggMTkuOTA0QzE3LjY3OCAxOC42MiAxOC43MjEgMTcuNTc4IDIwLjAwNSAxNy41NzhDMjEuMjg5IDE3LjU3OCAyMi4zMzEgMTguNjIgMjIuMzMxIDE5LjkwNEMyMi4zMzEgMjEuMTg4IDIxLjI4OSAyMi4yMyAyMC4wMDUgMjIuMjNaIiBmaWxsPSIjRTM0MDVGIi8+CjxwYXRoIGQ9Ik0yNC40NzYgMTYuOTI3QzI0Ljc5OSAxNi45MjcgMjUuMDYxIDE2LjY2NSAyNS4wNjEgMTYuMzQyQzI1LjA2MSAxNi4wMTkgMjQuNzk5IDE1Ljc1NyAyNC40NzYgMTUuNzU3QzI0LjE1MyAxNS43NTcgMjMuODkxIDE2LjAxOSAyMy44OTEgMTYuMzQyQzIzLjg5MSAxNi42NjUgMjQuMTUzIDE2LjkyNyAyNC40NzYgMTYuOTI3WiIgZmlsbD0iI0UzNDA1RiIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzFfMiIgeDE9IjgiIHkxPSI4IiB4Mj0iMzIiIHkyPSIzMiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkY0NTY4Ii8+CjxzdG9wIG9mZnNldD0iMC41IiBzdG9wLWNvbG9yPSIjRkY0NTY4Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZGNDQ0NCIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo="
-                          alt="Instagram"
-                          className="position-absolute bottom-0 end-0 rounded-circle"
-                          style={{ 
-                            border: '2px solid white',
-                            width: '18px',
-                            height: '18px',
-                            objectFit: 'cover'
-                          }}
-                        />
+                          <i 
+                              className="fab fa-instagram text-primary position-absolute"
+                              style={{ 
+                                fontSize: '12px',
+                                bottom: '-2px',
+                                right: '-2px',
+                                backgroundColor: 'white',
+                                borderRadius: '50%',
+                                padding: '2px',
+                                border: '1px solid #dee2e6'
+                              }}
+                            ></i>
                       </div>
                       <div>
                         <div className="fw-semibold">{selectedInfluencer.fullname}</div>
@@ -468,7 +480,7 @@ const SocialAnalyticsPage = () => {
 
                     <div className="d-flex justify-content-between align-items-center">
                       <div className="d-flex align-items-center">
-                        <span className="badge bg-dark me-2">{(parseFloat(selectedInfluencer.er) * 100).toFixed(2)}%</span>
+                        <span className="badge bg-dark me-2">{(parseFloat(selectedInfluencer.er)).toFixed(2)}%</span>
                         <small className="text-muted">ER</small>
                       </div>
                       <button 
