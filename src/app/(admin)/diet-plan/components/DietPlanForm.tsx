@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap'
 import { useNotificationContext } from '@/context/useNotificationContext'
 import DietPlanService from '@/services/dietPlanService'
-import { DietPlan, DietPlanFormData, DIET_CATEGORIES, DIET_TYPES, DIET_SUBCATEGORIES, DURATION_OPTIONS } from '@/types/diet-plan'
+import { DietPlan, DietPlanFormData, DIET_CATEGORIES, DIET_SUBCATEGORIES, DIET_TYPES, DURATION_OPTIONS } from '@/types/diet-plan'
 
 interface DietPlanFormProps {
   show: boolean

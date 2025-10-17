@@ -403,76 +403,7 @@ const HashtagPerformancePage = () => {
             {/* Campaign Analytics Dashboard */}
             {analysisData ? (
               <>
-                {/* Primary Metrics Row */}
-                <div className="row mb-4">
-                  <div className="col-lg-3 col-md-6 mb-3">
-                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                      <div className="card-body text-white">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_followers)}</h3>
-                            <p className="mb-0 opacity-75">Total Followers</p>
-                            <small className="opacity-75">Cumulative reach</small>
-                          </div>
-                          <div className="text-end">
-                            <i className="fas fa-users fa-2x opacity-75"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="col-lg-3 col-md-6 mb-3">
-                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-                      <div className="card-body text-white">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_engagements)}</h3>
-                            <p className="mb-0 opacity-75">Total Engagements</p>
-                            <small className="opacity-75">Likes + Comments + Shares</small>
-                          </div>
-                          <div className="text-end">
-                            <i className="fas fa-heart fa-2x opacity-75"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="col-lg-3 col-md-6 mb-3">
-                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-                      <div className="card-body text-white">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_plays)}</h3>
-                            <p className="mb-0 opacity-75">Total Video Plays</p>
-                            <small className="opacity-75">Video content views</small>
-                          </div>
-                          <div className="text-end">
-                            <i className="fas fa-play-circle fa-2x opacity-75"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="col-lg-3 col-md-6 mb-3">
-                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
-                      <div className="card-body text-white">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            <h3 className="mb-1 fw-bold">{(analysisData.avg_er * 100).toFixed(1)}%</h3>
-                            <p className="mb-0 opacity-75">Avg Engagement Rate</p>
-                            <small className="opacity-75">Performance metric</small>
-                          </div>
-                          <div className="text-end">
-                            <i className="fas fa-chart-line fa-2x opacity-75"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+           
 
                 {/* Secondary Metrics Row */}
                 <div className="row mb-4">
@@ -547,6 +478,77 @@ const HashtagPerformancePage = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                     {/* Primary Metrics Row */}
+                <div className="row mb-4">
+                  {/* <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_followers)}</h3>
+                            <p className="mb-0 opacity-75">Total Followers</p>
+                            <small className="opacity-75">Cumulative reach</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-users fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> */}
+                  
+                  <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_engagements)}</h3>
+                            <p className="mb-0 opacity-75">Total Engagements</p>
+                            <small className="opacity-75">Likes + Comments + Shares</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-heart fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_plays)}</h3>
+                            <p className="mb-0 opacity-75">Total Video Plays</p>
+                            <small className="opacity-75">Video content views</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-play-circle fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{(analysisData.avg_er * 100).toFixed(1)}%</h3>
+                            <p className="mb-0 opacity-75">Avg Engagement Rate</p>
+                            <small className="opacity-75">Performance metric</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-chart-line fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> */}
                 </div>
               </>
             ) : (

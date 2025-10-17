@@ -3,7 +3,7 @@ import PageTitle from '@/components/PageTitle'
 import { useState, useEffect } from 'react'
 import { useNotificationContext } from '@/context/useNotificationContext'
 import DietPlanService from '@/services/dietPlanService'
-import { DietPlan, DietPlanFilters, DIET_CATEGORIES, DIET_TYPES, DIET_SUBCATEGORIES } from '@/types/diet-plan'
+import { DietPlan, DietPlanFilters, DIET_CATEGORIES, DIET_SUBCATEGORIES } from '@/types/diet-plan'
 import DietPlanForm from './components/DietPlanForm'
 
 const DietPlanPage = () => {
@@ -158,7 +158,7 @@ const DietPlanPage = () => {
                 ))}
               </select>
             </div>
-            <div className="col-md-2">
+            {/* <div className="col-md-2">
               <select
                 className="form-select"
                 value={filters.type || ''}
@@ -169,7 +169,7 @@ const DietPlanPage = () => {
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
-            </div>
+            </div> */}
             <div className="col-md-2">
               <select
                 className="form-select"
@@ -217,7 +217,7 @@ const DietPlanPage = () => {
                     <tr>
                       <th>Plan Name</th>
                       <th>Duration</th>
-                      <th>Type</th>
+                      {/* <th>Type</th> */}
                       <th>Category</th>
                       <th>Subcategory</th>
                       <th>PDF</th>
@@ -234,7 +234,7 @@ const DietPlanPage = () => {
                         <td>
                           <span className="badge bg-info">{plan.duration}</span>
                         </td>
-                        <td>{plan.type}</td>
+                        {/* <td>{plan.type}</td> */}
                         <td>
                           <span className="badge bg-secondary">{plan.category}</span>
                         </td>

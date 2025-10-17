@@ -170,7 +170,7 @@ const ChallengersPage = () => {
               <thead className="table-light">
                 <tr>
                   <th>Name & Contact</th>
-                  <th>Category & Type</th>
+                  <th>Category </th>
                   <th>Duration</th>
                   <th>Subcategory</th>
                   <th>Status</th>

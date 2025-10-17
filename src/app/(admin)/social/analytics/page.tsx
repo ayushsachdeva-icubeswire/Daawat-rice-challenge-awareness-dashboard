@@ -15,6 +15,8 @@ const SocialAnalyticsPage = () => {
   const [influencerError, setInfluencerError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
+  const [totalPages, setTotalPages] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
   
   // Modal state
   const [showModal, setShowModal] = useState(false)
@@ -57,14 +59,20 @@ const SocialAnalyticsPage = () => {
     fetchAnalyticsData()
   }, [])
 
-  // Fetch influencer data
+  // Fetch initial influencer data
   useEffect(() => {
-    const fetchInfluencerData = async () => {
+    const fetchInitialInfluencerData = async () => {
       try {
         setInfluencerLoading(true)
         setInfluencerError(null)
-        const data = await CampaignAnalyticsService.getInfluencerList('837', currentPage, itemsPerPage)
+        const data = await CampaignAnalyticsService.getInfluencerList('837', 1, itemsPerPage)
         setInfluencerData(data)
+        
+        // Set pagination metadata
+        if (data?.data) {
+          setTotalPages(data.data.totalPages || 0)
+          setTotalCount(data.data.totalCount || 0)
+        }
       } catch (err) {
         setInfluencerError(err instanceof Error ? err.message : 'Failed to fetch influencer data')
         console.error('Error fetching influencers:', err)
@@ -73,8 +81,37 @@ const SocialAnalyticsPage = () => {
       }
     }
 
-    fetchInfluencerData()
-  }, [currentPage, itemsPerPage])
+    // Only fetch on initial load
+    fetchInitialInfluencerData()
+  }, [itemsPerPage])
+
+  // Function to load more pages
+  const loadMoreData = async () => {
+    if (currentPage >= totalPages || influencerLoading) return
+    
+    try {
+      setInfluencerLoading(true)
+      const nextPage = currentPage + 1
+      const data = await CampaignAnalyticsService.getInfluencerList('837', nextPage, itemsPerPage)
+      
+      if (data?.data?.result && data.data.result.length > 0) {
+        // Append new influencers to existing data
+        const combinedData = {
+          ...data,
+          data: {
+            ...data.data,
+            result: [...(influencerData?.data?.result || []), ...data.data.result]
+          }
+        }
+        setInfluencerData(combinedData)
+        setCurrentPage(nextPage)
+      }
+    } catch (err) {
+      console.error('Error loading more data:', err)
+    } finally {
+      setInfluencerLoading(false)
+    }
+  }
 
   // Use API data if available, otherwise use default data
   const displayData = analyticsData?.data ? {
@@ -263,7 +300,7 @@ const SocialAnalyticsPage = () => {
                   {influencerData.data.result.map((influencer: InfluencerData, index: number) => (
                     <tr key={influencer.influencer_id}>
                       <td className="fw-semibold">
-                        {((currentPage - 1) * itemsPerPage) + index + 1}
+                        {index + 1}
                       </td>
                       <td>
                         <div className="d-flex align-items-center">
@@ -339,26 +376,70 @@ const SocialAnalyticsPage = () => {
           )}
 
           {/* Load More Button */}
-          {!influencerLoading && influencerData?.data && currentPage < influencerData.data.totalPages && (
+          {!influencerLoading && totalPages > 0 && currentPage < totalPages && (
             <div className="text-center mt-4">
               <button 
                 className="btn btn-outline-primary"
-                onClick={() => setCurrentPage(prev => prev + 1)}
+                onClick={loadMoreData}
                 disabled={influencerLoading}
               >
                 <i className="fas fa-chevron-down me-2"></i>
-                Load 10 More
+                Load {itemsPerPage} More
+              </button>
+            </div>
+          )}
+
+          {/* Page Navigation */}
+          {!influencerLoading && totalPages > 1 && (
+            <div className="d-flex justify-content-center align-items-center mt-4 gap-3">
+              <button 
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => {
+                  if (currentPage > 1) {
+                    // Reset to first page
+                    const loadFirstPage = async () => {
+                      try {
+                        setInfluencerLoading(true)
+                        const data = await CampaignAnalyticsService.getInfluencerList('837', 1, itemsPerPage)
+                        if (data?.data) {
+                          setInfluencerData(data)
+                          setCurrentPage(1)
+                        }
+                      } catch (err) {
+                        console.error('Error loading first page:', err)
+                      } finally {
+                        setInfluencerLoading(false)
+                      }
+                    }
+                    loadFirstPage()
+                  }
+                }}
+                disabled={currentPage === 1 || influencerLoading}
+              >
+                <i className="fas fa-chevron-left me-1"></i>
+                First
+              </button>
+              
+              <span className="badge bg-primary fs-6 px-3 py-2">
+                Page {currentPage} of {totalPages}
+              </span>
+              
+              <button 
+                className="btn btn-outline-primary btn-sm"
+                onClick={loadMoreData}
+                disabled={currentPage >= totalPages || influencerLoading}
+              >
+                Next
+                <i className="fas fa-chevron-right ms-1"></i>
               </button>
             </div>
           )}
 
           {/* Pagination Info */}
-          {!influencerLoading && influencerData?.data && (
+          {!influencerLoading && totalCount > 0 && (
             <div className="text-center mt-3">
               <small className="text-muted">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to{' '}
-                {Math.min(currentPage * itemsPerPage, influencerData.data.totalCount)} of{' '}
-                {influencerData.data.totalCount} influencers
+                Showing {influencerData?.data?.result?.length || 0} of {totalCount} influencers
               </small>
             </div>
           )}
