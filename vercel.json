@@ -1,12 +1,16 @@
 {
   "routes": [
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
+      "src": "/rya/dashboard/assets/(.*)",
+      "dest": "/rya/dashboard/assets/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "src": "/rya/dashboard/(.*)",
+      "dest": "/rya/dashboard/index.html"
+    },
+    {
+      "src": "/rya/dashboard",
+      "dest": "/rya/dashboard/index.html"
     }
   ]
 }

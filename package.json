@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "proxy": "http://localhost:8080",
-  "homepage": "./",
+  "homepage": "/rya/dashboard/",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

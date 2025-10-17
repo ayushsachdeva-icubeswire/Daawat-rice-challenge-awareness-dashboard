@@ -10,7 +10,7 @@ export default defineConfig({
       "@": resolve(__dirname, "src"),
     },
   },
-  base: "/",
+  base: "/rya/dashboard/",
   build: {
     assetsDir: "assets",
     rollupOptions: {
