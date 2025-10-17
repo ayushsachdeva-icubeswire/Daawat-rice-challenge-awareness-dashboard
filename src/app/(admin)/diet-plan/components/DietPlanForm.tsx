@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap'
 import { useNotificationContext } from '@/context/useNotificationContext'
 import DietPlanService from '@/services/dietPlanService'
-import { DietPlan, DietPlanFormData, DIET_CATEGORIES, DIET_SUBCATEGORIES, DIET_TYPES, DURATION_OPTIONS } from '@/types/diet-plan'
+import { DietPlan, DietPlanFormData, DIET_CATEGORIES, DIET_SUBCATEGORIES, DURATION_OPTIONS } from '@/types/diet-plan'
 
 interface DietPlanFormProps {
   show: boolean
@@ -15,7 +15,6 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
   const [formData, setFormData] = useState<DietPlanFormData>({
     name: '',
     duration: '',
-    type: '',
     category: '',
     subcategory: '',
     description: '',
@@ -32,7 +31,6 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
       setFormData({
         name: editingPlan.name || '',
         duration: editingPlan.duration || '',
-        type: editingPlan.type || '',
         category: editingPlan.category || '',
         subcategory: editingPlan.subcategory || '',
         description: editingPlan.description || '',
@@ -43,7 +41,6 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
       setFormData({
         name: '',
         duration: '',
-        type: '',
         category: '',
         subcategory: '',
         description: '',
@@ -65,9 +62,7 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
       newErrors.duration = 'Duration is required'
     }
 
-    if (!formData.type) {
-      newErrors.type = 'Type is required'
-    }
+
 
     if (!formData.category) {
       newErrors.category = 'Category is required'
@@ -144,7 +139,6 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
     setFormData({
       name: '',
       duration: '',
-      type: '',
       category: '',
       subcategory: '',
       description: '',
@@ -202,26 +196,7 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
           </Row>
 
           <Row>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Type <span className="text-danger">*</span></Form.Label>
-                <Form.Select
-                  value={formData.type}
-                  onChange={(e) => handleInputChange('type', e.target.value)}
-                  isInvalid={!!errors.type}
-                >
-                  <option value="">Select type</option>
-                  {DIET_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">
-                  {errors.type}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-            
-            <Col md={4}>
+            <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Category <span className="text-danger">*</span></Form.Label>
                 <Form.Select
@@ -240,7 +215,7 @@ const DietPlanForm = ({ show, onHide, editingPlan, onSubmit }: DietPlanFormProps
               </Form.Group>
             </Col>
 
-            <Col md={4}>
+            <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Subcategory (Optional)</Form.Label>
                 <Form.Select

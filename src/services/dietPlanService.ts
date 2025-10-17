@@ -59,7 +59,6 @@ class DietPlanService {
       
       if (filters?.category) queryParams.append('category', filters.category)
       if (filters?.subcategory) queryParams.append('subcategory', filters.subcategory)
-      if (filters?.type) queryParams.append('type', filters.type)
       if (filters?.isActive !== undefined) queryParams.append('isActive', filters.isActive.toString())
       if (filters?.page) queryParams.append('page', filters.page.toString())
       if (filters?.limit) queryParams.append('limit', filters.limit.toString())
@@ -117,7 +116,6 @@ class DietPlanService {
       const formData = new FormData()
       formData.append('name', data.name)
       formData.append('duration', data.duration)
-      formData.append('type', data.type)
       formData.append('category', data.category)
       formData.append('isActive', data.isActive.toString())
       
@@ -162,7 +160,6 @@ class DietPlanService {
       const formData = new FormData()
       formData.append('name', data.name)
       formData.append('duration', data.duration)
-      formData.append('type', data.type)
       formData.append('category', data.category)
       formData.append('isActive', data.isActive.toString())
       

@@ -3,7 +3,6 @@ export interface DietPlan {
   _id?: string
   name: string
   duration: string // e.g., "7 days", "1 month"
-  type: string // e.g., "Weight Loss", "Muscle Building"
   category: string // e.g., "Vegetarian", "Keto", "High Protein"
   subcategory?: string // e.g., "Beginner", "Advanced", "Low Sodium"
   pdfFile?: {
@@ -27,7 +26,6 @@ export interface DietPlan {
 export interface DietPlanFormData {
   name: string
   duration: string
-  type: string
   category: string
   subcategory?: string
   description?: string
@@ -45,7 +43,6 @@ export interface DietPlanListResponse {
 export interface DietPlanFilters {
   category?: string
   subcategory?: string
-  type?: string
   isActive?: boolean
   page?: number
   limit?: number

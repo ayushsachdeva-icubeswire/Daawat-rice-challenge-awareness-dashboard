@@ -78,7 +78,6 @@ const DietPlanPage = () => {
   const filteredPlans = (dietPlans || []).filter(plan =>
     plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     plan.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plan.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (plan.subcategory && plan.subcategory.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 

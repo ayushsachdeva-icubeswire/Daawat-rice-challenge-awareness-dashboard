@@ -185,7 +185,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
   const [currentProgressData, setCurrentProgressData] = useState<ProgressData | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [lastDisplayedValue, setLastDisplayedValue] = useState<number>(0)
-  const [isRepeatingAnimation, setIsRepeatingAnimation] = useState(false)
+  const lastDisplayedValueRef = useRef<number>(0)
 
 
   // Fetch progress data from API
@@ -242,38 +242,29 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
           }
           
           // Check if data has been updated since last animation
-          const hasNewData = !currentProgressData || 
-            newData.currentValue !== currentProgressData.currentValue ||
-            newData.updatedAt !== currentProgressData.updatedAt
+          // Only consider it new data if the currentValue is different from what we last displayed
+          const currentLastDisplayed = lastDisplayedValueRef.current
+          const hasNewData = newData.currentValue !== currentLastDisplayed
 
-          console.log(`${progressType}: hasNewData: ${hasNewData}`)
+          console.log(`${progressType}: hasNewData: ${hasNewData}, newCurrentValue: ${newData.currentValue}, lastDisplayedValue: ${currentLastDisplayed}`)
 
           if (hasNewData) {
             // Data has been updated - animate from current displayed value to new target
-            console.log(`${progressType}: NEW data detected, animating from ${lastDisplayedValue} to ${newData.currentValue}`)
-            const actualDifference = newData.currentValue - lastDisplayedValue
+            console.log(`${progressType}: NEW data detected, animating from ${currentLastDisplayed} to ${newData.currentValue}`)
+            const actualDifference = newData.currentValue - currentLastDisplayed
             setCurrentProgressData(newData)
             
             if (animateCounterRef.current) {
-              animateCounterRef.current(lastDisplayedValue, newData.currentValue, actualDifference)
+              animateCounterRef.current(currentLastDisplayed, newData.currentValue, actualDifference)
             }
           } else {
-            // No new data - repeat the same animation from previousValue to currentValue
-            console.log(`${progressType}: SAME data, repeating animation from ${newData.previousValue} to ${newData.currentValue}`)
-            setIsRepeatingAnimation(true)
-            
-            // Reset to previous value first, then animate to current value
-            if (counterInstanceRef.current) {
-              counterInstanceRef.current.setValueInstant(newData.previousValue)
-            }
-            setLastDisplayedValue(newData.previousValue)
-            
-            // Small delay before starting repeat animation for visual effect
+            // No new data - just schedule next poll without animation
+            console.log(`${progressType}: SAME data, no animation needed. Scheduling next poll`)
             setTimeout(() => {
-              if (animateCounterRef.current) {
-                animateCounterRef.current(newData.previousValue, newData.currentValue, newData.difference)
+              if (scheduleNextPollRef.current) {
+                scheduleNextPollRef.current()
               }
-            }, 500)
+            }, 100)
           }
         } else {
           console.warn(`${progressType}: Failed to fetch data, retrying in ${pollInterval}ms`)
@@ -306,6 +297,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
         counterInstanceRef.current.setValueInstant(toValue)
       }
       setLastDisplayedValue(toValue)
+      lastDisplayedValueRef.current = toValue
       // Still schedule next poll to check for updates
       console.log(`${progressType}: Scheduling next poll after no-animation case`)
       
@@ -354,6 +346,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
         
         // Update the last displayed value
         setLastDisplayedValue(currentValue)
+        lastDisplayedValueRef.current = currentValue
         
         if (animationIntervalRef.current) {
           clearInterval(animationIntervalRef.current)
@@ -365,7 +358,6 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
         // Use setTimeout to ensure state updates are processed before scheduling next poll
         setTimeout(() => {
           setIsAnimating(false)
-          setIsRepeatingAnimation(false)
           
           console.log(`${progressType}: States reset, scheduling next API poll after animation completion`)
           // Schedule next API call after animation completes and states are updated
@@ -399,6 +391,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
         // Initialize counter with previous value
         const startValue = initialData.previousValue
         setLastDisplayedValue(startValue)
+        lastDisplayedValueRef.current = startValue
         
         const counter = new FlipCounterClass(containerRef.current!, startValue)
         counterInstanceRef.current = counter
@@ -446,26 +439,21 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
           </div>
           <h6 className="card-title mb-2 fw-semibold">
             {label}
-            {isAnimating && !isRepeatingAnimation && <span className="ms-2 text-primary">🔄</span>}
-            {isRepeatingAnimation && <span className="ms-2 text-info">🔁</span>}
+            {isAnimating && <span className="ms-2 text-primary">🔄</span>}
           </h6>
           {currentProgressData && (
             <div className="text-center mt-2">
               <small className="text-muted">
-                {/* {isRepeatingAnimation ? (
-                  <span className="badge bg-light text-dark border">Repeating</span>
-                ) : (
-                  <div>
-                    <span className={`badge ${currentProgressData.difference > 0 ? 'bg-success' : currentProgressData.difference < 0 ? 'bg-danger' : 'bg-secondary'}`}>
-                      {currentProgressData.difference > 0 ? '+' : ''}{currentProgressData.difference}
-                    </span>
-                    <div className="mt-1">
-                      <small className="text-muted">
-                        {currentProgressData.previousValue} → {currentProgressData.currentValue}
-                      </small>
-                    </div>
+                <div>
+                  <span className={`badge ${currentProgressData.difference > 0 ? 'bg-success' : currentProgressData.difference < 0 ? 'bg-danger' : 'bg-secondary'}`}>
+                    {/* {currentProgressData.difference > 0 ? '+' : ''}{currentProgressData.difference} */}
+                  </span>
+                  <div className="mt-1">
+                    <small className="text-muted">
+                      {/* {currentProgressData.previousValue} → {currentProgressData.currentValue} */}
+                    </small>
                   </div>
-                )} */}
+                </div>
               </small>
             </div>
           )}
