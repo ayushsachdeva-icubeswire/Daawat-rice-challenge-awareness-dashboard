@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 createRoot(document.getElementById('root')!).render(
   // Temporarily disabled StrictMode to prevent double API calls in development
   // <StrictMode>
-    <BrowserRouter basename='/rya/admin'>
+    <BrowserRouter basename='/rya/dashboard'>
       <App />
     </BrowserRouter>
   // </StrictMode>,
