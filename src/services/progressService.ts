@@ -69,7 +69,7 @@ class ProgressService {
         return this.getMockProgressData()
       }
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}/challenger/progress`, {
+      const response = await fetch(`${API_CONFIG.API_URL}/challenger/progress`, {
         method: 'GET',
         headers: {
           'authorization': token,

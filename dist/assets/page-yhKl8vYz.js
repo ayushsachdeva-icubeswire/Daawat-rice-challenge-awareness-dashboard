@@ -1,1 +1,0 @@
-import{a8 as t,u as n,r as o,j as a}from"./index-BEIom4XY.js";const r=()=>{const e=t(),{changeMenu:s}=n();return o.useEffect(()=>{s.size("condensed"),e("/dashboards")},[e]),a.jsx(a.Fragment,{})},c=()=>a.jsx(r,{});export{c as default};
