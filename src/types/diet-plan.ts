@@ -51,8 +51,8 @@ export interface DietPlanFilters {
 // Common diet plan categories and types
 export const DIET_CATEGORIES = [
   'Vegetarian',
-  'Veg+ Egg',
-  'Veg+ Meat',
+  'Veg + Egg',
+  'Veg + Meat',
 ] as const
 
 export const DIET_TYPES = [

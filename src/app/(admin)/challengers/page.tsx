@@ -112,10 +112,10 @@ const ChallengersPage = () => {
               value={filters.category || ''}
               onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value || undefined }))}
             >
-              <option value="">All Categories</option>
+              <option value="" disabled>All Categories</option>
               <option value="Vegetarian">Vegetarian</option>
-              <option value="Keto">Keto</option>
-              <option value="High Protein">High Protein</option>
+              <option value="veg-egg">Veg + Egg</option>
+              <option value="veg-meat">Veg + Meat</option>
             </select>
           </div>
           <div className="col-md-2">
@@ -124,13 +124,14 @@ const ChallengersPage = () => {
               value={filters.duration || ''}
               onChange={(e) => setFilters(prev => ({ ...prev, duration: e.target.value || undefined }))}
             >
-              <option value="">All Durations</option>
+              <option value="" disabled>All Durations</option>
               <option value="7 days">7 days</option>
-              <option value="1 month">1 month</option>
-              <option value="3 months">3 months</option>
+              <option value="14 days">14 days</option>
+              <option value="21 days">21 days</option>
+              <option value="30 days">30 days</option>
             </select>
           </div>
-          <div className="col-md-2">
+          {/* <div className="col-md-2">
             <select
               className="form-select"
               value={filters.type || ''}
@@ -141,7 +142,7 @@ const ChallengersPage = () => {
               <option value="Muscle Building">Muscle Building</option>
               <option value="General Health">General Health</option>
             </select>
-          </div>
+          </div> */}
           <div className="col-md-2">
             <select
               className="form-select"
