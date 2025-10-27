@@ -217,7 +217,7 @@ const page = () => {
           />
         </Col> */}
         <Col xl={6} lg={12} md={12}>
-          {/* <div className="mb-3 d-flex align-items-center gap-3">
+          <div className="mb-3 d-flex align-items-center gap-3">
             <label htmlFor="dashboardHashtagFilter" className="form-label fw-semibold mb-0">
               <i className="fas fa-hashtag text-primary me-2"></i>
               Filter Hashtag:
@@ -235,7 +235,7 @@ const page = () => {
                 </option>
               ))}
             </select>
-          </div> */}
+          </div>
           <PostsList 
             posts={campaignPosts}
             title="Recent Posts"
