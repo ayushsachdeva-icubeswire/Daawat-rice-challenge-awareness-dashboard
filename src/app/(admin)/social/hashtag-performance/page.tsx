@@ -199,15 +199,23 @@ const HashtagPerformancePage = () => {
       setLoading(true)
       const nextPage = currentPage + 1
       // If 'all' is selected, use 'onlydaawatnovember' for pagination API
+      // For API calls that support multiple hashtags, use this array if 'all' is selected
+      const allHashtagsArr = ['onlydaawatnovember', 'onlyricenovember', 'riceyourawareness']
       const hashtagParam = currentHashtag === 'all' ? 'onlydaawatnovember' : currentHashtag
-      const response = await CampaignContentsService.getCampaignContents(hashtagParam, nextPage, itemsPerPage)
+      // If 'all' is selected, call getMultipleHashtagsPerformance with all hashtags array
+      let response
+      if (currentHashtag === 'all') {
+        response = await CampaignContentsService.getMultipleHashtagsPerformance(allHashtagsArr, nextPage, itemsPerPage)
+      } else {
+        response = await CampaignContentsService.getCampaignContents(hashtagParam, nextPage, itemsPerPage)
+      }
 
       if (response.success && response.data.posts.length > 0) {
         // Append new posts to existing data (like analytics page)
         const combinedPosts = [...allPosts, ...response.data.posts]
         setAllPosts(combinedPosts)
         // Update analytics with combined data
-        const analyticsData = processPostsIntoAnalytics(combinedPosts, hashtagParam)
+  const analyticsData = processPostsIntoAnalytics(combinedPosts, hashtagParam)
         setCampaignData([analyticsData])
         setCurrentPage(nextPage)
       }
