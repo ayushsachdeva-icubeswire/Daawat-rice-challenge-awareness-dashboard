@@ -26,7 +26,7 @@ const storySchema = yup.object({
     .required('Handle is required')
     .min(3, 'Handle must be at least 3 characters')
     .max(50, 'Handle cannot exceed 50 characters')
-    .matches(/^[a-zA-Z0-9_]+$/, 'Handle can only contain letters, numbers, and underscores'),
+    .matches(/^[a-zA-Z0-9_.]+$/, 'Handle can only contain letters, numbers, underscores, and periods'),
   storyLink: yup
     .string()
     .required('Story link is required')
