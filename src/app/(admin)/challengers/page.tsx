@@ -114,8 +114,8 @@ const ChallengersPage = () => {
             >
               <option value="" disabled>All Categories</option>
               <option value="Vegetarian">Vegetarian</option>
-              <option value="veg-egg">Veg + Egg</option>
-              <option value="veg-meat">Veg + Meat</option>
+              <option value="Veg + Egg">Veg + Egg</option>
+              <option value="Veg + Meat">Veg + Meat</option>
             </select>
           </div>
           <div className="col-md-2">

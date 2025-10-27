@@ -228,7 +228,7 @@ export class CampaignContentsService {
    * @returns Promise with campaign contents data
    */
   static async getCampaignContents(
-    hashtag: string = 'OnlyRiceNovember',
+    hashtag: string = 'onlyricenovember',
     page: number = 1,
     limit: number = 8
   ): Promise<CampaignContentsResponse> {
@@ -264,7 +264,7 @@ export class CampaignContentsService {
    * @returns Promise with campaign contents data for multiple hashtags
    */
   static async getMultipleHashtagsPerformance(
-    hashtags: string[] = ['OnlyRiceNovember', 'RiceYourAwareness', 'OnlyDaawatNovember'],
+    hashtags: string[] = ['onlyricenovember', 'RiceYourAwareness', 'OnlyDaawatNovember'],
     page: number = 1,
     limit: number = 8
   ): Promise<CampaignContentsResponse> {
@@ -299,7 +299,7 @@ export class CampaignContentsService {
    * @returns Promise with campaign analysis data
    */
   static async getCampaignAnalysis(
-    hashtag: string = 'OnlyRiceNovember'
+    hashtag: string = 'onlyricenovember'
   ): Promise<CampaignAnalysisResponse> {
     try {
       const response = await fetch(
