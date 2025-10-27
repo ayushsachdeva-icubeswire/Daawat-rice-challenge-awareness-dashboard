@@ -28,7 +28,7 @@ const page = () => {
   const staticHashtags = [
     { value: 'all', label: 'All Hashtags', display: 'All Hashtags' },
     { value: 'onlydaawatnovember', label: '#onlydaawatnovember', display: '#onlydaawatnovember' },
-    { value: 'OnlyRiceNovember', label: '#onlyricenovember', display: '#onlyricenovember' },
+    { value: 'onlyricenovember', label: '#onlyricenovember', display: '#onlyricenovember' },
     { value: 'riceyourawareness', label: '#riceyourawareness', display: '#riceyourawareness' }
   ]
   
