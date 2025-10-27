@@ -3,12 +3,10 @@ import PageTitle from '@/components/PageTitle'
 import InstagramCommentsModal from '@/components/InstagramCommentsModal'
 import { useState, useEffect } from 'react'
 import { CampaignContentsService, CampaignContent, processPostsIntoAnalytics, CampaignAnalysisData } from '@/services/campaignContentsService'
-import { CampaignAnalyticsService } from '@/services/campaignAnalyticsService'
 import { formatNumber } from '@/utils/numberFormat'
-import { PostInteraction } from '@/types/post-interactions'
 
 const HashtagPerformancePage = () => {
-  const [searchTerm, setSearchTerm] = useState('')
+  // const [searchTerm, setSearchTerm] = useState('')
   const [campaignData, setCampaignData] = useState<CampaignContent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -25,8 +23,8 @@ const HashtagPerformancePage = () => {
   
   // Modal state for Instagram-style comments
   const [showCommentsModal, setShowCommentsModal] = useState(false)
-  const [modalInteractions, setModalInteractions] = useState<PostInteraction[]>([])
-  const [modalLoading, setModalLoading] = useState(false)
+  // const [modalInteractions, setModalInteractions] = useState<PostInteraction[]>([])
+  // const [modalLoading, setModalLoading] = useState(false)
 
   // Mock hashtag performance data
   const hashtagData = [
@@ -196,19 +194,20 @@ const HashtagPerformancePage = () => {
   // Function to load more pages
   const loadMoreData = async () => {
     if (currentPage >= totalPages || loading) return
-    
+
     try {
       setLoading(true)
       const nextPage = currentPage + 1
-      const response = await CampaignContentsService.getCampaignContents(currentHashtag, nextPage, itemsPerPage)
-      
+      // If 'all' is selected, use 'onlydaawatnovember' for pagination API
+      const hashtagParam = currentHashtag === 'all' ? 'onlydaawatnovember' : currentHashtag
+      const response = await CampaignContentsService.getCampaignContents(hashtagParam, nextPage, itemsPerPage)
+
       if (response.success && response.data.posts.length > 0) {
-        // Append new posts to existing data
+        // Append new posts to existing data (like analytics page)
         const combinedPosts = [...allPosts, ...response.data.posts]
         setAllPosts(combinedPosts)
-        
         // Update analytics with combined data
-        const analyticsData = processPostsIntoAnalytics(combinedPosts, currentHashtag)
+        const analyticsData = processPostsIntoAnalytics(combinedPosts, hashtagParam)
         setCampaignData([analyticsData])
         setCurrentPage(nextPage)
       }
@@ -245,33 +244,33 @@ const HashtagPerformancePage = () => {
   }
 
   // Handler for viewing post interactions
-  const handleViewInteractions = async (postId: string) => {
-    if (!postId) {
-      alert('Post ID is not available')
-      return
-    }
+  // const handleViewInteractions = async (postId: string) => {
+  //   if (!postId) {
+  //     alert('Post ID is not available')
+  //     return
+  //   }
 
-    setModalLoading(true)
-    setShowCommentsModal(true)
-    setModalInteractions([])
+  //   setModalLoading(true)
+  //   setShowCommentsModal(true)
+  //   setModalInteractions([])
 
-    try {
-      const response = await CampaignAnalyticsService.getPostInteractions(postId)
+  //   try {
+  //     const response = await CampaignAnalyticsService.getPostInteractions(postId)
       
-      if (response.success) {
-        // Set the interactions data for the modal
-        setModalInteractions(response.data.intractions || [])
-      } else {
-        console.error('Failed to fetch interactions:', response.message || 'Unknown error')
-        setModalInteractions([])
-      }
-    } catch (error) {
-      console.error('Error fetching post interactions:', error)
-      setModalInteractions([])
-    } finally {
-      setModalLoading(false)
-    }
-  }
+  //     if (response.success) {
+  //       // Set the interactions data for the modal
+  //       setModalInteractions(response.data.intractions || [])
+  //     } else {
+  //       console.error('Failed to fetch interactions:', response.message || 'Unknown error')
+  //       setModalInteractions([])
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching post interactions:', error)
+  //     setModalInteractions([])
+  //   } finally {
+  //     setModalLoading(false)
+  //   }
+  // }
 
   // Helper function to safely get caption text
   const getCaptionText = (caption: any): string => {
@@ -511,76 +510,8 @@ const HashtagPerformancePage = () => {
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="col-lg-3 col-md-4 col-sm-6 mb-3">
-                    <div className="card bg-info text-white border-0 shadow-sm">
-                      <div className="card-body">
-                        <div className="text-center">
-                          <i className="fas fa-thumbs-up fa-2x mb-2 opacity-75"></i>
-                          <h4 className="mb-1 fw-bold">{formatNumber(analysisData.avg_likes)}</h4>
-                          <p className="mb-0 small">Avg Likes</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
-                    <div className="card bg-warning text-white border-0 shadow-sm">
-                      <div className="card-body">
-                        <div className="text-center">
-                          <i className="fas fa-venus fa-2x mb-2 opacity-75"></i>
-                          <h4 className="mb-1 fw-bold">{analysisData.gender_distribution.find(g => g.name === 'female')?.percentage || 0}%</h4>
-                          <p className="mb-0 small">Female</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
-                    <div className="card bg-secondary text-white border-0 shadow-sm">
-                      <div className="card-body">
-                        <div className="text-center">
-                          <i className="fas fa-mars fa-2x mb-2 opacity-75"></i>
-                          <h4 className="mb-1 fw-bold">{analysisData.gender_distribution.find(g => g.name === 'male')?.percentage || 0}%</h4>
-                          <p className="mb-0 small">Male</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div> */}
-                  
-                  <div className="col-lg-3 col-md-4 col-sm-6 mb-3">
-                    <div className="card bg-dark text-white border-0 shadow-sm">
-                      <div className="card-body">
-                        <div className="text-center">
-                          <i className="fas fa-fire fa-2x mb-2 opacity-75"></i>
-                          <h4 className="mb-1 fw-bold">{analysisData.er_distribution.find(er => er.name === 'Above 10')?.count || 0}</h4>
-                          <p className="mb-0 small">High ER (&gt;10%)</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                     {/* Primary Metrics Row */}
-                <div className="row mb-4">
-                  {/* <div className="col-lg-3 col-md-6 mb-3">
-                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                      <div className="card-body text-white">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_followers)}</h3>
-                            <p className="mb-0 opacity-75">Total Followers</p>
-                            <small className="opacity-75">Cumulative reach</small>
-                          </div>
-                          <div className="text-end">
-                            <i className="fas fa-users fa-2x opacity-75"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div> */}
-                  
-                  <div className="col-lg-3 col-md-6 mb-3">
+                     <div className="col-lg-3 col-md-6 mb-3">
                     <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
                       <div className="card-body text-white">
                         <div className="d-flex justify-content-between align-items-center">
@@ -613,6 +544,86 @@ const HashtagPerformancePage = () => {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* <div className="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-info text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-thumbs-up fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{formatNumber(analysisData.avg_likes)}</h4>
+                          <p className="mb-0 small">Avg Likes</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+             
+                  
+                  <div className="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <div className="card bg-dark text-white border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="text-center">
+                          <i className="fas fa-fire fa-2x mb-2 opacity-75"></i>
+                          <h4 className="mb-1 fw-bold">{analysisData.er_distribution.find(er => er.name === 'Above 10')?.count || 0}</h4>
+                          <p className="mb-0 small">High ER (&gt;10%)</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div> */}
+                </div>
+
+                     {/* Primary Metrics Row */}
+                <div className="row mb-4">
+                  {/* <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_followers)}</h3>
+                            <p className="mb-0 opacity-75">Total Followers</p>
+                            <small className="opacity-75">Cumulative reach</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-users fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> */}
+                  
+                  {/* <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_engagements)}</h3>
+                            <p className="mb-0 opacity-75">Total Engagements</p>
+                            <small className="opacity-75">Likes + Comments + Shares</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-heart fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-lg-3 col-md-6 mb-3">
+                    <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                      <div className="card-body text-white">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h3 className="mb-1 fw-bold">{formatNumber(analysisData.total_plays)}</h3>
+                            <p className="mb-0 opacity-75">Total Video Plays</p>
+                            <small className="opacity-75">Video content views</small>
+                          </div>
+                          <div className="text-end">
+                            <i className="fas fa-play-circle fa-2x opacity-75"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> */}
                   
                   {/* <div className="col-lg-3 col-md-6 mb-3">
                     <div className="card border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
@@ -855,13 +866,13 @@ const HashtagPerformancePage = () => {
         >
           <div className="row mb-3">
             <div className="col-md-6 d-flex gap-3 align-items-center">
-              <input
+              {/* <input
                 type="text"
                 className="form-control"
                 placeholder="Search posts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              /> */}
               <select
                 id="hashtagFilterSimple"
                 className="form-select"
@@ -896,7 +907,7 @@ const HashtagPerformancePage = () => {
                     <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Influencer</th>
                     <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post</th>
                     {/* <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post Type</th> */}
-                    <th style={{ width: '150px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Interactions</th>
+                    {/* <th style={{ width: '150px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Interactions</th> */}
                     <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Engagement</th>
                     <th style={{ padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Details</th>
                   </tr>
@@ -910,7 +921,7 @@ const HashtagPerformancePage = () => {
                       <td style={{ padding: '1.5rem' }}>
                         <div className="d-flex align-items-center">
                           <img 
-                            src={post.influencer?.instagram?.profile_pic_url || '/images/default-avatar.jpg'} 
+                            src={post.influencer?.profile_pic_url || '/images/default-avatar.jpg'} 
                             alt={post.influencer?.fullname || 'User Profile'}
                             className="rounded-circle me-3"
                             style={{ width: '45px', height: '45px', objectFit: 'cover' }}
@@ -919,8 +930,8 @@ const HashtagPerformancePage = () => {
                             }}
                           />
                           <div>
-                            <div className="fw-semibold" style={{ fontSize: '16px' }}>{post.influencer?.handle || post.influencer?.instagram?.handle || 'Unknown'}</div>
-                            <div className="text-muted" style={{ fontSize: '14px' }}>{post.influencer?.fullname || 'No name available'}</div>
+                            <div className="fw-semibold" style={{ fontSize: '16px' }}>{post.influencer?.username || post.influencer?.instagram?.handle || 'Unknown'}</div>
+                            <div className="text-muted" style={{ fontSize: '14px' }}>{post.influencer?.full_name || 'No name available'}</div>
                             <div className="mt-2">
                               {(post.influencer?.is_verified || post.influencer?.instagram?.is_verified) && (
                                 <span className="badge bg-primary" style={{ fontSize: '12px' }}>
@@ -971,7 +982,7 @@ const HashtagPerformancePage = () => {
                         </span>
                         <div className="text-muted mt-2" style={{ fontSize: '13px' }}>Organic</div>
                       </td> */}
-                      <td style={{ padding: '1.5rem' }}>
+                      {/* <td style={{ padding: '1.5rem' }}>
                         <button 
                           className="btn btn-outline-primary btn-sm"
                           onClick={() => handleViewInteractions(post._id?.$oid || post._id)}
@@ -981,7 +992,7 @@ const HashtagPerformancePage = () => {
                           <i className="fas fa-chart-line me-1"></i>
                           View Interactions
                         </button>
-                      </td>  
+                      </td>   */}
                       <td style={{ padding: '1.5rem' }}>
                         <div className="d-flex align-items-center justify-content-start gap-4">
                                                   <div className="d-flex flex-column gap-3">
@@ -1010,10 +1021,10 @@ const HashtagPerformancePage = () => {
                             <i className="far fa-calendar text-muted me-2" style={{ fontSize: '14px' }}></i>
                             <span style={{ fontSize: '15px' }}>{post.created_timestamp_formatted}</span>
                           </div>
-                          <div className="d-flex align-items-center mb-3">
+                          {/* <div className="d-flex align-items-center mb-3">
                             <i className="fas fa-users text-muted me-2" style={{ fontSize: '14px' }}></i>
                             <span style={{ fontSize: '15px' }}>{formatNumber(post.total_play || 0)}</span>
-                          </div>
+                          </div> */}
                           {post.location && post.location.name && (
                             <div className="d-flex align-items-center mb-3">
                               <i className="fas fa-map-marker-alt text-danger me-2" style={{ fontSize: '14px' }}></i>
@@ -1130,75 +1141,75 @@ const HashtagPerformancePage = () => {
                 </tbody>
               </table>
 
-              {/* Load More Button */}
-              {!loading && totalPages > 0 && currentPage < totalPages && (
-                <div className="text-center mt-4">
-                  <button 
-                    className="btn btn-outline-primary"
-                    onClick={loadMoreData}
-                    disabled={loading}
-                  >
-                    <i className="fas fa-chevron-down me-2"></i>
-                    Load {itemsPerPage} More
-                  </button>
-                </div>
-              )}
-
-              {/* Page Navigation */}
-              {!loading && totalPages > 1 && (
-                <div className="d-flex justify-content-center align-items-center mt-4 gap-3">
-                  <button 
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={() => {
-                      if (currentPage > 1) {
-                        setCurrentPage(1)
-                        // Reset to first page
-                        const loadFirstPage = async () => {
-                          try {
-                            setLoading(true)
-                            const response = await CampaignContentsService.getCampaignContents(currentHashtag, 1, itemsPerPage)
-                            if (response.success) {
-                              setAllPosts(response.data.posts)
-                              const analyticsData = processPostsIntoAnalytics(response.data.posts, currentHashtag)
-                              setCampaignData([analyticsData])
-                              setCurrentPage(1)
+              {/* Pagination Controls - Unified with analytics */}
+              {!loading && totalPages > 0 && (
+                <div className="d-flex flex-column align-items-center mt-4 gap-2">
+                  {/* Page Navigation */}
+                  {totalPages > 1 && (
+                    <div className="d-flex justify-content-center align-items-center gap-3">
+                      <button 
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => {
+                          if (currentPage > 1) {
+                            setCurrentPage(1)
+                            const loadFirstPage = async () => {
+                              try {
+                                setLoading(true)
+                                const response = await CampaignContentsService.getCampaignContents(currentHashtag, 1, itemsPerPage)
+                                if (response.success) {
+                                  setAllPosts(response.data.posts)
+                                  const analyticsData = processPostsIntoAnalytics(response.data.posts, currentHashtag)
+                                  setCampaignData([analyticsData])
+                                  setCurrentPage(1)
+                                }
+                              } catch (err) {
+                                console.error('Error loading first page:', err)
+                              } finally {
+                                setLoading(false)
+                              }
                             }
-                          } catch (err) {
-                            console.error('Error loading first page:', err)
-                          } finally {
-                            setLoading(false)
+                            loadFirstPage()
                           }
-                        }
-                        loadFirstPage()
-                      }
-                    }}
-                    disabled={currentPage === 1 || loading}
-                  >
-                    <i className="fas fa-chevron-left me-1"></i>
-                    First
-                  </button>
-                  
-                  <span className="badge bg-primary fs-6 px-3 py-2">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  
-                  <button 
-                    className="btn btn-outline-primary btn-sm"
-                    onClick={loadMoreData}
-                    disabled={currentPage >= totalPages || loading}
-                  >
-                    Next
-                    <i className="fas fa-chevron-right ms-1"></i>
-                  </button>
-                </div>
-              )}
-
-              {/* Pagination Info */}
-              {!loading && totalCount > 0 && (
-                <div className="text-center mt-3">
-                  <small className="text-muted">
-                    Showing {allPosts.length} of {totalCount} posts
-                  </small>
+                        }}
+                        disabled={currentPage === 1 || loading}
+                      >
+                        <i className="fas fa-chevron-left me-1"></i>
+                        First
+                      </button>
+                      <span className="badge bg-primary fs-6 px-3 py-2">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <button 
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={loadMoreData}
+                        disabled={currentPage >= totalPages || loading}
+                      >
+                        Next
+                        <i className="fas fa-chevron-right ms-1"></i>
+                      </button>
+                    </div>
+                  )}
+                  {/* Load More Button */}
+                  {currentPage < totalPages && (
+                    <div className="text-center">
+                      <button 
+                        className="btn btn-outline-primary"
+                        onClick={loadMoreData}
+                        disabled={loading}
+                      >
+                        <i className="fas fa-chevron-down me-2"></i>
+                        Load {itemsPerPage} More
+                      </button>
+                    </div>
+                  )}
+                  {/* Pagination Info */}
+                  {totalCount > 0 && (
+                    <div className="text-center mt-2">
+                      <small className="text-muted">
+                        Showing {allPosts.length} of {totalCount} posts
+                      </small>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1218,8 +1229,8 @@ const HashtagPerformancePage = () => {
       <InstagramCommentsModal
         show={showCommentsModal}
         onHide={() => setShowCommentsModal(false)}
-        interactions={modalInteractions}
-        loading={modalLoading}
+        interactions={[]}
+        loading={false}
       />
     </>
   )
