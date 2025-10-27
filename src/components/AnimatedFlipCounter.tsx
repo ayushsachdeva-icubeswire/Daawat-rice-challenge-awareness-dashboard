@@ -47,7 +47,7 @@ class FlipDigit {
   update(val: string | number, forceAnimation: boolean = false) {
     const valStr = val.toString()
     const hasChanged = valStr !== this.currentValue
-    
+
     if (hasChanged || forceAnimation) {
       this.back.setAttribute('data-value', this.currentValue)
       this.bottom.setAttribute('data-value', this.currentValue)
@@ -120,30 +120,30 @@ class FlipCounterClass {
   setValueWithAnimation(newValue: number, oldValue: number) {
     const newStr = newValue.toString()
     const oldStr = oldValue.toString()
-    
+
     // Pad strings to same length for comparison
     const maxLength = Math.max(newStr.length, oldStr.length)
     const paddedNew = newStr.padStart(maxLength, '0')
     const paddedOld = oldStr.padStart(maxLength, '0')
-    
+
     // If we need more digits, re-render
     if (newStr.length > this.digits.length) {
       this.value = newValue
       this.render()
       return
     }
-    
+
     this.value = newValue
-    
+
     // Update each digit, animating only those that changed
     for (let i = 0; i < this.digits.length; i++) {
       const digitIndex = paddedNew.length - this.digits.length + i
       const newDigit = digitIndex >= 0 ? paddedNew[digitIndex] : '0'
       const oldDigit = digitIndex >= 0 && digitIndex < paddedOld.length ? paddedOld[digitIndex] : '0'
-      
+
       // Only animate if the digit actually changed
       const shouldAnimate = newDigit !== oldDigit
-      
+
       if (shouldAnimate) {
         this.digits[i].update(newDigit, true) // Force animation for changed digits
       } else {
@@ -160,7 +160,7 @@ class FlipCounterClass {
       this.render()
       return
     }
-    
+
     this.value = newValue
     for (let i = 0; i < this.digits.length; i++) {
       const digitIndex = str.length - this.digits.length + i
@@ -170,9 +170,9 @@ class FlipCounterClass {
   }
 }
 
-const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({ 
-  progressType, 
-  label, 
+const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
+  progressType,
+  label,
   className = '',
   animationDuration = 5000, // 5 seconds default
   pollInterval = 10000 // 10 seconds default
@@ -181,7 +181,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
   const counterInstanceRef = useRef<FlipCounterClass | null>(null)
   const animationIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const pollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  
+
   const [currentProgressData, setCurrentProgressData] = useState<ProgressData | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [lastDisplayedValue, setLastDisplayedValue] = useState<number>(0)
@@ -194,7 +194,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
       console.log(`${progressType}: Calling API...`)
       const response = await ProgressService.getChallengerProgress()
       const progressData = response.data[progressType]
-      
+
       if (progressData) {
         console.log(`${progressType}: API response received:`, progressData)
         setCurrentProgressData(progressData)
@@ -215,7 +215,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
   // Schedule next API poll - simplified to avoid dependency issues
   const scheduleNextPoll: () => void = useCallback(() => {
     console.log(`${progressType}: Scheduling next API poll in ${pollInterval}ms`)
-    
+
     if (pollTimeoutRef.current) {
       clearTimeout(pollTimeoutRef.current)
     }
@@ -224,7 +224,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
       try {
         console.log(`${progressType}: Timer triggered - Fetching new progress data...`)
         const newData = await fetchProgressData()
-        
+
         if (newData) {
           console.log(`${progressType}: API returned data:`, {
             currentValue: newData.currentValue,
@@ -232,7 +232,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
             difference: newData.difference,
             lastDisplayed: lastDisplayedValue
           })
-          
+
           // Check if we're currently animating
           if (isAnimating) {
             console.log(`${progressType}: Still animating, rescheduling poll`)
@@ -240,7 +240,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
             setTimeout(() => scheduleNextPollRef.current?.(), 2000)
             return
           }
-          
+
           // Check if data has been updated since last animation
           // Only consider it new data if the currentValue is different from what we last displayed
           const currentLastDisplayed = lastDisplayedValueRef.current
@@ -253,7 +253,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
             console.log(`${progressType}: NEW data detected, animating from ${currentLastDisplayed} to ${newData.currentValue}`)
             const actualDifference = newData.currentValue - currentLastDisplayed
             setCurrentProgressData(newData)
-            
+
             if (animateCounterRef.current) {
               animateCounterRef.current(currentLastDisplayed, newData.currentValue, actualDifference)
             }
@@ -288,7 +288,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
   // Animate counter from previousValue to currentValue
   const animateCounter: (fromValue: number, toValue: number, difference: number) => void = useCallback((fromValue: number, toValue: number, difference: number) => {
     console.log(`${progressType}: animateCounter called with fromValue: ${fromValue}, toValue: ${toValue}, difference: ${difference}`)
-    
+
     // Check if there's no change to animate
     if (fromValue === toValue) {
       console.log(`${progressType}: No animation needed (fromValue === toValue), setting value to: ${toValue}`)
@@ -300,7 +300,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
       lastDisplayedValueRef.current = toValue
       // Still schedule next poll to check for updates
       console.log(`${progressType}: Scheduling next poll after no-animation case`)
-      
+
       // Use setTimeout to ensure state updates are processed
       setTimeout(() => {
         console.log(`${progressType}: Executing scheduled poll from no-animation case`)
@@ -331,41 +331,41 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
       currentStep++
       const previousValue = currentValue
       currentValue = Math.round(fromValue + (stepValue * currentStep))
-      
+
       // Ensure we don't exceed the target value (handle both positive and negative differences)
       const reachedTarget = (difference > 0 && currentValue >= toValue) || (difference < 0 && currentValue <= toValue) || currentStep >= steps
-      
+
       console.log(`${progressType}: Step ${currentStep}/${steps} - currentValue: ${currentValue}, toValue: ${toValue}, reachedTarget: ${reachedTarget}`)
-      
+
       if (reachedTarget) {
         currentValue = toValue
         if (counterInstanceRef.current) {
           // Use digit-level animation for the final value
           counterInstanceRef.current.setValueWithAnimation(currentValue, previousValue)
         }
-        
+
         // Update the last displayed value
         setLastDisplayedValue(currentValue)
         lastDisplayedValueRef.current = currentValue
-        
+
         if (animationIntervalRef.current) {
           clearInterval(animationIntervalRef.current)
           animationIntervalRef.current = null
         }
-        
+
         console.log(`${progressType}: Animation completed, reached value: ${currentValue}`)
-        
+
         // Use setTimeout to ensure state updates are processed before scheduling next poll
         setTimeout(() => {
           setIsAnimating(false)
-          
+
           console.log(`${progressType}: States reset, scheduling next API poll after animation completion`)
           // Schedule next API call after animation completes and states are updated
           if (scheduleNextPollRef.current) {
             scheduleNextPollRef.current()
           }
         }, 100) // Small delay to ensure state updates
-        
+
         return
       }
 
@@ -387,17 +387,17 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
       const initialData = await fetchProgressData()
       if (initialData) {
         console.log(`${progressType}: Initializing with data:`, initialData)
-        
+
         // Initialize counter with previous value
         const startValue = initialData.previousValue
         setLastDisplayedValue(startValue)
         lastDisplayedValueRef.current = startValue
-        
+
         const counter = new FlipCounterClass(containerRef.current!, startValue)
         counterInstanceRef.current = counter
 
         console.log(`${progressType}: Starting initial animation from ${initialData.previousValue} to ${initialData.currentValue}`)
-        
+
         // Start animation from previous to current
         animateCounter(initialData.previousValue, initialData.currentValue, initialData.difference)
       } else {
@@ -431,35 +431,111 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
   // to avoid duplicate animations
 
   return (
-    <div className={`card shadow-sm h-100 ${className}`}>
-      <div className="card-body d-flex flex-column justify-content-center align-items-center text-center p-4">
-        <div className="flip-counter-container w-100">
-          <div className="d-flex gap-2 justify-content-center mb-3">
-            <div ref={containerRef} className="flip-clock"></div>
-          </div>
-          <h6 className="card-title mb-2 fw-semibold">
-            {label}
-            {isAnimating && <span className="ms-2 text-primary">🔄</span>}
-          </h6>
-          {currentProgressData && (
-            <div className="text-center mt-2">
-              <small className="text-muted">
-                <div>
-                  <span className={`badge ${currentProgressData.difference > 0 ? 'bg-success' : currentProgressData.difference < 0 ? 'bg-danger' : 'bg-secondary'}`}>
-                    {/* {currentProgressData.difference > 0 ? '+' : ''}{currentProgressData.difference} */}
-                  </span>
-                  <div className="mt-1">
-                    <small className="text-muted">
-                      {/* {currentProgressData.previousValue} → {currentProgressData.currentValue} */}
-                    </small>
-                  </div>
-                </div>
-              </small>
-            </div>
-          )}
-        </div>
+    <div
+  className={`card h-100 border-0 ${className}`}
+  style={{
+    background: 'linear-gradient(180deg, #ffffff 0%, #f7f7f7 100%)',
+    border: '1px solid #e6e6e6',
+    boxShadow:
+      '0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+    position: 'relative',
+  }}
+>
+  {/* Top thin highlight line */}
+  <div
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '2px',
+      background: 'linear-gradient(to right, #d4af37, transparent)',
+      opacity: 0.5,
+    }}
+  ></div>
+
+  <div className="card-body d-flex flex-column justify-content-center align-items-center text-center p-4">
+    {/* Counter */}
+    <div className="flip-counter-container w-100 mb-3">
+      <div className="d-flex gap-2 justify-content-center">
+        <div ref={containerRef} className="flip-clock"></div>
       </div>
     </div>
+
+    {/* Subtle separator line */}
+    <div
+      style={{
+        width: '40%',
+        height: '2px',
+        background: 'linear-gradient(to right, transparent, #c9a73b, transparent)',
+        marginBottom: '12px',
+      }}
+    ></div>
+
+    {/* Label */}
+    <h6
+      className="card-title fw-semibold mb-0"
+      style={{
+        color: '#2e2e2e',
+        fontSize: '0.95rem',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+      }}
+    >
+      {label}
+      {isAnimating && <span className="ms-2 text-primary">🔄</span>}
+    </h6>
+
+    {/* Divider below label */}
+    <div
+      style={{
+        width: '30%',
+        height: '1px',
+        backgroundColor: '#e0e0e0',
+        marginTop: '10px',
+      }}
+    ></div>
+
+    {/* Sub-info */}
+    {currentProgressData && (
+      <div className="text-center mt-2">
+        <small
+          className="text-muted"
+          style={{
+            fontSize: '0.8rem',
+            letterSpacing: '0.3px',
+            opacity: 0.8,
+          }}
+        >
+          <span
+            className={`badge ${
+              currentProgressData.difference > 0
+                ? 'bg-success'
+                : currentProgressData.difference < 0
+                ? 'bg-danger'
+                : 'bg-secondary'
+            }`}
+          ></span>
+        </small>
+      </div>
+    )}
+  </div>
+
+  {/* Bottom subtle accent strip */}
+  <div
+    style={{
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      width: '100%',
+      height: '3px',
+      background: 'linear-gradient(to right, transparent, #d4af37, transparent)',
+      opacity: 0.3,
+    }}
+  ></div>
+</div>
+
+
   )
 }
 
