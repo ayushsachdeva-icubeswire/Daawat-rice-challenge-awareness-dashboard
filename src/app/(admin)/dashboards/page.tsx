@@ -24,6 +24,13 @@ const page = () => {
   const [campaignPosts, setCampaignPosts] = useState<PostData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentHashtag, setCurrentHashtag] = useState('all')
+  const staticHashtags = [
+    { value: 'all', label: 'All Hashtags', display: 'All Hashtags' },
+    { value: 'onlydaawatnovember', label: '#onlydaawatnovember', display: '#onlydaawatnovember' },
+    { value: 'OnlyRiceNovember', label: '#onlyricenovember', display: '#onlyricenovember' },
+    { value: 'riceyourawareness', label: '#riceyourawareness', display: '#riceyourawareness' }
+  ]
   
   // Dashboard data state
   const [dashboardData, setDashboardData] = useState<DashboardStats | null>(null)
@@ -60,20 +67,32 @@ const page = () => {
     const fetchCampaignContents = async () => {
       try {
         setIsLoading(true)
-        const response = await CampaignContentsService.getCampaignContents('daawatbiryani', 1, 10)
+        let hashtagParam = currentHashtag
+        let hashtagParamsArr: string[] = []
+        if (currentHashtag === 'all') {
+          hashtagParamsArr = staticHashtags.filter(h => h.value !== 'all').map(h => h.value)
+        }
+        let response
+        if (currentHashtag === 'all') {
+          response = await CampaignContentsService.getMultipleHashtagsPerformance(hashtagParamsArr, 1, 10)
+        } else {
+          response = await CampaignContentsService.getCampaignContents(hashtagParam, 1, 10)
+        }
         if (response.success && response.data.posts) {
           setCampaignPosts(response.data.posts)
+        } else {
+          setCampaignPosts([])
         }
       } catch (err) {
         setError('Failed to fetch campaign contents')
         console.error('Error fetching campaign contents:', err)
+        setCampaignPosts([])
       } finally {
         setIsLoading(false)
       }
     }
-
     fetchCampaignContents()
-  }, [])
+  }, [currentHashtag])
 
   // Fetch challengers on component mount
   useEffect(() => {
@@ -198,6 +217,25 @@ const page = () => {
           />
         </Col> */}
         <Col xl={6} lg={12} md={12}>
+          {/* <div className="mb-3 d-flex align-items-center gap-3">
+            <label htmlFor="dashboardHashtagFilter" className="form-label fw-semibold mb-0">
+              <i className="fas fa-hashtag text-primary me-2"></i>
+              Filter Hashtag:
+            </label>
+            <select
+              id="dashboardHashtagFilter"
+              className="form-select"
+              style={{ maxWidth: '250px' }}
+              value={currentHashtag}
+              onChange={e => setCurrentHashtag(e.target.value)}
+            >
+              {staticHashtags.map(hashtag => (
+                <option key={hashtag.value} value={hashtag.value}>
+                  {hashtag.display}
+                </option>
+              ))}
+            </select>
+          </div> */}
           <PostsList 
             posts={campaignPosts}
             title="Recent Posts"

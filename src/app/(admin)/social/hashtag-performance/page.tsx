@@ -12,7 +12,8 @@ const HashtagPerformancePage = () => {
   const [campaignData, setCampaignData] = useState<CampaignContent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [currentHashtag] = useState('daawatbiryani')
+  const [currentHashtag, setCurrentHashtag] = useState('all')
+  const [selectedHashtag, setSelectedHashtag] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(8)
   const [totalCount, setTotalCount] = useState(0)
@@ -76,13 +77,21 @@ const HashtagPerformancePage = () => {
     },
   ]
 
+  // Static hashtags for filter
+  const staticHashtags = [
+    { value: 'all', label: 'All Hashtags', display: 'All Hashtags' },
+    { value: 'onlydaawatnovember', label: '#onlydaawatnovember', display: '#onlydaawatnovember' },
+    { value: 'OnlyRiceNovember', label: '#onlyricenovember', display: '#onlyricenovember' },
+    { value: 'riceyourawareness', label: '#riceyourawareness', display: '#riceyourawareness' }
+  ]
+
   // Fetch campaign contents and analysis from API
   useEffect(() => {
     const loadCampaignData = async () => {
       try {
         setLoading(true)
         setError(null)
-        
+
         // For now, let's use mock data that matches your API response structure
         // You can replace this with actual API calls later
         const mockApiResponse = {
@@ -94,12 +103,24 @@ const HashtagPerformancePage = () => {
           },
           "message": "Success"
         }
-        
+
         // Call both APIs with individual error handling
         let contentsResponse, analysisResponse
-        
+
+
+        // If 'all' is selected, pass hashtags as array params
+        let hashtagParam = currentHashtag
+        let hashtagParamsArr: string[] = []
+        if (currentHashtag === 'all') {
+          hashtagParamsArr = staticHashtags.filter(h => h.value !== 'all').map(h => h.value)
+        }
+
         try {
-          contentsResponse = await CampaignContentsService.getCampaignContents(currentHashtag, 1, itemsPerPage)
+          if (currentHashtag === 'all') {
+            contentsResponse = await CampaignContentsService.getMultipleHashtagsPerformance(hashtagParamsArr, 1, itemsPerPage)
+          } else {
+            contentsResponse = await CampaignContentsService.getCampaignContents(hashtagParam, 1, itemsPerPage)
+          }
           // If API fails, you can use mock data structure
           if (!contentsResponse?.success) {
             contentsResponse = mockApiResponse
@@ -108,27 +129,36 @@ const HashtagPerformancePage = () => {
           console.error('Contents API Error:', contentsError)
           contentsResponse = mockApiResponse
         }
-        
+
         try {
-          analysisResponse = await CampaignContentsService.getCampaignAnalysis(currentHashtag)
+          if (currentHashtag === 'all') {
+            // Build query string for multiple hashtags
+            const queryString = hashtagParamsArr.map((tag, idx) => `hashtags[${idx}]=${tag}`).join('&')
+            const response = await fetch(`https://apis.icubeswire.co/api/v1/campaign-contents/analysis?${queryString}`)
+            if (!response.ok) throw new Error(`API call failed: ${response.status} ${response.statusText}`)
+            const analysisData = await response.json()
+            analysisResponse = { success: true, data: analysisData, message: 'Campaign analysis data retrieved successfully' }
+          } else {
+            analysisResponse = await CampaignContentsService.getCampaignAnalysis(hashtagParam)
+          }
         } catch (analysisError) {
           console.error('Analysis API Error:', analysisError)
         }
-        
+
         // Handle contents response
         if (contentsResponse?.success && contentsResponse.data.posts) {
           // Store pagination metadata
           setTotalCount(contentsResponse.data.total_count || 0)
           setTotalPages(contentsResponse.data.total_pages || 0)
           setAllPosts(contentsResponse.data.posts)
-          
+
           // Reset expanded states
           setExpandedCaptions(new Set())
           setExpandedHashtags(new Set())
-          
+
           // Process the posts data into analytics format if there are posts
           if (contentsResponse.data.posts.length > 0) {
-            const analyticsData = processPostsIntoAnalytics(contentsResponse.data.posts, currentHashtag)
+            const analyticsData = processPostsIntoAnalytics(contentsResponse.data.posts, hashtagParam)
             setCampaignData([analyticsData])
           } else {
             setCampaignData([])
@@ -141,14 +171,14 @@ const HashtagPerformancePage = () => {
           setTotalPages(0)
           setCurrentPage(1)
         }
-        
+
         // Handle analysis response
         if (analysisResponse?.success) {
           setAnalysisData(analysisResponse.data)
         } else {
           setAnalysisData(null)
         }
-        
+
       } catch (err) {
         setError('Failed to fetch some campaign data. Please try again.')
         console.error('General API Error:', err)
@@ -161,7 +191,7 @@ const HashtagPerformancePage = () => {
     }
 
     loadCampaignData()
-  }, [currentHashtag, itemsPerPage])
+  }, [currentHashtag, itemsPerPage, selectedHashtag])
 
   // Function to load more pages
   const loadMoreData = async () => {
@@ -332,74 +362,125 @@ const HashtagPerformancePage = () => {
           </div>
         )}
 
-        {/* Hashtag Selection */}
+        {/* Hashtag Selection Filter */}
         {!loading && (
           <div className="row mb-4">
-            <div className="col-md-6">
-              {/* <div className="card">
+            {/* <div className="col-md-8">
+              <div className="card border-0 shadow-sm">
                 <div className="card-body">
-                  <label htmlFor="hashtagInput" className="form-label">Track Hashtag Performance</label>
-                  <div className="input-group">
-                    <span className="input-group-text">#</span>
-                    <input
-                      id="hashtagInput"
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter hashtag (e.g., daawatbiryani)"
-                      value={currentHashtag}
-                      onChange={(e) => setCurrentHashtag(e.target.value)}
-                    />
-                    <button 
-                      className="btn btn-primary" 
-                      type="button"
-                      onClick={() => {
-                        // Force re-fetch by updating state
-                        const trimmedHashtag = currentHashtag.trim()
-                        if (trimmedHashtag) {
-                          setCurrentHashtag(trimmedHashtag)
+                  <div className="row align-items-center">
+                    <div className="col-md-4">
+                      <label htmlFor="hashtagFilter" className="form-label fw-semibold mb-2">
+                        <i className="fas fa-hashtag text-primary me-2"></i>
+                        Select Campaign Hashtag
+                      </label>
+                      <select
+                        id="hashtagFilter"
+                        className="form-select form-select-lg"
+                        value={currentHashtag}
+                        onChange={(e) => {
+                          const newHashtag = e.target.value
+                          setCurrentHashtag(newHashtag)
+                          setSelectedHashtag(newHashtag)
                           // Clear previous data to show loading
                           setCampaignData([])
-                        }
-                      }}
-                      disabled={loading || !currentHashtag.trim()}
-                    >
-                      {loading ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <i className="fas fa-search me-2"></i>
-                          Analyze
-                        </>
-                      )}
-                    </button>
+                          setAllPosts([])
+                        }}
+                        style={{ borderRadius: '10px' }}
+                      >
+                        {staticHashtags.map((hashtag) => (
+                          <option key={hashtag.value} value={hashtag.value}>
+                            {hashtag.display}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="mt-4">
+                        <div className="d-flex align-items-center">
+                          <div className="me-3">
+                            <span className="badge bg-primary-subtle text-primary px-3 py-2 fs-6">
+                              Currently Analyzing: <strong>{staticHashtags.find(h => h.value === currentHashtag)?.label || `#${currentHashtag}`}</strong>
+                            </span>
+                          </div>
+                          {campaignData.length > 0 ? (
+                            <span className="badge bg-success px-3 py-2">
+                              <i className="fas fa-check me-1"></i>
+                              API Data Loaded
+                            </span>
+                          ) : !loading ? (
+                            <span className="badge bg-warning px-3 py-2">
+                              <i className="fas fa-exclamation-triangle me-1"></i>
+                              Using Mock Data
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-2">
+                      <div className="mt-4">
+                        <button 
+                          className="btn btn-primary btn-lg w-100" 
+                          type="button"
+                          onClick={() => {
+                            // Force refresh current hashtag data
+                            setCampaignData([])
+                            setAllPosts([])
+                            setCurrentPage(1)
+                          }}
+                          disabled={loading}
+                          style={{ borderRadius: '10px' }}
+                        >
+                          {loading ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-sync-alt me-2"></i>
+                              Refresh
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <small className="form-text text-muted">
-                    Currently analyzing: <strong>#{currentHashtag}</strong>
-                    {campaignData.length > 0 && (
-                      <span className="badge bg-success ms-2">
-                        <i className="fas fa-check me-1"></i>
-                        API Data Loaded
-                      </span>
-                    )}
-                    {campaignData.length === 0 && !loading && (
-                      <span className="badge bg-warning ms-2">
-                        <i className="fas fa-exclamation-triangle me-1"></i>
-                        Using Mock Data
-                      </span>
-                    )}
-                  </small>
                 </div>
-              </div> */}
-            </div>
+              </div>
+            </div> */}
           </div>
         )}
 
         {/* Main Content - Only show when not loading */}
         {!loading && (
           <>
+            {/* Current Hashtag Banner */}
+            <div className="row mb-4">
+              {/* <div className="col-12">
+                <div className="alert alert-info border-0 shadow-sm" role="alert" style={{ background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' }}>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div className="d-flex align-items-center">
+                      <i className="fas fa-hashtag fa-2x text-primary me-3"></i>
+                      <div>
+                        <h5 className="alert-heading mb-1 text-primary">
+                          Campaign Analysis: {staticHashtags.find(h => h.value === currentHashtag)?.display || currentHashtag}
+                        </h5>
+                        <p className="mb-0 text-muted">
+                          Tracking performance for <strong>{staticHashtags.find(h => h.value === currentHashtag)?.label || `#${currentHashtag}`}</strong> across all social media platforms
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-end">
+                      <div className="badge bg-primary fs-6 px-3 py-2">
+                        {allPosts.length} Posts Analyzed
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div> */}
+            </div>
+
             {/* Campaign Analytics Dashboard */}
             {analysisData ? (
               <>
@@ -773,7 +854,7 @@ const HashtagPerformancePage = () => {
           description="Detailed view of all posts using this hashtag"
         >
           <div className="row mb-3">
-            <div className="col-md-6">
+            <div className="col-md-6 d-flex gap-3 align-items-center">
               <input
                 type="text"
                 className="form-control"
@@ -781,38 +862,25 @@ const HashtagPerformancePage = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-            </div>
-            <div className="col-md-6 text-end">
-              <div className="dropdown">
-                <button className="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                  <i className="fas fa-filter me-2"></i>Filters
-                </button>
-                <div className="dropdown-menu p-3" style={{ minWidth: '250px' }}>
-                  <h6 className="dropdown-header">Filter Options</h6>
-                  <div className="mb-2">
-                    <label className="form-label small">Sort By (Highest)</label>
-                    <select className="form-select form-select-sm">
-                      <option>Latest First</option>
-                      <option>Oldest First</option>
-                      <option>Highest Liked</option>
-                      <option>Highest Shared</option>
-                      <option>Highest Played</option>
-                    </select>
-                  </div>
-                  <div className="form-check">
-                    <input className="form-check-input" type="checkbox" id="verifiedOnly" />
-                    <label className="form-check-label small" htmlFor="verifiedOnly">
-                      Verified accounts only
-                    </label>
-                  </div>
-                  <div className="form-check">
-                    <input className="form-check-input" type="checkbox" id="videoOnly" />
-                    <label className="form-check-label small" htmlFor="videoOnly">
-                      Video posts only
-                    </label>
-                  </div>
-                </div>
-              </div>
+              <select
+                id="hashtagFilterSimple"
+                className="form-select"
+                style={{ maxWidth: '250px' }}
+                value={currentHashtag}
+                onChange={(e) => {
+                  const newHashtag = e.target.value
+                  setCurrentHashtag(newHashtag)
+                  setSelectedHashtag(newHashtag)
+                  setCampaignData([])
+                  setAllPosts([])
+                }}
+              >
+                {staticHashtags.map((hashtag) => (
+                  <option key={hashtag.value} value={hashtag.value}>
+                    {hashtag.display}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
