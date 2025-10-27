@@ -1,0 +1,1 @@
+import{j as d}from"./index-82rsXWI8.js";const p=({tag:s="div",type:r="bordered",className:a,color:e,size:t,children:n})=>{const o=s||"div";return d.jsx(o,{role:"status",className:`${r==="bordered"?"spinner-border":r==="grow"?"spinner-grow":""} ${e?`text-${e}`:"text-primary"} ${t?"avatar-"+t:""} ${a}`,children:n})};export{p as S};

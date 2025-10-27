@@ -46,7 +46,7 @@ const SocialAnalyticsPage = () => {
       try {
         setLoading(true)
         setError(null)
-        const data = await CampaignAnalyticsService.getCampaignAnalysis('837')
+        const data = await CampaignAnalyticsService.getCampaignAnalysis('1069')
         setAnalyticsData(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch analytics data')
@@ -65,7 +65,7 @@ const SocialAnalyticsPage = () => {
       try {
         setInfluencerLoading(true)
         setInfluencerError(null)
-        const data = await CampaignAnalyticsService.getInfluencerList('837', 1, itemsPerPage)
+        const data = await CampaignAnalyticsService.getInfluencerList('1069', 1, itemsPerPage)
         setInfluencerData(data)
         
         // Set pagination metadata
@@ -92,7 +92,7 @@ const SocialAnalyticsPage = () => {
     try {
       setInfluencerLoading(true)
       const nextPage = currentPage + 1
-      const data = await CampaignAnalyticsService.getInfluencerList('837', nextPage, itemsPerPage)
+      const data = await CampaignAnalyticsService.getInfluencerList('1069', nextPage, itemsPerPage)
       
       if (data?.data?.result && data.data.result.length > 0) {
         // Append new influencers to existing data
@@ -400,7 +400,7 @@ const SocialAnalyticsPage = () => {
                     const loadFirstPage = async () => {
                       try {
                         setInfluencerLoading(true)
-                        const data = await CampaignAnalyticsService.getInfluencerList('837', 1, itemsPerPage)
+                        const data = await CampaignAnalyticsService.getInfluencerList('1069', 1, itemsPerPage)
                         if (data?.data) {
                           setInfluencerData(data)
                           setCurrentPage(1)
