@@ -13,6 +13,9 @@ const StoriesPage = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalStories, setTotalStories] = useState(0)
+  // Modal state for viewing story image
+  const [showImageModal, setShowImageModal] = useState(false)
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null)
 
   // Fetch stories from API
   const fetchStories = async (page = 1) => {
@@ -258,7 +261,8 @@ const StoriesPage = () => {
                             transition: 'transform 0.2s ease-in-out'
                           }}
                           onClick={() => {
-                            window.open(story.storyLink, '_blank', 'noopener,noreferrer')
+                            setModalImageUrl(story.imageUrl)
+                            setShowImageModal(true)
                           }}
                           onMouseOver={(e) => {
                             e.currentTarget.style.transform = 'scale(1.05)'
@@ -266,7 +270,7 @@ const StoriesPage = () => {
                           onMouseOut={(e) => {
                             e.currentTarget.style.transform = 'scale(1)'
                           }}
-                          title="Click to open story on Instagram"
+                          title="Click to view story image"
                         />
                       ) : (
                         <div 
@@ -278,7 +282,8 @@ const StoriesPage = () => {
                             transition: 'background-color 0.2s ease-in-out'
                           }}
                           onClick={() => {
-                            window.open(story.storyLink, '_blank', 'noopener,noreferrer')
+                            setModalImageUrl(null)
+                            setShowImageModal(true)
                           }}
                           onMouseOver={(e) => {
                             e.currentTarget.style.backgroundColor = '#e9ecef'
@@ -286,7 +291,7 @@ const StoriesPage = () => {
                           onMouseOut={(e) => {
                             e.currentTarget.style.backgroundColor = '#f8f9fa'
                           }}
-                          title="Click to open story on Instagram"
+                          title="Click to view story image"
                         >
                           <i className="fas fa-image text-muted"></i>
                         </div>
@@ -401,6 +406,36 @@ const StoriesPage = () => {
             setCurrentPage(1)
           }}
         />
+      {/* Story Image Modal */}
+      {showImageModal && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}
+          tabIndex={-1}
+          role="dialog"
+          onClick={() => setShowImageModal(false)}
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            role="document"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Story Image</h5>
+                <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowImageModal(false)}></button>
+              </div>
+              <div className="modal-body text-center">
+                {modalImageUrl ? (
+                  <img src={modalImageUrl} alt="Story" style={{ minWidth: '50%', maxHeight: '60vh', borderRadius: '8px' }} />
+                ) : (
+                  <div className="text-muted">No image available for this story.</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </>
   )

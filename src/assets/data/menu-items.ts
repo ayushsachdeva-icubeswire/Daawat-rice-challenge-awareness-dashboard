@@ -51,12 +51,12 @@ export const MENU_ITEMS: MenuItemType[] = [
       },
     ],
   },
-  {
-    key: 'diet-plan',
-    label: 'Diet Plan',
-    icon: 'solar:chef-hat-broken',
-    url: '/diet-plan',
-  },
+  // {
+  //   key: 'diet-plan',
+  //   label: 'Diet Plan',
+  //   icon: 'solar:chef-hat-broken',
+  //   url: '/diet-plan',
+  // },
 
   // {
   //   key: 'overall-performance',
