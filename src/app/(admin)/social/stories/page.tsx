@@ -6,37 +6,49 @@ import { useState, useEffect } from 'react'
 import { formatNumber } from '@/utils/numberFormat'
 
 const StoriesPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState('all')
+  // const [selectedStatus, setSelectedStatus] = useState('all') // status filter (commented for future use)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [storiesData, setStoriesData] = useState<Story[]>([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalStories, setTotalStories] = useState(0)
+  const [stats, setStats] = useState<{ totalViews: number; totalLikes: number } | null>(null)
   // Modal state for viewing story image
   const [showImageModal, setShowImageModal] = useState(false)
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null)
 
-  // Fetch stories from API
-  const fetchStories = async (page = 1) => {
+  // Fetch stories from API with status
+  const fetchStories = async (page: number) => {
     try {
       setLoading(true)
-      const response = await getStories({ page, limit: 10 })
-      
+  // Always use selectedStatus from state (commented out)
+  // const params: any = { page, limit: 10, status: selectedStatus };
+  const params: any = { page, limit: 10 };
+      const response = await getStories(params);
       if (response.success) {
-        setStoriesData(response.data.stories)
-        setCurrentPage(response.data.pagination.currentPage)
-        setTotalPages(response.data.pagination.totalPages)
-        setTotalStories(response.data.pagination.total)
+        setStoriesData(response.data.stories);
+        setCurrentPage(response.data.pagination.currentPage);
+        setTotalPages(response.data.pagination.totalPages);
+        setTotalStories(response.data.pagination.total);
+        if (response.data.stats) {
+          setStats({
+            totalViews: response.data.stats.totalViews,
+            totalLikes: response.data.stats.totalLikes,
+          });
+        } else {
+          setStats(null);
+        }
       } else {
-        console.error('Failed to fetch stories:', response.message)
-        setStoriesData([])
+        console.error('Failed to fetch stories:', response.message);
+        setStoriesData([]);
+        setStats(null);
       }
     } catch (error) {
-      console.error('Error fetching stories:', error)
-      setStoriesData([])
+      console.error('Error fetching stories:', error);
+      setStoriesData([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -75,13 +87,14 @@ const StoriesPage = () => {
     image: story.imageUrl // Map imageUrl to image for backward compatibility
   }))
 
-  const filteredStories = mappedStories.filter(story => {
-    const matchesStatus = selectedStatus === 'all' || story.status.toLowerCase() === selectedStatus.toLowerCase()
-    return matchesStatus
-  })
+  // const filteredStories = mappedStories.filter(story => {
+  //   const matchesStatus = selectedStatus === 'all' || story.status.toLowerCase() === selectedStatus.toLowerCase()
+  //   return matchesStatus
+  // })
+  const filteredStories = mappedStories // status filtering disabled
 
-  const totalViews = storiesData.reduce((sum, story) => sum + story.views, 0)
-  const totalLikes = storiesData.reduce((sum, story) => sum + story.likes, 0)
+  const totalViews = stats ? stats.totalViews : 0;
+  const totalLikes = stats ? stats.totalLikes : 0;
   const totalInfluencers = new Set(storiesData.map(story => story.influencer.id)).size // Count unique influencers
   const activeStories = mappedStories.filter(story => story.status === 'Active').length
 
@@ -156,15 +169,21 @@ const StoriesPage = () => {
         >
           <div className="row mb-3">
             <div className="col-md-6">
-              <select 
+              {/* <select 
                 className="form-select"
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
+                onChange={(e) => {
+                  const newStatus = e.target.value;
+                  setSelectedStatus(newStatus);
+                  setCurrentPage(1);
+                  // Wait for state update before fetching
+                  setTimeout(() => fetchStories(1), 0);
+                }}
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="expired">Expired</option>
-              </select>
+              </select> */}
             </div>
             <div className="col-md-6 text-end">
               <button 
@@ -187,7 +206,7 @@ const StoriesPage = () => {
                   <th>Views</th>
                   <th>Likes</th>
                   <th>Posted</th>
-                  <th>Status</th>
+                  {/* <th>Status</th> */}
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -302,11 +321,11 @@ const StoriesPage = () => {
                       <span className="badge bg-success">{formatNumber(story.likes)}</span>
                     </td>
                     <td>{new Date(story.posted).toLocaleDateString()}</td>
-                    <td>
+                    {/* <td>
                       <span className={`badge ${story.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
                         {story.status}
                       </span>
-                    </td>
+                    </td> */}
                     <td>
                       <button 
                         className="btn btn-sm btn-outline-primary"
