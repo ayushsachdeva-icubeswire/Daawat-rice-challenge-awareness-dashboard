@@ -2,30 +2,28 @@ import { Card, CardBody, CardHeader } from 'react-bootstrap'
 import ReactApexChart from 'react-apexcharts'
 import { ApexOptions } from 'apexcharts'
 import Spinner from '@/components/Spinner'
-import { DashboardStats } from '@/services/dashboardService'
 // import { formatNumber } from '@/utils/numberFormat'
 
 interface PostsChartProps {
-  dashboardData?: DashboardStats | null
+  postGraphData?: { x: number; y: number }[]
   isLoading?: boolean
   error?: string | null
 }
 
 const PostsChart: React.FC<PostsChartProps> = ({ 
-  dashboardData, 
+  postGraphData = [],
   isLoading = false, 
   error = null 
 }) => {
   // Prepare chart data from API response or use fallback data
   const getChartData = () => {
-    if (dashboardData?.postGraphData?.itchotels && Array.isArray(dashboardData.postGraphData.itchotels)) {
+    if (Array.isArray(postGraphData) && postGraphData.length > 0) {
       // Convert timestamps to dates and prepare data for ApexCharts
-      const chartData = dashboardData.postGraphData.itchotels
-        .filter(point => point.y !== null)
+      const chartData = postGraphData
         .map(point => ({
           timestamp: point.x,
           date: new Date(point.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          value: point.y || 0
+          value: point.y
         }))
         .sort((a, b) => a.timestamp - b.timestamp)
 
@@ -35,7 +33,6 @@ const PostsChart: React.FC<PostsChartProps> = ({
         timestamps: chartData.map(item => item.timestamp)
       }
     }
-    
     // Fallback data if API data is not available
     return {
       categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],

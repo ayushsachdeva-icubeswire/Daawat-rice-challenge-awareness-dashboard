@@ -47,7 +47,7 @@ const RecentChallengers = ({
   isLoading = false,
   error = null,
   onTitleClick,
-  challengrsGraphData
+  // challengrsGraphData
 }: RecentChallengersProps) => {
   
   const getTypeColor = (type: string) => {
@@ -80,22 +80,22 @@ const RecentChallengers = ({
     }
   }
 
-  const getCategoryIcon = (category: string) => {
-    switch (category.toLowerCase()) {
-      case 'vegetarian':
-        return 'solar:leaf-broken'
-      case 'keto':
-        return 'solar:fire-broken'
-      case 'high protein':
-        return 'solar:dumbbell-broken'
-      case 'low carb':
-        return 'solar:scale-broken'
-      case 'mediterranean':
-        return 'solar:planet-broken'
-      default:
-        return 'solar:nutrition-broken'
-    }
-  }
+  // const getCategoryIcon = (category: string) => {
+  //   switch (category.toLowerCase()) {
+  //     case 'Vegetarian':
+  //       return 'solar:leaf-broken'
+  //     case 'Veg + Egg':
+  //       return 'solar:fire-broken'
+  //     case 'Veg + Meat':
+  //       return 'solar:dumbbell-broken'
+  //     case 'low carb':
+  //       return 'solar:scale-broken'
+  //     case 'mediterranean':
+  //       return 'solar:planet-broken'
+  //     default:
+  //       return 'solar:nutrition-broken'
+  //   }
+  // }
 
   const getStatusIcon = (isActive: boolean) => {
     return isActive ? 'solar:check-circle-broken' : 'solar:pause-circle-broken'
@@ -106,19 +106,19 @@ const RecentChallengers = ({
   }
 
   // Calculate totals from graph data
-  const getTotalsFromGraphData = () => {
-    if (!challengrsGraphData || challengrsGraphData.length === 0) {
-      return { totalCompleted: 0, totalInProgress: 0 }
-    }
+  // const getTotalsFromGraphData = () => {
+  //   if (!challengrsGraphData || challengrsGraphData.length === 0) {
+  //     return { totalCompleted: 0, totalInProgress: 0 }
+  //   }
     
-    const latest = challengrsGraphData[challengrsGraphData.length - 1]
-    return {
-      totalCompleted: latest.Completed,
-      totalInProgress: latest.InProgress
-    }
-  }
+  //   const latest = challengrsGraphData[challengrsGraphData.length - 1]
+  //   return {
+  //     totalCompleted: latest.Completed,
+  //     totalInProgress: latest.InProgress
+  //   }
+  // }
 
-  const { totalCompleted, totalInProgress } = getTotalsFromGraphData()
+  // const { totalCompleted, totalInProgress } = getTotalsFromGraphData()
 
   return (
     <Card className="h-100">
@@ -134,7 +134,7 @@ const RecentChallengers = ({
           <Badge bg="primary" pill>{challengers.length}</Badge>
         </CardHeader>
       )}
-      {challengrsGraphData && challengrsGraphData.length > 0 && (
+      {/* {challengrsGraphData && challengrsGraphData.length > 0 && (
         <div className="px-3 py-2 bg-light border-bottom">
           <Row className="text-center">
             <Col>
@@ -147,7 +147,7 @@ const RecentChallengers = ({
             </Col>
           </Row>
         </div>
-      )}
+      )} */}
       <CardBody className="p-0">
         <div style={{ maxHeight, overflowY: 'auto' }}>
           {isLoading ? (
@@ -174,13 +174,9 @@ const RecentChallengers = ({
                       <Col xs="auto">
                         <div 
                           className="avatar-sm rounded-circle d-flex align-items-center justify-content-center"
-                          style={{ backgroundColor: `${getTypeColor(challenger.type)}20` }}
+                          style={{ backgroundColor: `${getTypeColor(challenger.type)}20`, fontWeight: 600, fontSize: '1.1rem', color: getTypeColor(challenger.type) }}
                         >
-                          <IconifyIcon 
-                            icon={getCategoryIcon(challenger.category)} 
-                            className="fs-18"
-                            color={getTypeColor(challenger.type)}
-                          />
+                          {challenger.name?.charAt(0).toUpperCase()}
                         </div>
                       </Col>
                       <Col>

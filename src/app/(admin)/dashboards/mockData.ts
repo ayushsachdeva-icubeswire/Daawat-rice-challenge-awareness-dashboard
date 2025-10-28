@@ -441,7 +441,7 @@ export const getRecentPostsData = (limit: number = 10): PostData[] => {
       _id: { $oid: post.author.id },
       first_name: post.author.name.split(' ')[0] || '',
       last_name: post.author.name.split(' ')[1] || '',
-      fullname: post.author.name,
+  full_name: post.author.name,
       username: post.author.name.toLowerCase().replace(' ', '_'),
       handle: post.author.name.toLowerCase().replace(' ', '_'),
       platform: 'instagram',
@@ -449,7 +449,7 @@ export const getRecentPostsData = (limit: number = 10): PostData[] => {
       role_id: 1,
       categories: [],
       instagram: {
-        profile_pic_url: post.author.avatar,
+  profile_pic_url: post.author.avatar,
         follower_count: (Math.floor(Math.random() * 100000) + 10000).toString(),
         following_count: (Math.floor(Math.random() * 1000) + 100).toString(),
         media_count: Math.floor(Math.random() * 500) + 50,

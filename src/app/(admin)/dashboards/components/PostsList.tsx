@@ -129,8 +129,8 @@ const PostsList = ({
                         }}
                       >
                         <img 
-                          src={post.influencer.instagram?.profile_pic_url || '/images/users/user-1.jpg'}
-                          alt={post.influencer.fullname}
+                          src={post.influencer?.profile_pic_url || '/images/users/user-1.jpg'}
+                          alt={post.influencer.full_name}
                           style={{ 
                             width: '100%', 
                             height: '100%', 
@@ -169,20 +169,20 @@ const PostsList = ({
                             <span 
                               className="text-primary"
                               style={{ cursor: 'pointer', textDecoration: 'none' }}
-                              onClick={() => handleInstagramRedirect(post.influencer?.instagram?.handle || post.influencer?.username || '')}
+                              onClick={() => handleInstagramRedirect(post.influencer?.handle || post.influencer?.username || '')}
                               onMouseEnter={(e) => {
                                 e.currentTarget.style.textDecoration = 'underline'
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.textDecoration = 'none'
                               }}
-                              title={`Open @${post.influencer?.instagram?.handle || post.influencer?.username || ''} on Instagram`}
+                              title={`Open @${post.influencer?.handle || post.influencer?.username || ''} on Instagram`}
                             >
-                              @{String(post.influencer?.instagram?.handle || post.influencer?.username || 'Unknown')}
+                              @{String(post.influencer?.handle || post.influencer?.username || 'Unknown')}
                             </span>
                           </h6>
                           <div className="d-flex align-items-center text-muted small mb-1">
-                            <span className="me-2">{String(post.influencer?.fullname || '')}</span>
+                            <span className="me-2">{String(post.influencer?.full_name || '')}</span>
                             {/* <Badge bg="outline-primary" text="primary" className="me-2">
                               {post.is_video ? 'Video' : post.is_carousel ? 'Carousel' : 'Photo'}
                             </Badge> */}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { DIET_SUBCATEGORIES } from '@/assets/data/diet-subcategories'
 import ComponentContainerCard from '@/components/ComponentContainerCard'
 import PageTitle from '@/components/PageTitle'
 import Footer from '@/components/layout/Footer'
@@ -23,6 +24,12 @@ const ChallengersPage = () => {
     totalItems: 0,
     itemsPerPage: 10
   })
+  const [overview, setOverview] = useState([
+    { _id: 'Veg + Egg', count: 0 },
+    { _id: 'Vegetarian', count: 0 },
+    { _id: 'Veg + Meat', count: 0 },
+    { _id: 'Not downloaded', count: 0 }
+  ])
 
   // Load challengers from API
   useEffect(() => {
@@ -41,6 +48,18 @@ const ChallengersPage = () => {
           totalItems: response.totalItems || 0,
           itemsPerPage: filters.limit || 10
         })
+        if (response.overview) {
+          // Map and reorder overview: 'None' to 'Not downloaded' and move to 4th place
+          const mapped = response.overview.map(item =>
+            item._id === 'None' ? { ...item, _id: 'Not downloaded' } : item
+          )
+          const vegEgg = mapped.find(item => item._id === 'Veg + Egg')
+          const vegetarian = mapped.find(item => item._id === 'Vegetarian')
+          const vegMeat = mapped.find(item => item._id === 'Veg + Meat')
+          const notDownloaded = mapped.find(item => item._id === 'Not downloaded')
+          const reordered = [vegEgg, vegetarian, vegMeat, notDownloaded].filter((item): item is { _id: string; count: number } => !!item)
+          setOverview(reordered)
+        }
       } catch (error) {
         console.error('❌ Error fetching challengers:', error)
         showNotification({ message: 'Error fetching challengers', variant: 'danger' })
@@ -88,7 +107,21 @@ const ChallengersPage = () => {
   return (
     <>
       <PageTitle subName="Daawat" title="Challengers" />
-      
+
+      {/* Overview Cards */}
+      <div className="row mb-4">
+        {overview.map((item) => (
+          <div className="col-md-3 mb-2" key={item._id}>
+            <div className="card shadow-sm border-0 h-100">
+              <div className="card-body d-flex flex-column justify-content-center align-items-center">
+                <h6 className="mb-1 text-muted">{item._id}</h6>
+                <h3 className="mb-0 fw-bold">{item.count}</h3>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <ComponentContainerCard id="challengers-list" title="All Challengers" description="Manage and view all registered challengers">
         {/* Search and Filters */}
         <div className="row mb-4">
@@ -112,11 +145,23 @@ const ChallengersPage = () => {
               value={filters.category || ''}
               onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value || undefined }))}
             >
-              <option value="" disabled>All Categories</option>
+              <option value="" >All Categories</option>
               <option value="Vegetarian">Vegetarian</option>
               <option value="Veg + Egg">Veg + Egg</option>
               <option value="Veg + Meat">Veg + Meat</option>
             </select>
+          </div>
+          <div className="col-md-2">
+                 <select
+                         className="form-select"
+                         value={filters.subcategory || ''}
+                         onChange={(e) => setFilters(prev => ({ ...prev, subcategory: e.target.value || undefined }))}
+                       >
+                         <option value="">All Subcategories</option>
+                         {DIET_SUBCATEGORIES.map(subcategory => (
+                           <option key={subcategory} value={subcategory}>{subcategory}</option>
+                         ))}
+                       </select>
           </div>
           <div className="col-md-2">
             <select
@@ -245,7 +290,7 @@ const ChallengersPage = () => {
                             View
                           </button>
                         ) : (
-                          <span className="text-muted">No PDF</span>
+                          <span className="text-muted">No meal plan chosen</span>
                         )}
                       </td>
                     </tr>

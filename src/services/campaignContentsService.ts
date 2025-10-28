@@ -33,7 +33,8 @@ export interface Influencer {
   }
   first_name: string
   last_name: string
-  fullname: string
+  full_name: string
+  profile_pic_url?: string
   username?: string
   handle: string
   platform: string

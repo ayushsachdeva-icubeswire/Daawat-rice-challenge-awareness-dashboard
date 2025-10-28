@@ -187,7 +187,7 @@ const page = () => {
         </Col>
         <Col xl={6} lg={12} md={12}>
           <PostsChart 
-            dashboardData={dashboardData}
+            postGraphData={Array.isArray(dashboardData?.postGraphData) ? dashboardData.postGraphData : []}
             isLoading={dashboardLoading}
             error={dashboardError}
           />
