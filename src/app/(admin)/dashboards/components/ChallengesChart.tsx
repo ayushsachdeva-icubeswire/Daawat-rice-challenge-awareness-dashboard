@@ -92,6 +92,7 @@ const ChallengesChart = ({ challengrsGraphData, isLoading = false, error = null 
       enabled: false,
     },
     legend: {
+      show: false,
       position: 'top',
       horizontalAlign: 'right',
     },

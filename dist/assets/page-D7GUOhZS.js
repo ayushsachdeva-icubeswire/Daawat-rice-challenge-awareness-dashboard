@@ -1,0 +1,1 @@
+import{a8 as e,u as r,r as o,j as a}from"./index-iPpwFLzO.js";const n=()=>{const t=e(),{changeTopbarTheme:s}=r();return o.useEffect(()=>{s("dark"),t("/dashboards")},[t]),a.jsx(a.Fragment,{})},c=()=>a.jsx(a.Fragment,{children:a.jsx(n,{})});export{c as default};

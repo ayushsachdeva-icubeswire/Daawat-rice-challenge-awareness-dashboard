@@ -331,10 +331,7 @@ const StoriesPage = () => {
                         className="btn btn-sm btn-outline-primary"
                         title="Share Story"
                         onClick={() => {
-                          // Copy story link to clipboard
-                          navigator.clipboard.writeText(story.storyLink).then(() => {
-                            alert('Story link copied to clipboard!')
-                          })
+                          window.open(story.storyLink, '_blank', 'noopener,noreferrer')
                         }}
                       >
                         <i className="fas fa-share"></i>
