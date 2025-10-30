@@ -184,19 +184,19 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
 
   const [currentProgressData, setCurrentProgressData] = useState<ProgressData | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
-  const [lastDisplayedValue, setLastDisplayedValue] = useState<number>(0)
+  // const [lastDisplayedValue, setLastDisplayedValue] = useState<number>(0) // unused, commented to fix build
   const lastDisplayedValueRef = useRef<number>(0)
 
 
   // Fetch progress data from API
   const fetchProgressData = useCallback(async () => {
     try {
-      console.log(`${progressType}: Calling API...`)
+      // console.log(`${progressType}: Calling API...`)
       const response = await ProgressService.getChallengerProgress()
       const progressData = response.data[progressType]
 
       if (progressData) {
-        console.log(`${progressType}: API response received:`, progressData)
+        // console.log(`${progressType}: API response received:`, progressData)
         setCurrentProgressData(progressData)
         return progressData
       } else {
@@ -214,7 +214,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
 
   // Schedule next API poll - simplified to avoid dependency issues
   const scheduleNextPoll: () => void = useCallback(() => {
-    console.log(`${progressType}: Scheduling next API poll in ${pollInterval}ms`)
+    // console.log(`${progressType}: Scheduling next API poll in ${pollInterval}ms`)
 
     if (pollTimeoutRef.current) {
       clearTimeout(pollTimeoutRef.current)
@@ -222,20 +222,20 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
 
     pollTimeoutRef.current = setTimeout(async () => {
       try {
-        console.log(`${progressType}: Timer triggered - Fetching new progress data...`)
+        // console.log(`${progressType}: Timer triggered - Fetching new progress data...`)
         const newData = await fetchProgressData()
 
         if (newData) {
-          console.log(`${progressType}: API returned data:`, {
-            currentValue: newData.currentValue,
-            previousValue: newData.previousValue,
-            difference: newData.difference,
-            lastDisplayed: lastDisplayedValue
-          })
+          // console.log(`${progressType}: API returned data:`, {
+          //   currentValue: newData.currentValue,
+          //   previousValue: newData.previousValue,
+          //   difference: newData.difference,
+          //   lastDisplayed: lastDisplayedValue
+          // })
 
           // Check if we're currently animating
           if (isAnimating) {
-            console.log(`${progressType}: Still animating, rescheduling poll`)
+            // console.log(`${progressType}: Still animating, rescheduling poll`)
             // If still animating, reschedule this poll
             setTimeout(() => scheduleNextPollRef.current?.(), 2000)
             return
@@ -246,11 +246,11 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
           const currentLastDisplayed = lastDisplayedValueRef.current
           const hasNewData = newData.currentValue !== currentLastDisplayed
 
-          console.log(`${progressType}: hasNewData: ${hasNewData}, newCurrentValue: ${newData.currentValue}, lastDisplayedValue: ${currentLastDisplayed}`)
+          // console.log(`${progressType}: hasNewData: ${hasNewData}, newCurrentValue: ${newData.currentValue}, lastDisplayedValue: ${currentLastDisplayed}`)
 
           if (hasNewData) {
             // Data has been updated - animate from current displayed value to new target
-            console.log(`${progressType}: NEW data detected, animating from ${currentLastDisplayed} to ${newData.currentValue}`)
+            // console.log(`${progressType}: NEW data detected, animating from ${currentLastDisplayed} to ${newData.currentValue}`)
             const actualDifference = newData.currentValue - currentLastDisplayed
             setCurrentProgressData(newData)
 
@@ -259,7 +259,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
             }
           } else {
             // No new data - just schedule next poll without animation
-            console.log(`${progressType}: SAME data, no animation needed. Scheduling next poll`)
+            // console.log(`${progressType}: SAME data, no animation needed. Scheduling next poll`)
             setTimeout(() => {
               if (scheduleNextPollRef.current) {
                 scheduleNextPollRef.current()
@@ -287,23 +287,23 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
 
   // Animate counter from previousValue to currentValue
   const animateCounter: (fromValue: number, toValue: number, difference: number) => void = useCallback((fromValue: number, toValue: number, difference: number) => {
-    console.log(`${progressType}: animateCounter called with fromValue: ${fromValue}, toValue: ${toValue}, difference: ${difference}`)
+    // console.log(`${progressType}: animateCounter called with fromValue: ${fromValue}, toValue: ${toValue}, difference: ${difference}`)
 
     // Check if there's no change to animate
     if (fromValue === toValue) {
-      console.log(`${progressType}: No animation needed (fromValue === toValue), setting value to: ${toValue}`)
+      // console.log(`${progressType}: No animation needed (fromValue === toValue), setting value to: ${toValue}`)
       // No animation needed, just set the final value
       if (counterInstanceRef.current) {
         counterInstanceRef.current.setValueInstant(toValue)
       }
-      setLastDisplayedValue(toValue)
+  // setLastDisplayedValue(toValue)
       lastDisplayedValueRef.current = toValue
       // Still schedule next poll to check for updates
-      console.log(`${progressType}: Scheduling next poll after no-animation case`)
+      // console.log(`${progressType}: Scheduling next poll after no-animation case`)
 
       // Use setTimeout to ensure state updates are processed
       setTimeout(() => {
-        console.log(`${progressType}: Executing scheduled poll from no-animation case`)
+        // console.log(`${progressType}: Executing scheduled poll from no-animation case`)
         if (scheduleNextPollRef.current) {
           scheduleNextPollRef.current()
         }
@@ -318,7 +318,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
     const stepDuration = animationDuration / steps
     const stepValue = difference / steps
 
-    console.log(`${progressType}: Animation setup - absoluteDifference: ${absoluteDifference}, steps: ${steps}, stepDuration: ${stepDuration}, stepValue: ${stepValue}`)
+    // console.log(`${progressType}: Animation setup - absoluteDifference: ${absoluteDifference}, steps: ${steps}, stepDuration: ${stepDuration}, stepValue: ${stepValue}`)
 
     let currentStep = 0
     let currentValue = fromValue
@@ -335,7 +335,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
       // Ensure we don't exceed the target value (handle both positive and negative differences)
       const reachedTarget = (difference > 0 && currentValue >= toValue) || (difference < 0 && currentValue <= toValue) || currentStep >= steps
 
-      console.log(`${progressType}: Step ${currentStep}/${steps} - currentValue: ${currentValue}, toValue: ${toValue}, reachedTarget: ${reachedTarget}`)
+      // console.log(`${progressType}: Step ${currentStep}/${steps} - currentValue: ${currentValue}, toValue: ${toValue}, reachedTarget: ${reachedTarget}`)
 
       if (reachedTarget) {
         currentValue = toValue
@@ -345,7 +345,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
         }
 
         // Update the last displayed value
-        setLastDisplayedValue(currentValue)
+  // setLastDisplayedValue(currentValue)
         lastDisplayedValueRef.current = currentValue
 
         if (animationIntervalRef.current) {
@@ -353,13 +353,13 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
           animationIntervalRef.current = null
         }
 
-        console.log(`${progressType}: Animation completed, reached value: ${currentValue}`)
+        // console.log(`${progressType}: Animation completed, reached value: ${currentValue}`)
 
         // Use setTimeout to ensure state updates are processed before scheduling next poll
         setTimeout(() => {
           setIsAnimating(false)
 
-          console.log(`${progressType}: States reset, scheduling next API poll after animation completion`)
+          // console.log(`${progressType}: States reset, scheduling next API poll after animation completion`)
           // Schedule next API call after animation completes and states are updated
           if (scheduleNextPollRef.current) {
             scheduleNextPollRef.current()
@@ -386,17 +386,17 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
     const initializeCounter = async () => {
       const initialData = await fetchProgressData()
       if (initialData) {
-        console.log(`${progressType}: Initializing with data:`, initialData)
+        // console.log(`${progressType}: Initializing with data:`, initialData)
 
         // Initialize counter with previous value
         const startValue = initialData.previousValue
-        setLastDisplayedValue(startValue)
+  // setLastDisplayedValue(startValue)
         lastDisplayedValueRef.current = startValue
 
         const counter = new FlipCounterClass(containerRef.current!, startValue)
         counterInstanceRef.current = counter
 
-        console.log(`${progressType}: Starting initial animation from ${initialData.previousValue} to ${initialData.currentValue}`)
+        // console.log(`${progressType}: Starting initial animation from ${initialData.previousValue} to ${initialData.currentValue}`)
 
         // Start animation from previous to current
         animateCounter(initialData.previousValue, initialData.currentValue, initialData.difference)
@@ -404,7 +404,7 @@ const AnimatedFlipCounter: React.FC<AnimatedFlipCounterProps> = ({
         console.warn(`${progressType}: No initial data received`)
         // Even if no data, try to schedule polling
         setTimeout(() => {
-          console.log(`${progressType}: No initial data, starting polling cycle`)
+          // console.log(`${progressType}: No initial data, starting polling cycle`)
           if (scheduleNextPollRef.current) {
             scheduleNextPollRef.current()
           }
