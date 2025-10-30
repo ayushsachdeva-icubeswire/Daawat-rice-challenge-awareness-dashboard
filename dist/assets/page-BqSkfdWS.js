@@ -1,0 +1,1 @@
+import{a8 as s,u as r,r as n,j as a}from"./index-Dhu1--85.js";const o=()=>{const e=s(),{changeMenu:t}=r();return n.useEffect(()=>{t.theme("dark"),e("/dashboards")},[e]),a.jsx(a.Fragment,{})},c=()=>a.jsx(a.Fragment,{children:a.jsx(o,{})});export{c as default};

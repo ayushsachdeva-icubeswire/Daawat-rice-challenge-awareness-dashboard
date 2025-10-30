@@ -219,7 +219,7 @@ const ChallengersPage = () => {
                   <th>Category </th>
                   <th>Duration</th>
                   <th>Subcategory</th>
-                  <th>Status</th>
+                  {/* <th>Status</th> */}
                   <th>Created</th>
                   <th>PDF</th>
                 </tr>
@@ -269,11 +269,11 @@ const ChallengersPage = () => {
                       <td>
                         <span className="text-muted">{challenger.subcategory || 'N/A'}</span>
                       </td>
-                      <td>
+                      {/* <td>
                         <span className={`badge ${challenger.isActive ? 'bg-success' : 'bg-secondary'}`}>
                           {challenger.isActive ? 'Active' : 'Inactive'}
                         </span>
-                      </td>
+                      </td> */}
                       <td>
                         <span className="text-muted">
                           {challenger.createdAt ? new Date(challenger.createdAt).toLocaleDateString() : 'N/A'}
