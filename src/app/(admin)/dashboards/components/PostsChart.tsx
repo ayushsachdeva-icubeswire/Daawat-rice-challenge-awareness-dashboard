@@ -53,7 +53,7 @@ const PostsChart: React.FC<PostsChartProps> = ({
     },
     series: [
       {
-        name: 'Posts Count',
+        name: 'Interactions',
         data: chartData.publishedData,
         color: '#f59e0b',
       },
@@ -105,7 +105,7 @@ const PostsChart: React.FC<PostsChartProps> = ({
     <Card>
       <CardHeader>
         <div className="d-flex justify-content-between align-items-center">
-          <h5 className="card-title mb-0">Post Interactions</h5>
+          <h5 className="card-title mb-0">Hashtag Interactions</h5>
           {/* {dashboardData && (
             <div className="d-flex gap-3 text-muted small">
               <span>Stories: <strong>{dashboardData.totalStories ?? 0}</strong></span>
