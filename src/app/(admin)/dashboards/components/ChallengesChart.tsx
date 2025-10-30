@@ -58,7 +58,7 @@ const ChallengesChart = ({ challengrsGraphData, isLoading = false, error = null 
         color: '#10b981',
       },
       {
-        name: 'In Progress',
+        name: 'Challenges Taken',
         data: chartData.inProgressData,
         color: '#3b82f6',
       },
