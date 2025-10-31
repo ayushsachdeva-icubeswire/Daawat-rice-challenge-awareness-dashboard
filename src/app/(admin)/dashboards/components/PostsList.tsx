@@ -189,8 +189,9 @@ const PostsList = ({
                           </div>
                         </div>
                         <div className="text-end">
-                          <div className="badge bg-success-subtle text-success small">
-                            {String(formatNumber(Number(post.total_followers) || 0))} followers
+                          <div className={`badge small ${post.is_paid_partnership ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'}`}>
+                            {post.is_paid_partnership ? 'Collaborated' : 'Organic'}
+                            {/* {String(formatNumber(Number(post.total_followers) || 0))} followers */}
                           </div>
                         </div>
                       </div>

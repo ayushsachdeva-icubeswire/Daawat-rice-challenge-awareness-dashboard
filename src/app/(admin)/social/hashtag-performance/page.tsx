@@ -914,7 +914,7 @@ const HashtagPerformancePage = () => {
                     <th style={{ width: '60px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">#</th>
                     <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Influencer</th>
                     <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post</th>
-                    {/* <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post Type</th> */}
+                    <th style={{ width: '130px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Post Type</th>
                     {/* <th style={{ width: '150px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Interactions</th> */}
                     <th style={{ width: '280px', padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Engagement</th>
                     <th style={{ padding: '1.25rem', fontSize: '16px' }} className="fw-semibold">Details</th>
@@ -984,12 +984,14 @@ const HashtagPerformancePage = () => {
                           </div>
                         </div>
                       </td>
-                      {/* <td style={{ padding: '1.5rem' }}>
-                        <span className={`badge ${post.is_video ? 'bg-success' : post.is_carousel ? 'bg-info' : 'bg-secondary'}`} style={{ fontSize: '13px' }}>
-                          {post.is_video ? 'Video' : post.is_carousel ? 'Carousel' : 'Image'}
-                        </span>
-                        <div className="text-muted mt-2" style={{ fontSize: '13px' }}>Organic</div>
-                      </td> */}
+                      <td style={{ padding: '1.5rem' }}>
+                        <div
+                          className={`mt-2 fw-semibold ${post.is_paid_partnership ? 'text-success' : 'text-primary'}`}
+                          style={{ fontSize: '13px' }}
+                        >
+                          {post.is_paid_partnership ? 'Collaborated' : 'Organic'}
+                        </div>
+                      </td>
                       {/* <td style={{ padding: '1.5rem' }}>
                         <button 
                           className="btn btn-outline-primary btn-sm"

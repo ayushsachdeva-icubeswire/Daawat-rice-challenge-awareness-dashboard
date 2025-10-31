@@ -157,7 +157,7 @@ const page = () => {
         <Col xl={6} lg={6} md={12}>
           <AnimatedFlipCounter 
             progressType="erProgress"
-            label="Interactions"
+            label="Interactions (Hashtags + Stories)"
             className="h-100"
             animationDuration={5000}
             pollInterval={15000}
