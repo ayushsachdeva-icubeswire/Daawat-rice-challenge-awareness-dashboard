@@ -369,7 +369,7 @@ const ChallengersPage = () => {
         )}
 
         {/* Stats */}
-        {!loading && challengers.length > 0 && (
+        {/* {!loading && challengers.length > 0 && (
           <div className="row mt-3">
             <div className="col-md-6">
               <small className="text-muted">
@@ -379,7 +379,7 @@ const ChallengersPage = () => {
               </small>
             </div>
           </div>
-        )}
+        )} */}
       </ComponentContainerCard>
       
       <Footer />
