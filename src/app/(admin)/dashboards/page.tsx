@@ -4,7 +4,7 @@ import Footer from '@/components/layout/Footer'
 import RecentChallengers from './components/RecentChallengers'
 import PostsList from './components/PostsList'
 // import InteractionsChart from './components/InteractionsChart'
-import ChallengesChart from './components/ChallengesChart'
+// import ChallengesChart from './components/ChallengesChart'
 import PostsChart from './components/PostsChart'
 import PageTitle from '@/components/PageTitle'
 import AnimatedFlipCounter from '@/components/AnimatedFlipCounter'
@@ -178,14 +178,14 @@ const page = () => {
         {/* <Col xl={4} lg={6} md={12}>
           <InteractionsChart />
         </Col> */}
-        <Col xl={6} lg={6} md={12}>
+        {/* <Col xl={6} lg={6} md={12}>
           <ChallengesChart 
             challengrsGraphData={dashboardData?.challengrsGraphData || []}
             isLoading={dashboardLoading}
             error={dashboardError}
           />
-        </Col>
-        <Col xl={6} lg={12} md={12}>
+        </Col> */}
+        <Col xl={12} lg={12} md={12}>
           <PostsChart 
             postGraphData={Array.isArray(dashboardData?.postGraphData) ? dashboardData.postGraphData : []}
             isLoading={dashboardLoading}
