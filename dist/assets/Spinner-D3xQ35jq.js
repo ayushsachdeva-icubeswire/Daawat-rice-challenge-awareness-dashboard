@@ -1,0 +1,1 @@
+import{r as m,e as x,j as c,f}from"./index-DyoCW3t3.js";const $=m.forwardRef(({bsPrefix:s,variant:r,animation:t="border",size:e,as:n="div",className:o,...p},i)=>{s=x(s,"spinner");const a=`${s}-${t}`;return c.jsx(n,{ref:i,...p,className:f(o,a,e&&`${a}-${e}`,r&&`text-${r}`)})});$.displayName="Spinner";export{$ as S};

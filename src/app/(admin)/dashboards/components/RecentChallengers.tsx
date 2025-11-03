@@ -97,13 +97,13 @@ const RecentChallengers = ({
   //   }
   // }
 
-  const getStatusIcon = (isActive: boolean) => {
-    return isActive ? 'solar:check-circle-broken' : 'solar:pause-circle-broken'
-  }
+  // const getStatusIcon = (isActive: boolean) => {
+  //   return isActive ? 'solar:check-circle-broken' : 'solar:pause-circle-broken'
+  // }
 
-  const getStatusVariant = (isActive: boolean) => {
-    return isActive ? 'success' : 'secondary'
-  }
+  // const getStatusVariant = (isActive: boolean) => {
+  //   return isActive ? 'success' : 'secondary'
+  // }
 
   // Calculate totals from graph data
   // const getTotalsFromGraphData = () => {
@@ -180,13 +180,13 @@ const RecentChallengers = ({
                         </div>
                       </Col>
                       <Col>
-                        <div className="d-flex align-items-center justify-content-between mb-2">
+                        {/* <div className="d-flex align-items-center justify-content-between mb-2">
                           <h6 className="mb-0 text-truncate flex-grow-1 me-2">{challenger.name}</h6>
                           <Badge bg={getStatusVariant(challenger.isActive)} className="d-flex align-items-center">
                             <IconifyIcon icon={getStatusIcon(challenger.isActive)} className="fs-12 me-1" />
                             {challenger.isActive ? 'Active' : 'Inactive'}
                           </Badge>
-                        </div>
+                        </div> */}
                         
                         <p className="text-muted mb-2 small">
                           <IconifyIcon icon="solar:phone-broken" className="fs-12 me-1" />
