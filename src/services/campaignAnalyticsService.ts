@@ -15,6 +15,7 @@ export interface CampaignAnalyticsData {
     total_comments?: string
     total_likes?: string
     total_posts?: string
+    total_repost?: string
     total_reshare?: string
     total_views?: string
     avg_er?: number
@@ -49,6 +50,8 @@ export interface InfluencerData {
   total_views_actual: number
   total_reshare_count: string
   total_reshare_count_actual: number
+  total_repost:string
+  total_repost_actual:number
   reach: string
   reach_actual: number
   er: string

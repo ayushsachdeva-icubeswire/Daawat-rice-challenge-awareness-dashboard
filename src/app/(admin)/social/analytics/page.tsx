@@ -32,6 +32,7 @@ const SocialAnalyticsPage = () => {
     avgER: 0,
     avgReach: '0',
     influencerCount: 0,
+    totalRepost:0,
     platforms: [
       { name: 'Instagram', followers: 0, engagement: 0, posts: 0 },
       { name: 'Facebook', followers: 0, engagement: 0, posts: 0 },
@@ -121,6 +122,7 @@ const SocialAnalyticsPage = () => {
     totalComments: analyticsData.data.total_comments || '0',
     totalReshare: analyticsData.data.total_reshare || '0',
     avgER: analyticsData.data.avg_er || 0,
+    totalRepost: analyticsData.data.total_repost || '0',
     avgReach: analyticsData.data.avg_reach || '0',
     influencerCount: analyticsData.data.influencer_count || 0,
     platforms: defaultAnalyticsData.platforms // Keep platforms static for now
@@ -249,6 +251,19 @@ const SocialAnalyticsPage = () => {
                 </div>
               </div>
             </div>
+            <div className="col-xl-3 col-md-6">
+              <div className="card bg-secondary text-white">
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 className="mb-0">{displayData.totalRepost}</h4>
+                      <p className="mb-0">Total Reposts</p>
+                    </div>
+                    <i className="fas fa-repeat fa-2x opacity-75"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
          
           </div>
         )}
@@ -293,6 +308,7 @@ const SocialAnalyticsPage = () => {
                     <th>Content ER</th>
                     <th>Reach</th>
                     <th>Shares</th>
+                    <th>Reposts</th>
                     <th>Post Actions</th>
                   </tr>
                 </thead>
@@ -354,6 +370,9 @@ const SocialAnalyticsPage = () => {
                       </td>
                       <td>
                         <span className="fw-semibold">{influencer.total_reshare_count}</span>
+                      </td>
+                      <td>
+                        <span className="fw-semibold">{influencer.total_repost}</span>
                       </td>
                       <td>
                         <img 
@@ -524,7 +543,7 @@ const SocialAnalyticsPage = () => {
                     </div>
 
                     <div className="row g-2 mb-4">
-                      <div className="col-4">
+                      <div className="col-3">
                         <div className="card border-0 text-center py-3" style={{ background: 'linear-gradient(135deg, #e91e63 0%, #f06292 100%)', borderRadius: '12px' }}>
                           <div className="d-flex flex-column align-items-center">
                             <div className="rounded-circle d-flex align-items-center justify-content-center mb-2" style={{ width: '36px', height: '36px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
@@ -535,7 +554,7 @@ const SocialAnalyticsPage = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-4">
+                      <div className="col-3">
                         <div className="card border-0 text-center py-3" style={{ background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)', borderRadius: '12px' }}>
                           <div className="d-flex flex-column align-items-center">
                             <div className="rounded-circle d-flex align-items-center justify-content-center mb-2" style={{ width: '36px', height: '36px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
@@ -546,7 +565,7 @@ const SocialAnalyticsPage = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-4">
+                      <div className="col-3">
                         <div className="card border-0 text-center py-3" style={{ background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)', borderRadius: '12px' }}>
                           <div className="d-flex flex-column align-items-center">
                             <div className="rounded-circle d-flex align-items-center justify-content-center mb-2" style={{ width: '36px', height: '36px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
@@ -554,6 +573,17 @@ const SocialAnalyticsPage = () => {
                             </div>
                             <span className="fw-bold text-white small">{selectedInfluencer.total_views}</span>
                             <small className="text-white-50">Views</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-3">
+                        <div className="card border-0 text-center py-3" style={{ background: 'linear-gradient(135deg, #e4b723ff 0%, #c6c781ff 100%)', borderRadius: '12px' }}>
+                          <div className="d-flex flex-column align-items-center">
+                            <div className="rounded-circle d-flex align-items-center justify-content-center mb-2" style={{ width: '36px', height: '36px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                              <i className="fas fa-repeat text-white"></i>
+                            </div>
+                            <span className="fw-bold text-white small">{selectedInfluencer.total_repost}</span>
+                            <small className="text-white-50">Reposts</small>
                           </div>
                         </div>
                       </div>
