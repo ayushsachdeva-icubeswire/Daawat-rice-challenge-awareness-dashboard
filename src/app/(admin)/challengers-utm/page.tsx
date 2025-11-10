@@ -26,7 +26,8 @@ const ChallengersUTMPage = () => {
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
-    itemsPerPage: 10
+    itemsPerPage: 10,
+    actualCount: 0
   })
 
   // Predefined UTM URLs for dropdown selection
@@ -63,6 +64,7 @@ const ChallengersUTMPage = () => {
           currentPage: response.currentPage || 1,
           totalPages: response.totalPages || 1,
           totalItems: response.totalItems || 0,
+          actualCount: response.actualCount || 0,
           itemsPerPage: filters.limit || 10
         })
       } catch (error) {
@@ -133,7 +135,7 @@ const ChallengersUTMPage = () => {
           <div className="card shadow-sm border-0 h-100 bg-primary-subtle">
             <div className="card-body d-flex flex-column justify-content-center align-items-center">
               <h6 className="mb-1 text-primary">Total Challengers</h6>
-              <h3 className="mb-0 fw-bold text-primary">{pagination.totalItems}</h3>
+              <h3 className="mb-0 fw-bold text-primary">{pagination.actualCount}</h3>
             </div>
           </div>
         </div>

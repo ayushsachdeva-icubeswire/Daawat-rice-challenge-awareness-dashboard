@@ -18,6 +18,7 @@ export interface ChallengerListResponse {
   currentPage: number
   totalPages: number
   totalItems: number
+  actualCount: number
   overview?: { _id: string; count: number }[]
 }
 
