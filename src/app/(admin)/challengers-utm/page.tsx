@@ -33,11 +33,11 @@ const ChallengersUTMPage = () => {
   const predefinedUTMs = [
     {
       label: 'Meta2 - LPV Campaign',
-      url: 'https://www.daawat.com/rya/?utm_source=icubeswire&utm_medium=meta2&utm_campaign=lpv'
+      url: 'https://www.daawat.com/rya/?utm_source=icubeswire2&utm_medium=meta2&utm_campaign=lpv'
     },
     {
       label: 'Meta2 - Custom Audience',
-      url: 'https://www.daawat.com/rya/?utm_source=icubeswire&utm_medium=meta2&utm_campaign=custom+audience'
+      url: 'https://www.daawat.com/rya/?utm_source=icubeswire2&utm_medium=google2&utm_campaign=custom+audience'
     },
     {
       label: 'RYA Base URL',
