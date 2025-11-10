@@ -29,4 +29,7 @@ export interface ChallengerFilters {
   search?: string
   page?: number
   limit?: number
+  utm_url?: string
+  from?: string
+  to?: string
 }

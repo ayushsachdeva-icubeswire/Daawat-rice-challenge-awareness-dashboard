@@ -69,6 +69,38 @@ class ChallengerService {
     }
   }
 
+  // Get challengers by UTM URL with date range
+  static async getUTMChallengers(filters?: ChallengerFilters): Promise<ChallengerListResponse> {
+    try {
+      // Check if auth token is available
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.')
+      }
+
+      const queryParams = new URLSearchParams()
+
+      if (filters?.utm_url) queryParams.append('utm_url', filters.utm_url)
+      if (filters?.from) queryParams.append('from', filters.from)
+      if (filters?.to) queryParams.append('to', filters.to)
+      if (filters?.page) queryParams.append('page', filters.page.toString())
+      if (filters?.limit) queryParams.append('limit', filters.limit.toString())
+
+      const response = await fetch(`${API_CONFIG.API_URL}/challenger?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch UTM challengers: ${response.statusText}`)
+      }
+      return await response.json()
+    } catch (error) {
+      console.error('Error fetching UTM challengers:', error)
+      throw error
+    }
+  }
+
   // Get specific challenger by ID
   static async getChallengerById(id: string): Promise<Challenger> {
     try {

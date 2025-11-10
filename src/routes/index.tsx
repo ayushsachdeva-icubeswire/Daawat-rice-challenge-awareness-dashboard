@@ -13,6 +13,7 @@ const RecipeView = lazy(() => import('@/app/(admin)/recipes/view/page'))
 const RecipeCreate = lazy(() => import('@/app/(admin)/recipes/create/page'))
 const OverallPerformance = lazy(() => import('@/app/(admin)/overall-performance/page'))
 const Challengers = lazy(() => import('@/app/(admin)/challengers/page'))
+const ChallengersUtm = lazy(() => import('@/app/(admin)/challengers-utm/page'))
 
 // Base UI Routes
 const Accordions = lazy(() => import('@/app/(admin)/base-ui/accordion/page'))
@@ -104,6 +105,11 @@ const generalRoutes: RoutesProps[] = [
     path: '/challengers',
     name: 'Challenges',
     element: <Challengers />,
+  },
+  {
+    path: '/challengers-utm',
+    name: 'Challenges UTM',
+    element: <ChallengersUtm />,
   },
   {
     path: '/posts',
