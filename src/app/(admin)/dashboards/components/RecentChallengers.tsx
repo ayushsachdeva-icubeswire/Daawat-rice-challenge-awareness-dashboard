@@ -195,9 +195,9 @@ const RecentChallengers = ({
                         
                         <div className="d-flex align-items-center justify-content-between mb-2">
                           <div className="d-flex align-items-center">
-                            <Badge bg={getTypeVariant(challenger.type)} className="me-2">
+                            {/* <Badge bg={getTypeVariant(challenger.type)} className="me-2">
                               {challenger.type}
-                            </Badge>
+                            </Badge> */}
                             <span className="text-muted small">{challenger.category}</span>
                           </div>
                           <div className="text-end">
