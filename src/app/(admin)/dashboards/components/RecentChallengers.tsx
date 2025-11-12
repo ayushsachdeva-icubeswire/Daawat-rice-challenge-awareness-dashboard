@@ -65,20 +65,20 @@ const RecentChallengers = ({
     }
   }
 
-  const getTypeVariant = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'weight loss':
-        return 'danger'
-      case 'muscle building':
-        return 'success'
-      case 'endurance':
-        return 'warning'
-      case 'flexibility':
-        return 'info'
-      default:
-        return 'secondary'
-    }
-  }
+  // const getTypeVariant = (type: string) => {
+  //   switch (type.toLowerCase()) {
+  //     case 'weight loss':
+  //       return 'danger'
+  //     case 'muscle building':
+  //       return 'success'
+  //     case 'endurance':
+  //       return 'warning'
+  //     case 'flexibility':
+  //       return 'info'
+  //     default:
+  //       return 'secondary'
+  //   }
+  // }
 
   // const getCategoryIcon = (category: string) => {
   //   switch (category.toLowerCase()) {
