@@ -1,1 +1,0 @@
-import{a8 as t,u as n,r,j as e}from"./index-C74y-FR0.js";const o=()=>{const a=t(),{changeMenu:s}=n();return r.useEffect(()=>{s.size("hidden"),a("/dashboards")},[a]),e.jsx(e.Fragment,{})},i=()=>e.jsx(e.Fragment,{children:e.jsx(o,{})});export{i as default};
