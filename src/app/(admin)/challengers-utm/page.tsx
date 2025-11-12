@@ -361,7 +361,7 @@ const ChallengersUTMPage = () => {
                               {challenger.category}
                             </span>
                             <br />
-                            <small className="text-muted">{challenger.type}</small>
+                            {/* <small className="text-muted">{challenger.type}</small> */}
                           </div>
                         </td>
                         <td>
