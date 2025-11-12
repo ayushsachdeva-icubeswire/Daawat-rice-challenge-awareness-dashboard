@@ -204,7 +204,7 @@ const page = () => {
             maxHeight="400px"
             isLoading={challengersLoading}
             error={challengersError}
-            onTitleClick={() => window.open('/challengers', '_blank')}
+            onTitleClick={() => window.open('/rya/dashboard/challengers', '_blank')}
             challengrsGraphData={dashboardData?.challengrsGraphData || []}
           />
         </Col>
@@ -243,7 +243,7 @@ const page = () => {
             maxHeight="400px"
             isLoading={isLoading}
             error={error}
-            onTitleClick={() => window.open('/social/hashtag-performance', '_blank')}
+            onTitleClick={() => window.open('/rya/dashboard/social/hashtag-performance', '_blank')}
           />
         </Col>
       </Row>
