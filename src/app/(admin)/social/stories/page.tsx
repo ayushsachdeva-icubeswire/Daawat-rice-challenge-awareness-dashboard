@@ -18,16 +18,27 @@ const StoriesPage = () => {
   const [showImageModal, setShowImageModal] = useState(false)
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null)
 
-  // Fetch stories from API with status
+  // Fetch stories from API with status. Supports pagination and "load more" appending.
   const fetchStories = async (page: number) => {
     try {
       setLoading(true)
-  // Always use selectedStatus from state (commented out)
-  // const params: any = { page, limit: 10, status: selectedStatus };
-  const params: any = { page, limit: 10 };
+      // Always use selectedStatus from state (commented out)
+      // const params: any = { page, limit: 10, status: selectedStatus };
+      const params: any = { page, limit: 10 };
       const response = await getStories(params);
       if (response.success) {
-        setStoriesData(response.data.stories);
+        // When requesting first page, replace. Otherwise append to existing list for "Load more" behavior.
+        if (page === 1) {
+          setStoriesData(response.data.stories || []);
+        } else {
+          setStoriesData(prev => {
+            // Append and avoid duplicates by _id
+            const existingIds = new Set(prev.map(s => s._id));
+            const newStories = (response.data.stories || []).filter((s: Story) => !existingIds.has(s._id));
+            return [...prev, ...newStories];
+          });
+        }
+
         setCurrentPage(response.data.pagination.currentPage);
         setTotalPages(response.data.pagination.totalPages);
         setTotalStories(response.data.pagination.total);
@@ -41,12 +52,12 @@ const StoriesPage = () => {
         }
       } else {
         console.error('Failed to fetch stories:', response.message);
-        setStoriesData([]);
+        if (page === 1) setStoriesData([]);
         setStats(null);
       }
     } catch (error) {
       console.error('Error fetching stories:', error);
-      setStoriesData([]);
+      if (page === 1) setStoriesData([]);
     } finally {
       setLoading(false);
     }
@@ -200,6 +211,7 @@ const StoriesPage = () => {
             <table className="table table-striped table-hover">
               <thead className="table-dark">
                 <tr>
+                  <th style={{ width: '60px' }}>No.</th>
                   <th>Influencer</th>
                   <th>Handle</th>
                   <th>Image</th>
@@ -211,8 +223,9 @@ const StoriesPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredStories.map((story) => (
+                {filteredStories.map((story, index) => (
                   <tr key={story.id}>
+                    <td className="align-middle">{index + 1}</td>
                     <td>
                       <div className="d-flex align-items-center">
                         <div className="position-relative me-2">
@@ -363,51 +376,27 @@ const StoriesPage = () => {
             </div>
           )}
 
-          {/* Pagination Controls */}
+          {/* Load More Controls (replaces pagination) */}
           {!loading && totalPages > 1 && (
-            <div className="d-flex justify-content-between align-items-center mt-4">
-              <div className="text-muted">
-                Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalStories)} of {totalStories} stories
+            <div className="mt-4">
+              {/* Info */}
+              <div className="text-center text-muted mb-2">
+                Showing {storiesData.length} of {totalStories} stories
               </div>
-              <nav>
-                <ul className="pagination mb-0">
-                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                    <button 
-                      className="page-link"
-                      onClick={() => fetchStories(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      <i className="fas fa-chevron-left"></i> Previous
-                    </button>
-                  </li>
-                  
-                  {[...Array(Math.min(5, totalPages))].map((_, index) => {
-                    const pageNum = Math.max(1, currentPage - 2) + index
-                    if (pageNum > totalPages) return null
-                    
-                    return (
-                      <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
-                        <button 
-                          className="page-link"
-                          onClick={() => fetchStories(pageNum)}
-                        >
-                          {pageNum}
-                        </button>
-                      </li>
-                    )
-                  })}
-                  
-                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                    <button 
-                      className="page-link"
-                      onClick={() => fetchStories(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next <i className="fas fa-chevron-right"></i>
-                    </button>
-                  </li>
-                </ul>
-              </nav>
+
+              {/* Load More Button */}
+              {currentPage < totalPages && (
+                <div className="text-center">
+                  <button
+                    className="btn btn-outline-primary"
+                    onClick={() => fetchStories(currentPage + 1)}
+                    disabled={loading}
+                  >
+                    <i className="fas fa-chevron-down me-2"></i>
+                    Load {10} More
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </ComponentContainerCard>
