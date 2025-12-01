@@ -12,7 +12,6 @@ const StoriesPage = () => {
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [totalStories, setTotalStories] = useState(0)
   const [stats, setStats] = useState<{ totalViews: number; totalLikes: number } | null>(null)
   // Modal state for viewing story image
   const [showImageModal, setShowImageModal] = useState(false)
@@ -39,9 +38,9 @@ const StoriesPage = () => {
           });
         }
 
-        setCurrentPage(response.data.pagination.currentPage);
-        setTotalPages(response.data.pagination.totalPages);
-        setTotalStories(response.data.pagination.total);
+  setCurrentPage(response.data.pagination.currentPage);
+  setTotalPages(response.data.pagination.totalPages);
+  // totalStories state removed (kept commented in UI as requested)
         if (response.data.stats) {
           setStats({
             totalViews: response.data.stats.totalViews,
@@ -379,10 +378,11 @@ const StoriesPage = () => {
           {/* Load More Controls (replaces pagination) */}
           {!loading && totalPages > 1 && (
             <div className="mt-4">
-              {/* Info */}
+              {/* Info (kept commented as requested)
               <div className="text-center text-muted mb-2">
                 Showing {storiesData.length} of {totalStories} stories
               </div>
+              */}
 
               {/* Load More Button */}
               {currentPage < totalPages && (
