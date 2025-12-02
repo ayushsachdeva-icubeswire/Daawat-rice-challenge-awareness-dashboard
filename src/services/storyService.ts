@@ -56,6 +56,7 @@ interface ApiPagination {
 interface ApiStats {
   totalViews: number
   totalLikes: number
+  uniqueInfluencers: number
 }
 
 interface ApiStoriesResponse {
@@ -186,7 +187,8 @@ export const getStories = async (params: GetStoriesParams = {}, authToken?: stri
         },
         stats: {
           totalViews: 0,
-          totalLikes: 0
+          totalLikes: 0,
+          uniqueInfluencers: 0
         }
       },
       message: error instanceof Error ? error.message : 'Failed to fetch stories'

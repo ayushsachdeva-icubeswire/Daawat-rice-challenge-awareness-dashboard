@@ -12,7 +12,7 @@ const StoriesPage = () => {
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [stats, setStats] = useState<{ totalViews: number; totalLikes: number } | null>(null)
+  const [stats, setStats] = useState<{ totalViews: number; totalLikes: number; uniqueInfluencers: number } | null>(null)
   // Modal state for viewing story image
   const [showImageModal, setShowImageModal] = useState(false)
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null)
@@ -45,6 +45,7 @@ const StoriesPage = () => {
           setStats({
             totalViews: response.data.stats.totalViews,
             totalLikes: response.data.stats.totalLikes,
+            uniqueInfluencers: response.data.stats.uniqueInfluencers,
           });
         } else {
           setStats(null);
@@ -105,7 +106,7 @@ const StoriesPage = () => {
 
   const totalViews = stats ? stats.totalViews : 0;
   const totalLikes = stats ? stats.totalLikes : 0;
-  const totalInfluencers = new Set(storiesData.map(story => story.influencer.id)).size // Count unique influencers
+  const totalInfluencers = stats ? stats.uniqueInfluencers : 0// Count unique influencers
   const activeStories = mappedStories.filter(story => story.status === 'Active').length
 
 
