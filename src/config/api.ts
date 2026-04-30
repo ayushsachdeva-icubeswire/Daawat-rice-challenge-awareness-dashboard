@@ -6,9 +6,9 @@ const getBaseUrl = (): string => {
   if (typeof window !== 'undefined' && window.location.href.includes('localhost:5173')) {
     return 'http://localhost:8080'
   }
-  //  else if (window !== undefined && window.location.href.includes('stage.daawat.com')) {
-  //   return 'https://stage.daawat.com'
-  // }
+  else if (window !== undefined && window.location.href.includes('stage.daawat.com')) {
+    return 'https://stage.daawat.com'
+  }
   else {
     return 'http://13.127.155.47'
   }
